@@ -130,8 +130,9 @@ Il progetto segue **Agile Model Driven Development (AMDD)**:
 
 * **Iterazione 0** – Requisiti e architettura
 * **Iterazione 1** – Microservizio contabilità
-* **Iterazione ...** – Analytics e aggregazioni
-* **Iterazione finale** – NLU, integrazione e testing
+* **Iterazione 2** – Analytics e aggregazioni
+* **Iterazione 3** - NLU e integrazione dei servizi
+* **Iterazione finale** – testing e documentazione
 
 
 ## 🚀 Stato del Progetto
