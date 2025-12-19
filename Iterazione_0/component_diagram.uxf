@@ -23,4 +23,4 @@ UserInterface
 +displayReport()</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>490</x><y>130</y><w>20</w><h>20</h></coordinates><panel_attributes>
 halign=left</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>10</x><y>50</y><w>810</w><h>520</h></coordinates><panel_attributes>symbol=component
 &lt;&lt;component&gt;&gt;
-JarFin System</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLNote</id><coordinates><x>520</x><y>130</y><w>120</w><h>60</h></coordinates><panel_attributes>GUIPORT</panel_attributes><additional_attributes></additional_attributes></element></diagram>
+JarFin System</panel_attributes><additional_attributes></additional_attributes></element><element><id>Text</id><coordinates><x>520</x><y>130</y><w>120</w><h>60</h></coordinates><panel_attributes>GUIPORT</panel_attributes><additional_attributes></additional_attributes></element></diagram>
