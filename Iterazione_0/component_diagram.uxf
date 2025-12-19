@@ -1,26 +1,41 @@
-<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><help_text></help_text><element><id>UMLGeneric</id><coordinates><x>20</x><y>100</y><w>480</w><h>140</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
-Client Layer</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>20</x><y>460</y><w>150</w><h>60</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
-Application Layer</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>370</x><y>340</y><w>140</w><h>60</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
-Data Layer</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>70</x><y>200</y><w>90</w><h>170</h></coordinates><panel_attributes>
-
-
-
-
-
-
-       jarfinIF
-lt=()-[v]
-
-</panel_attributes><additional_attributes>10;120;10;40</additional_attributes></element><element><id>Relation</id><coordinates><x>60</x><y>320</y><w>50</w><h>160</h></coordinates><panel_attributes>lt=[v]-(</panel_attributes><additional_attributes>20;140;20;20</additional_attributes></element><element><id>Relation</id><coordinates><x>270</x><y>360</y><w>120</w><h>30</h></coordinates><panel_attributes>lt=()-[v]</panel_attributes><additional_attributes>10;10;100;10</additional_attributes></element><element><id>Relation</id><coordinates><x>110</x><y>430</y><w>220</w><h>80</h></coordinates><panel_attributes>lt=[v]-(
-
-                                      
-                                       TransactionIF</panel_attributes><additional_attributes>60;60;150;20</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>1100</x><y>40</y><w>790</w><h>540</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
-JarFin System::Application Layer</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>40</x><y>140</y><w>140</w><h>40</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
-GUI</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>200</x><y>140</y><w>140</w><h>70</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><help_text></help_text><element><id>UMLGeneric</id><coordinates><x>220</x><y>60</y><w>480</w><h>140</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
+Client Layer</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>230</x><y>380</y><w>710</w><h>290</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
+Application Layer</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>290</x><y>710</y><w>370</w><h>200</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
+Data Layer</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>240</x><y>100</y><w>140</w><h>40</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
+GUI</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>400</x><y>100</y><w>140</w><h>80</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
 UserInterface
 --
 +inputCommand()
-+displayReport()</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>490</x><y>130</y><w>20</w><h>20</h></coordinates><panel_attributes>
-halign=left</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>10</x><y>50</y><w>810</w><h>520</h></coordinates><panel_attributes>symbol=component
++displayReport()</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>690</x><y>90</y><w>20</w><h>20</h></coordinates><panel_attributes>
+halign=left</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>210</x><y>0</y><w>810</w><h>970</h></coordinates><panel_attributes>symbol=component
 &lt;&lt;component&gt;&gt;
-JarFin System</panel_attributes><additional_attributes></additional_attributes></element><element><id>Text</id><coordinates><x>520</x><y>130</y><w>120</w><h>60</h></coordinates><panel_attributes>GUIPORT</panel_attributes><additional_attributes></additional_attributes></element></diagram>
+JarFin System</panel_attributes><additional_attributes></additional_attributes></element><element><id>Text</id><coordinates><x>720</x><y>70</y><w>120</w><h>60</h></coordinates><panel_attributes>:GUIPORT [1]</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>240</x><y>420</y><w>200</w><h>220</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
+NLU Service</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>490</x><y>460</y><w>140</w><h>80</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+AccountingInterface
+--
++addTransaction()
++getBalance()
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>270</x><y>560</y><w>140</w><h>40</h></coordinates><panel_attributes>&lt;&lt;artifact&gt;&gt;
+ParserNLU.java</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>460</x><y>420</y><w>200</w><h>220</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
+Accounting Service</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>270</x><y>470</y><w>140</w><h>70</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+NLUInterface
+--
++parseCommand()
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>690</x><y>420</y><w>200</w><h>220</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
+Analytics Service</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>720</x><y>470</y><w>140</w><h>80</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+AnalyticsInterface
+--
++getStatistics()
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>720</x><y>570</y><w>140</w><h>40</h></coordinates><panel_attributes>&lt;&lt;artifact&gt;&gt;
+DataAggregator.java</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>330</x><y>760</y><w>140</w><h>40</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
+Database</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>490</x><y>760</y><w>140</w><h>70</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+DBInterface
+--
++save()
++query()
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>740</x><y>660</y><w>20</w><h>20</h></coordinates><panel_attributes>
+halign=left</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>650</x><y>760</y><w>20</w><h>20</h></coordinates><panel_attributes>
+halign=left</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>660</x><y>670</y><w>110</w><h>120</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>90;10;90;100;10;100</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>0</x><y>240</y><w>140</w><h>40</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
+STT Service</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>130</x><y>240</y><w>220</w><h>200</h></coordinates><panel_attributes>lt=.&gt;
+            &lt;&lt;use&gt;&gt;</panel_attributes><additional_attributes>180;180;180;20;10;20</additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>770</x><y>370</y><w>20</w><h>20</h></coordinates><panel_attributes>
+halign=left</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>700</x><y>90</y><w>100</w><h>300</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>10;10;80;10;80;280</additional_attributes></element><element><id>Relation</id><coordinates><x>650</x><y>480</y><w>60</w><h>30</h></coordinates><panel_attributes>lt=.</panel_attributes><additional_attributes>40;10;10;10</additional_attributes></element><element><id>Text</id><coordinates><x>790</x><y>340</y><w>120</w><h>60</h></coordinates><panel_attributes>:APPORT [1]</panel_attributes><additional_attributes></additional_attributes></element><element><id>Text</id><coordinates><x>760</x><y>680</y><w>120</w><h>60</h></coordinates><panel_attributes>:APPORTDB [1]</panel_attributes><additional_attributes></additional_attributes></element><element><id>Text</id><coordinates><x>670</x><y>790</y><w>120</w><h>60</h></coordinates><panel_attributes>:DBPORT [1]</panel_attributes><additional_attributes></additional_attributes></element><element><id>Text</id><coordinates><x>790</x><y>200</y><w>120</w><h>60</h></coordinates><panel_attributes>API Gateway</panel_attributes><additional_attributes></additional_attributes></element></diagram>
