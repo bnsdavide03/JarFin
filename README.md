@@ -123,19 +123,11 @@ Il progetto segue **Agile Model Driven Development (AMDD)**:
 | Code Coverage    | EclEmma              |
 | Analisi Statica  | STAN4J               |
 | Database         | PostgreSQL / MongoDB |
-| Container        | Docker (opzionale)   |
 
 
 ## 🔄 Piano delle Iterazioni
 
 * **Iterazione 0** – Requisiti e architettura
-* **Iterazione 1** – Microservizio contabilità
-* **Iterazione 2** – Analytics e aggregazioni
-* **Iterazione 3** - NLU e integrazione dei servizi
-* **Iterazione finale** – testing e documentazione
-
-
-## 🚀 Stato del Progetto
-
-📌 **Progetto accademico / dimostrativo**
-Pensato come base estendibile per assistenti finanziari intelligenti.
+* **Iterazione 1** – Core contabilità
+* **Iterazione 2** – Integrazione dei servizi e analytics
+* **Iterazione finale** – NLU e Integrazione
