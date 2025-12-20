@@ -113,16 +113,15 @@ Il progetto segue **Agile Model Driven Development (AMDD)**:
 
 ## 🛠️ Toolchain
 
-| Area             | Strumento            |
-| ---------------- | -------------------- |
-| Backend          | Java + Spring Boot   |
-| Modellazione UML | UMLlet               |
-| Versioning       | GitHub               |
-| API Testing      | Postman              |
-| Unit Testing     | JUnit                |
-| Code Coverage    | EclEmma              |
-| Analisi Statica  | STAN4J               |
-| Database         | PostgreSQL / MongoDB |
+| Area            | Strumento          | Scopo                                                  |
+| --------------- | ------------------ | ------------------------------------------------------ |
+| Modellazione    | UMLet              | Diagrammi UML (Use Case, Classi, Componenti, Sequenza) |
+| Versioning & PM | GitHub             | Repository, Kanban board, Pull Request                 |
+| Backend         | Java + Spring Boot | Microservizi Jarfin                                    |
+| Testing API     | Postman            | Verifica endpoint REST                                 |
+| Unit Testing    | JUnit              | Test della logica applicativa                          |
+| Code Coverage   | EclEmma            | Analisi dinamica dei test                              |
+| Analisi Statica | STAN4J             | Metriche di qualità del codice                         |
 
 
 ## 🔄 Piano delle Iterazioni
