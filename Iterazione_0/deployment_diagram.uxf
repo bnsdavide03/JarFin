@@ -19,7 +19,7 @@ group=group-1</panel_attributes><additional_attributes></additional_attributes><
 Web Browser
 group=group-0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>470</x><y>680</y><w>160</w><h>60</h></coordinates><panel_attributes>symbol=artifact
 &lt;&lt;artifact&gt;&gt;
-JarFin Web UI
+Jarfin Web UI
 group=group-0</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLDeployment</id><coordinates><x>30</x><y>530</y><w>220</w><h>110</h></coordinates><panel_attributes>Database Server</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>60</x><y>570</y><w>160</w><h>50</h></coordinates><panel_attributes>symbol=artifact
 &lt;&lt;artifact&gt;&gt;
 PostgreSQL</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLDeployment</id><coordinates><x>30</x><y>20</y><w>200</w><h>50</h></coordinates><panel_attributes>External STT Service</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>40</x><y>60</y><w>210</w><h>190</h></coordinates><panel_attributes>
