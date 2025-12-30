@@ -118,8 +118,29 @@ Il diagramma identifica due tipologie di attori che interagiscono con il sistema
         * **Visualizzare Report e Stime**: generazione di previsioni in base allo storico.
 
 
-
 ### 3.1.2 Diagramma dei Componenti
+
+Il Diagramma dei Componenti illustra la struttura logica del sistema e le dipendenze verso i servizi esterni. L'architettura è organizzata in tre livelli distinti.
+
+1. **Client Layer**
+Rappresenta il frontend dell'applicazione:
+    * **Componente GUI**: Gestisce l'interfaccai grafica e le interazioni dell'utente;
+    * **UserInterface**: definisce i metodi *inputCommand()* (per catturare l'intento dell'utente) e *displayReport()* (per mostrare i risultati finanziari);
+    * ***GUIPORT[1]***: punto di uscita che collega il client al resto del sistema tramite un *API Gateway*.
+
+2. **Application Layer**
+Responsabile della logica di Business, è costituita da tre microservizi:
+    * **NLU Service**: si occupa della comprensione del linguaggio naturale. Utilizza l'artefatto *ParserNLU.java* per eseguire l'algoritmo di parsing tramite il metodo *parseCommand()*;
+    * **Accounting Service**: gestisce l'aspetto finanziario. Fornisce i metodi *addTransaction()* e *getBalance()* per gestire le spese;
+    * **Analytics Service**: utlizza l'artefatto *DataAggregator.java* per generare statistiche e previsioni tramite il metodo *getStatistics()*.
+
+3. **Data Layer**
+Si occupa della persistenza delle informazioni
+    * **Componente Database**: gestisce l'archiviazione fisica dei dati;
+    * **DBInterface**: fornisce le operazioni di *save()* e *query()*, gestendo il disaccoppiamento tra la logica di business e la persistenza dei dati. Questo permette la manutenzione e la portabilità del sistema.
+
+4. **Dipendenze Esterne**
+    * **STT Service**: componente richiesto dall'**NLU Service** per convertire l'input vocale in testo prima che venga elaborato dalla logica interna del sistema.
 
 
 ### 3.1.3 Diagramma dei Deployment
