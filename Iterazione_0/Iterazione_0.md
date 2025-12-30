@@ -92,31 +92,56 @@ Queste viste guidano l'implementazione delle funzionalità e i flussi di dati.
 
 
 ## 3.1. Spiegazione Diagrammi UML
+
 ### 3.1.1 Diagramma dei Casi d'Uso
+
+Il Diagramma dei Casi d'Uso rappresenta le interazioni tra l'utente e il sistema durante l'**Iterazione 0**.
+
+1. **Attori**
+Il diagramma identifica due tipologie di attori che interagiscono con il sistema:
+    * **Utente**: attore che interagisce con l'interfaccia per la gestione delle proprie finanze;
+    * **Sistemi esterni**:
+        * **Cloud Speech-to-Text**: necessario per la funzionalità vocale; 
+        * **Database**: necessario per la persistenza dei dati.
+
+2. **Casi d'uso**
+    * **Gestione Accesso**
+        * **Registrazione, Login e Logout**: necessari per la sicurezza del sistema; il "Logout" include il "Login", che a sua volta include la "Registrazione".
+
+    * **Gestione Transazioni**
+        * **Registrare Transazione**: include la "Conversione NL ad Azione", in quanto ogni comando testuale è processato dal parser NLU per essere compreso dal sistema; è esteso dalla "Conversione STT", che interviene solo se la condizione *input==vocale* è soddisfatta. In tal caso viene coinvolto il sistema esterno Cloud Speech-to-Text;
+        * **Gestire Transazioni**: permette la modifica o l'eliminazione di spese inserite. Anche questo caso d'uso include la "Conversione NL ad Azione".
+
+    * **Analisi e Monitoraggio**
+        * **Consultare Stato Finanziario**: visualizzazione del saldo attuale;
+        * **Gestire Fondi e Budget**: permette di impostare limiti di spesa;
+        * **Visualizzare Report e Stime**: generazione di previsioni in base allo storico.
+
 
 
 ### 3.1.2 Diagramma dei Componenti
 
 
 ### 3.1.3 Diagramma dei Deployment
+
 Il Diagramma di Deployment illustra la configurazione fisica dei nodi hardware e ambienti software che compongono il sistema. L'architettura è organizzata a microservizi distrbuiti, in modo da garantire scalabilità e isolamento dei componenti.
 
 1. **Architettura dei Nodi**
 Il sistema è costituito da quattro entità fisiche o logiche:
-* **User Device**: Dispositivo terminale dell'utente; trattandosi di una Web App, non richiede installazione locale ma interagisce tramite un ambiente controllato (Web Browser);
-* **Cloud Server**: Server remoto che ospita la logica di business;
-* **Database Server**: si occupa della persistenza dei dati. È isolato dagli altri nodi per ragioni di sicurezza e di prestazioni. La scelta di questo RDBMS è giustificata da un'alta scalabilità e performance ottime anche lavorando con dati complessi. PostgreSQL garantisce che le operazioni seguano le proprietà ACID;
-* **External STT Service**: entità esterna che fornisce servizi di conversione Speech-to-Text.
+    * **User Device**: Dispositivo terminale dell'utente; trattandosi di una Web App, non richiede installazione locale ma interagisce tramite un ambiente controllato (Web Browser);
+    * **Cloud Server**: Server remoto che ospita la logica di business;
+    * **Database Server**: si occupa della persistenza dei dati. È isolato dagli altri nodi per ragioni di sicurezza e di prestazioni. La scelta di questo RDBMS è giustificata da un'alta scalabilità e performance ottime anche lavorando con dati complessi. PostgreSQL garantisce che le operazioni seguano le proprietà ACID;
+    * **External STT Service**: entità esterna che fornisce servizi di conversione Speech-to-Text.
 
 2. **Ambienti di Esecuzione e Artefatti**
-* **User Device**: Il Web Browser fornisce l'interprete per l'esecuzione del codice client. L'artefatto Jarfin Web UI è l'insieme di risorse che costituiscono l'interfaccia utente.
-* **Cloud Server**: L'organizzazione a Container garantisce l'isolamento. Il Container NLU ospita l'artefatto ParserNLU.jar (algoritmo 1); il Container Accounting ospita l'artefatto AccountingService.jar (gestione delle spese); il Container Analytics ospita l'artefatto AnalyticsService.jar, utile per la generazione dei report (algoritmo 2).
-* **Database Server**: Il database selezionato è PostgreSQL per l'archiviazione persistente delle operazioni.
+    * **User Device**: Il Web Browser fornisce l'interprete per l'esecuzione del codice client. L'artefatto Jarfin Web UI è l'insieme di risorse che costituiscono l'interfaccia utente.
+    * **Cloud Server**: L'organizzazione a Container garantisce l'isolamento. Il Container NLU ospita l'artefatto ParserNLU.jar (algoritmo 1); il Container Accounting ospita l'artefatto AccountingService.jar (gestione delle spese); il Container Analytics ospita l'artefatto AnalyticsService.jar, utile per la generazione dei report (algoritmo 2).
+    * **Database Server**: Il database selezionato è PostgreSQL per l'archiviazione persistente delle operazioni.
 
 3. **Percorsi di Comunicazione/Protocolli**
-* **User Device --> Cloud Server**: utilizza il protocollo HTTPS, il traffico web è gestito tramite API Gateway verso i microservizi interni.
-* **Cloud Server --> Database Server**: utilizza il protocollo JDBC, utile per l'interazione tra servizi e il database.
-* **Cloud Server --> External STT Service**: utilizza il protocollo HTTPS/JSON, si occupa dell'invio dei flussi audio e della ricezione delle trascrizioni testuali.
+    * **User Device --> Cloud Server**: utilizza il protocollo HTTPS, il traffico web è gestito tramite API Gateway verso i microservizi interni.
+    * **Cloud Server --> Database Server**: utilizza il protocollo JDBC, utile per l'interazione tra servizi e il database.
+    * **Cloud Server --> External STT Service**: utilizza il protocollo HTTPS/JSON, si occupa dell'invio dei flussi audio e della ricezione delle trascrizioni testuali.
 
 ### 3.1.4 Diagramma delle Classi
 ### 3.1.5 Diagramma di Sequenza
