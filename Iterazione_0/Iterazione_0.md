@@ -124,7 +124,7 @@ Il Diagramma dei Componenti illustra la struttura logica del sistema e le dipend
 
 1. **Client Layer**
 Rappresenta il frontend dell'applicazione:
-    * **Componente GUI**: Gestisce l'interfaccai grafica e le interazioni dell'utente;
+    * **Componente GUI**: Gestisce l'interfaccia grafica e le interazioni dell'utente;
     * **UserInterface**: definisce i metodi *inputCommand()* (per catturare l'intento dell'utente) e *displayReport()* (per mostrare i risultati finanziari);
     * ***GUIPORT[1]***: punto di uscita che collega il client al resto del sistema tramite un *API Gateway*.
 
@@ -132,7 +132,7 @@ Rappresenta il frontend dell'applicazione:
 Responsabile della logica di Business, è costituita da tre microservizi:
     * **NLU Service**: si occupa della comprensione del linguaggio naturale. Utilizza l'artefatto *ParserNLU.java* per eseguire l'algoritmo di parsing tramite il metodo *parseCommand()*;
     * **Accounting Service**: gestisce l'aspetto finanziario. Fornisce i metodi *addTransaction()* e *getBalance()* per gestire le spese;
-    * **Analytics Service**: utlizza l'artefatto *DataAggregator.java* per generare statistiche e previsioni tramite il metodo *getStatistics()*.
+    * **Analytics Service**: utilizza l'artefatto *DataAggregator.java* per generare statistiche e previsioni tramite il metodo *getStatistics()*.
 
 3. **Data Layer**
 Si occupa della persistenza delle informazioni
@@ -145,7 +145,7 @@ Si occupa della persistenza delle informazioni
 
 ### 3.1.3 Diagramma dei Deployment
 
-Il Diagramma di Deployment illustra la configurazione fisica dei nodi hardware e ambienti software che compongono il sistema. L'architettura è organizzata a microservizi distrbuiti, in modo da garantire scalabilità e isolamento dei componenti.
+Il Diagramma di Deployment illustra la configurazione fisica dei nodi hardware e ambienti software che compongono il sistema. L'architettura è organizzata a microservizi distribuiti, in modo da garantire scalabilità e isolamento dei componenti.
 
 1. **Architettura dei Nodi**
 Il sistema è costituito da quattro entità fisiche o logiche:
