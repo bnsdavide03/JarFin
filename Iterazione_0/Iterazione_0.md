@@ -50,9 +50,9 @@ Questi requisiti definiscono *cosa* il sistema deve fare.
 Questi requisiti definiscono *come* il sistema deve comportarsi (Quality Attributes).
 
 * **RNF-01 – Modularity (Architettura):** Il sistema deve essere basato su **Microservizi** indipendenti (Spring Boot) per garantire che il fallimento di un modulo (es. Analytics) non blocchi le funzionalità Core (es. Contabilità).
-* **RNF-02 – Maintainability (Qualità del Codice):** Il codice deve rispettare i principi di **Clean Code**. È obbligatoria l'analisi statica (tramite STAN4J) e una copertura dei test (JUnit + EclEmma) adeguata.
+* **RNF-02 – Maintainability (Qualità del Codice):** Il codice deve rispettare i principi di **Clean Code**. È obbligatoria l'analisi statica (tramite STAN4J) e una copertura dei test (JUnit + EclEmma) adeguata con un **Test Coverage** minimo del 70%.
 * **RNF-03 – Scalability:** L'architettura deve supportare l'aggiunta di nuovi moduli (es. Speech-to-Text) senza rifattorizzare l'intero backend.
-* **RNF-04 – Usability (Interazione):** Il parser NLU deve riconoscere comandi con una variabilità sintattica ragionevole (sinonimi, ordine delle parole diverso) per garantire un'esperienza "umana".
+* **RNF-04 – Usability (Interazione):** Il parser NLU deve riconoscere comandi con una variabilità sintattica ragionevole (sinonimi, ordine delle parole diverso) per garantire un'esperienza "umana" e il tempo di risposta deve essere inferiore a **500ms** per non degradare l'esperienza utente.
 * **RNF-05 – Data Integrity:** Le transazioni finanziarie devono garantire consistenza; nessuna spesa deve essere persa o duplicata durante l'elaborazione asincrona.
 
 
@@ -164,5 +164,52 @@ Il sistema è costituito da quattro entità fisiche o logiche:
     * **Cloud Server --> Database Server**: utilizza il protocollo JDBC, utile per l'interazione tra servizi e il database.
     * **Cloud Server --> External STT Service**: utilizza il protocollo HTTPS/JSON, si occupa dell'invio dei flussi audio e della ricezione delle trascrizioni testuali.
 
+
 ### 3.1.4 Diagramma delle Classi
+
+Il **Diagramma delle Classi** definisce la struttura statica del codice Java, organizzata secondo il pattern **Controller–Service–Repository** per garantire il disaccoppiamento tra interfaccia, logica applicativa e persistenza dei dati.
+
+- **Core Finanziario**
+  La classe `Transaction` rappresenta l’entità principale del dominio ed è caratterizzata da attributi quali:
+  - `amount`
+  - `date`
+  - `category`  
+
+  Essa è legata tramite un’associazione **1..*** alla classe `Account`, che identifica il portafoglio dell’utente.
+
+- **Logic Layer**
+  I microservizi sono gestiti da classi di tipo *Service* (ad es. `AccountingService`, `NLUParser`, `DataAggregator`).  
+  Queste classi implementano la logica di business, occupandosi di:
+  - validazione dei dati
+  - applicazione delle regole di dominio
+  - esecuzione degli algoritmi di aggregazione e analisi
+
+- **Persistence Layer**
+  L’accesso al database **PostgreSQL** è mediato da interfacce *Repository*, che astraggono le query SQL tramite **Spring Data JPA**, garantendo modularità e facilità di manutenzione.
+
+- **Infrastruttura**
+  La classe `APIGateway` funge da punto di ingresso unico del sistema, smistando le richieste (tramite **DTO**) verso i controller specifici dei diversi microservizi.
+
+
 ### 3.1.5 Diagramma di Sequenza
+
+Il **Diagramma di Sequenza** illustra la dinamica temporale di un comando utente, mostrando come i microservizi collaborano per processare una frase in linguaggio naturale.
+
+- **Trigger**
+  L’utente invia un comando (testuale o vocale) all’**API Gateway**.
+
+- **Preprocessing (Opzionale)**
+  Se l’input è vocale, il Gateway interroga il servizio **Cloud STT** per ottenere la trascrizione in formato testuale.
+
+- **Parsing NLU**
+  Il testo viene inviato al **NLU Service**, che tramite l’algoritmo di parsing:
+  - estrae l’intento (es. *“Aggiungi Spesa”*)
+  - identifica i dati rilevanti (es. *“20€”*, *“Cibo”*)
+
+- **Esecuzione**
+  Una volta validato l’intento, il Gateway inoltra la richiesta strutturata:
+  - all’**Accounting Service**, per salvare la transazione nel database
+  - oppure all’**Analytics Service**, per il calcolo di report e statistiche
+
+- **Feedback**
+  Il sistema restituisce una risposta di conferma in formato **JSON**, visualizzando l’esito dell’operazione sulla **GUI**.
