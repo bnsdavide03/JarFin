@@ -19,6 +19,10 @@ Thumbs.db
 .classpath
 .settings/
 
+# Metals (Scala / BSP)
+.metals/
+.bloop/
+
 # =========================
 # Build tools
 # =========================
