@@ -59,7 +59,7 @@ Questi requisiti definiscono *come* il sistema deve comportarsi (Quality Attribu
 ## 3. Strategia di Modellazione: UML 4+1 View Model
 
 Per gestire la complessità di un sistema a microservizi sviluppato in team, abbiamo adottato il modello **UML 4+1**.
-Come specificato nella strategia di progetto, utilizziamo queste viste in modo ibrido: **2 viste per la struttura statica** e **3 viste per lo sviluppo dinamico e ibrido**.
+Come specificato nella strategia di progetto, utilizziamo queste viste in modo ibrido: **3 viste per la struttura statica** e **2 viste per lo sviluppo dinamico e ibrido**.
 
 ### A. Viste Strutturali (Fondamenta del Progetto)
 
@@ -106,7 +106,7 @@ Il diagramma identifica due tipologie di attori che interagiscono con il sistema
 
 2. **Casi d'uso**
     * **Gestione Accesso**
-        * **Registrazione, Login e Logout**: necessari per la sicurezza del sistema; il "Logout" include il "Login", che a sua volta include la "Registrazione".
+        * **Registrazione, Login e Logout**: necessari per la sicurezza del sistema; sono modellati come casi d'uso distinti. La "Registrazione" è tipicamente eseguita una tantum, il "Login" richiede che l'utente sia già registrato e il "Logout" richiede che l'utente sia autenticato..
 
     * **Gestione Transazioni**
         * **Registrare Transazione**: include la "Conversione NL ad Azione", in quanto ogni comando testuale è processato dal parser NLU per essere compreso dal sistema; è esteso dalla "Conversione STT", che interviene solo se la condizione *input==vocale* è soddisfatta. In tal caso viene coinvolto il sistema esterno Cloud Speech-to-Text;
@@ -129,7 +129,7 @@ Rappresenta il frontend dell'applicazione:
     * ***GUIPORT[1]***: punto di uscita che collega il client al resto del sistema tramite un *API Gateway*.
 
 2. **Application Layer**
-Responsabile della logica di Business, è costituita da tre microservizi:
+Responsabile della logica di business, è costituita da tre microservizi:
     * **NLU Service**: si occupa della comprensione del linguaggio naturale. Utilizza l'artefatto *ParserNLU.java* per eseguire l'algoritmo di parsing tramite il metodo *parseCommand()*;
     * **Accounting Service**: gestisce l'aspetto finanziario. Fornisce i metodi *addTransaction()* e *getBalance()* per gestire le spese;
     * **Analytics Service**: utilizza l'artefatto *DataAggregator.java* per generare statistiche e previsioni tramite il metodo *getStatistics()*.
@@ -175,7 +175,7 @@ Il **Diagramma delle Classi** definisce la struttura statica del codice Java, or
   - `date`
   - `category`  
 
-  Essa è legata tramite un’associazione **1..*** alla classe `Account`, che identifica il portafoglio dell’utente.
+  Essa è legata tramite un’associazione 1..* alla classe `Account`, che identifica il portafoglio dell’utente.
 
 - **Logic Layer**
   I microservizi sono gestiti da classi di tipo *Service* (ad es. `AccountingService`, `NLUParser`, `DataAggregator`).  
