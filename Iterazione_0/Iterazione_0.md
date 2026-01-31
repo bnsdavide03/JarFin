@@ -40,7 +40,7 @@ Questi requisiti definiscono *cosa* il sistema deve fare.
 | ID | Requisito | Descrizione Formale | Priorità |
 | --- | --- | --- | --- |
 | **RF-01** | **Gestione Transazioni (CRUD)** | Il sistema deve permettere la creazione, lettura, aggiornamento e cancellazione di entrate e uscite finanziarie tramite API REST dedicate. | Alta |
-| **RF-02** | **Parsing del Linguaggio Naturale** | Il modulo NLU deve accettare input testuali (es. "Pranzo 15€"), estrarre le entità (Importo: 15, Valuta: €, Categoria: Pranzo) e mapparle in transazioni strutturate. | Alta |
+| **RF-02** | **Parsing del Linguaggio Naturale** | Il modulo NLU deve accettare input testuali (es. "Pranzo 15€"), estrarre le entità (importo: 15, valuta: €, categoria: Pranzo) e mapparle in transazioni strutturate. | Alta |
 | **RF-03** | **Aggregazione Dati e Reporting** | Il sistema deve calcolare totali per periodo temporale e categoria, fornendo proiezioni finanziarie basate sui dati storici. | Media |
 | **RF-04** | **Orchestrazione API Gateway** | Un singolo punto di ingresso deve gestire il routing delle richieste verso i microservizi di Contabilità, Analytics e NLU. | Alta |
 | **RF-05** | **Output Strutturato** | Il sistema deve restituire report e risposte in formato JSON standardizzato per essere consumati da eventuali frontend o interfacce vocali. | Media |
@@ -50,7 +50,7 @@ Questi requisiti definiscono *cosa* il sistema deve fare.
 Questi requisiti definiscono *come* il sistema deve comportarsi (Quality Attributes).
 
 * **RNF-01 – Modularity (Architettura):** Il sistema deve essere basato su **Microservizi** indipendenti (Spring Boot) per garantire che il fallimento di un modulo (es. Analytics) non blocchi le funzionalità Core (es. Contabilità).
-* **RNF-02 – Maintainability (Qualità del Codice):** Il codice deve rispettare i principi di **Clean Code**. È obbligatoria l'analisi statica (tramite STAN4J) e una copertura dei test (JUnit + EclEmma) adeguata con un **Test Coverage** minimo del 70%.
+* **RNF-02 – Maintainability (Qualità del Codice):** Il codice deve rispettare i principi di **Clean Code**. È obbligatoria l'analisi statica (tramite strumenti di analisi statica, es. STAN4J) e una copertura dei test (es. JUnit + EclEmma) adeguata con un **Test Coverage** minimo del 70%.
 * **RNF-03 – Scalability:** L'architettura deve supportare l'aggiunta di nuovi moduli (es. Speech-to-Text) senza rifattorizzare l'intero backend.
 * **RNF-04 – Usability (Interazione):** Il parser NLU deve riconoscere comandi con una variabilità sintattica ragionevole (sinonimi, ordine delle parole diverso) per garantire un'esperienza "umana" e il tempo di risposta deve essere inferiore a **500ms** per non degradare l'esperienza utente.
 * **RNF-05 – Data Integrity:** Le transazioni finanziarie devono garantire consistenza; nessuna spesa deve essere persa o duplicata durante l'elaborazione asincrona.
@@ -106,7 +106,7 @@ Il diagramma identifica due tipologie di attori che interagiscono con il sistema
 
 2. **Casi d'uso**
     * **Gestione Accesso**
-        * **Registrazione, Login e Logout**: necessari per la sicurezza del sistema; sono modellati come casi d'uso distinti. La "Registrazione" è tipicamente eseguita una tantum, il "Login" richiede che l'utente sia già registrato e il "Logout" richiede che l'utente sia autenticato..
+        * **Registrazione, Login e Logout**: necessari per la sicurezza del sistema e modellati come casi d’uso distinti. La "Registrazione" è tipicamente eseguita una tantum, il "Login" richiede che l'utente sia già registrato e il "Logout" richiede che l'utente sia autenticato.
 
     * **Gestione Transazioni**
         * **Registrare Transazione**: include la "Conversione NL ad Azione", in quanto ogni comando testuale è processato dal parser NLU per essere compreso dal sistema; è esteso dalla "Conversione STT", che interviene solo se la condizione *input==vocale* è soddisfatta. In tal caso viene coinvolto il sistema esterno Cloud Speech-to-Text;
@@ -126,7 +126,7 @@ Il Diagramma dei Componenti illustra la struttura logica del sistema e le dipend
 Rappresenta il frontend dell'applicazione:
     * **Componente GUI**: Gestisce l'interfaccia grafica e le interazioni dell'utente;
     * **UserInterface**: definisce i metodi *inputCommand()* (per catturare l'intento dell'utente) e *displayReport()* (per mostrare i risultati finanziari);
-    * ***GUIPORT[1]***: punto di uscita che collega il client al resto del sistema tramite un *API Gateway*.
+    * ***GUIPORT[1]***: porta di comunicazione che collega il client al resto del sistema tramite un *API Gateway*.
 
 2. **Application Layer**
 Responsabile della logica di business, è costituita da tre microservizi:
@@ -135,7 +135,7 @@ Responsabile della logica di business, è costituita da tre microservizi:
     * **Analytics Service**: utilizza l'artefatto *DataAggregator.java* per generare statistiche e previsioni tramite il metodo *getStatistics()*.
 
 3. **Data Layer**
-Si occupa della persistenza delle informazioni
+Si occupa della persistenza delle informazioni:
     * **Componente Database**: gestisce l'archiviazione fisica dei dati;
     * **DBInterface**: fornisce le operazioni di *save()* e *query()*, gestendo il disaccoppiamento tra la logica di business e la persistenza dei dati. Questo permette la manutenzione e la portabilità del sistema.
 
@@ -151,7 +151,7 @@ Il Diagramma di Deployment illustra la configurazione fisica dei nodi hardware e
 Il sistema è costituito da quattro entità fisiche o logiche:
     * **User Device**: Dispositivo terminale dell'utente; trattandosi di una Web App, non richiede installazione locale ma interagisce tramite un ambiente controllato (Web Browser);
     * **Cloud Server**: Server remoto che ospita la logica di business;
-    * **Database Server**: si occupa della persistenza dei dati. È isolato dagli altri nodi per ragioni di sicurezza e di prestazioni. La scelta di questo RDBMS è giustificata da un'alta scalabilità e performance ottime anche lavorando con dati complessi. PostgreSQL garantisce che le operazioni seguano le proprietà ACID;
+    * **Database Server**: si occupa della persistenza dei dati. È isolato dagli altri nodi per ragioni di sicurezza e di prestazioni. La scelta di questo RDBMS è giustificata da un’elevata scalabilità e da prestazioni elevate anche lavorando con dati complessi. PostgreSQL garantisce che le operazioni seguano le proprietà ACID;
     * **External STT Service**: entità esterna che fornisce servizi di conversione Speech-to-Text.
 
 2. **Ambienti di Esecuzione e Artefatti**
@@ -178,7 +178,7 @@ Il **Diagramma delle Classi** definisce la struttura statica del codice Java, or
   Essa è legata tramite un’associazione 1..* alla classe `Account`, che identifica il portafoglio dell’utente.
 
 - **Logic Layer**
-  I microservizi sono gestiti da classi di tipo *Service* (ad es. `AccountingService`, `NLUParser`, `DataAggregator`).  
+  I microservizi sono gestiti da classi di tipo *Service* (ad es. `AccountingService`, `ParserNLU`, `DataAggregator`).  
   Queste classi implementano la logica di business, occupandosi di:
   - validazione dei dati
   - applicazione delle regole di dominio
@@ -207,7 +207,7 @@ Il **Diagramma di Sequenza** illustra la dinamica temporale di un comando utente
   - identifica i dati rilevanti (es. *“20€”*, *“Cibo”*)
 
 - **Esecuzione**
-  Una volta validato l’intento, il Gateway inoltra la richiesta strutturata:
+  Una volta validato l’intento e i parametri estratti, il Gateway inoltra la richiesta strutturata:
   - all’**Accounting Service**, per salvare la transazione nel database
   - oppure all’**Analytics Service**, per il calcolo di report e statistiche
 
