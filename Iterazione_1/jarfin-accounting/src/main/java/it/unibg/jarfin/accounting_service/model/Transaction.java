@@ -1,55 +1,47 @@
 package it.unibg.jarfin.accounting_service.model;
 
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import java.math.BigDecimal;
 import java.time.LocalDate;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Data;
+import java.util.Objects;
 
 @Entity
 @Table(name = "transactions")
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+// @EqualsAndHashCode RIMOSSO per evitare il bug di Eclipse
 public class Transaction {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // RIMOSSO @EqualsAndHashCode.Include
 
-    private Double amount;
+    @Column(nullable = false, precision = 19, scale = 4)
+    private BigDecimal amount;
+
+    @Column(nullable = false)
     private LocalDate date;
+
     private String description;
+
+    @Column(nullable = false)
     private String category;
-    
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	public Double getAmount() {
-		return amount;
-	}
-	public void setAmount(Double amount) {
-		this.amount = amount;
-	}
-	public LocalDate getDate() {
-		return date;
-	}
-	public void setDate(LocalDate date) {
-		this.date = date;
-	}
-	public String getDescription() {
-		return description;
-	}
-	public void setDescription(String description) {
-		this.description = description;
-	}
-	public String getCategory() {
-		return category;
-	}
-	public void setCategory(String category) {
-		this.category = category;
-	}
+
+    // Codice generato manualmente (più sicuro per JPA)
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Transaction that = (Transaction) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
