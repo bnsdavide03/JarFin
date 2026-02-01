@@ -1,21 +1,21 @@
 package it.unibg.jarfin.analytics_service.dto;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Map;
 import lombok.Data;
 
 @Data
 public class FinancialReportDTO {
-    private BigDecimal totalBalance;
-    private BigDecimal totalIncomes;
-    private BigDecimal totalExpenses;
+    private BigDecimal totalBalance = BigDecimal.ZERO;
+    private BigDecimal totalIncomes = BigDecimal.ZERO;
+    private BigDecimal totalExpenses = BigDecimal.ZERO;
     
-    // Mappa Categoria -> Totale Speso
-    private Map<String, BigDecimal> breakdownByCategory;
+    private Map<String, BigDecimal> breakdownByCategory = Collections.emptyMap();
     
-    private BigDecimal projectedMonthlyExpenses; // Proiezione fine mese
-    private BigDecimal savingsRate;              // % Risparmio
+    private BigDecimal projectedMonthlyExpenses = BigDecimal.ZERO;
+    private BigDecimal savingsRate = BigDecimal.ZERO;
     
-    private String financialAdvice;
-    private String alertLevel;
+    private String financialAdvice = "Dati insufficienti.";
+    private String alertLevel = "GRAY";
 }

@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import it.unibg.jarfin.analytics_service.dto.FinancialReportDTO;
 import it.unibg.jarfin.analytics_service.dto.TransactionDTO;
+import it.unibg.jarfin.analytics_service.dto.TransactionType;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -26,11 +27,10 @@ public class AnalyticsService {
     private final RestTemplate restTemplate;
 
     public FinancialReportDTO generateReport() {
-        // FIX Copilot: Usa DTO tipizzato invece di List<Map> raw
         TransactionDTO[] response = restTemplate.getForObject(accountingUrl, TransactionDTO[].class);
         
         if (response == null || response.length == 0) {
-            return new FinancialReportDTO(); 
+            return new FinancialReportDTO();
         }
 
         List<TransactionDTO> transactions = Arrays.asList(response);
@@ -40,15 +40,14 @@ public class AnalyticsService {
         Map<String, BigDecimal> categories = new HashMap<>();
 
         for (TransactionDTO t : transactions) {
-            // FIX Copilot: Uso BigDecimal per evitare errori di precisione Double
             BigDecimal amount = t.getAmount();
 
-            if (amount.compareTo(BigDecimal.ZERO) > 0) {
+            if (t.getType() == TransactionType.INCOME) {
                 incomes = incomes.add(amount);
-            } else {
-                BigDecimal absAmount = amount.abs();
-                expenses = expenses.add(absAmount);
-                categories.merge(t.getCategory(), absAmount, BigDecimal::add);
+            } 
+            else if (t.getType() == TransactionType.EXPENSE) {
+                expenses = expenses.add(amount);
+                categories.merge(t.getCategory(), amount, BigDecimal::add);
             }
         }
 
@@ -66,7 +65,7 @@ public class AnalyticsService {
     private void calculateProjections(FinancialReportDTO report, BigDecimal incomes, BigDecimal expenses) {
         LocalDate today = LocalDate.now();
         int dayOfMonth = today.getDayOfMonth();
-        int daysInMonth = today.lengthOfMonth(); // FIX Copilot: Usa i giorni reali del mese (es. 28, 30, 31)
+        int daysInMonth = today.lengthOfMonth();
         
         if (dayOfMonth > 0) {
             BigDecimal dailyAverage = expenses.divide(BigDecimal.valueOf(dayOfMonth), 2, RoundingMode.HALF_UP);
@@ -74,7 +73,6 @@ public class AnalyticsService {
             report.setProjectedMonthlyExpenses(projected);
         }
 
-        // FIX Copilot: Gestione divisione per zero e alert coerenti
         if (incomes.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal balance = incomes.subtract(expenses);
             BigDecimal rate = balance.divide(incomes, 4, RoundingMode.HALF_UP)
@@ -83,15 +81,18 @@ public class AnalyticsService {
 
             if (rate.compareTo(new BigDecimal("20")) > 0) {
                 report.setAlertLevel("GREEN - Ottimo risparmio");
+                report.setFinancialAdvice("Ottimo lavoro! Continua a risparmiare così.");
             } else if (rate.compareTo(BigDecimal.ZERO) > 0) {
                 report.setAlertLevel("YELLOW - Attenzione alle spese");
+                report.setFinancialAdvice("Cerca di ridurre le spese non essenziali.");
             } else {
                 report.setAlertLevel("RED - Bilancio in negativo!");
+                report.setFinancialAdvice("Attenzione: le uscite superano le entrate.");
             }
         } else {
-            // Caso limite: Nessuna entrata
             report.setSavingsRate(BigDecimal.ZERO);
             report.setAlertLevel("RED - Nessuna entrata rilevata");
+            report.setFinancialAdvice("Registra delle entrate per ottenere analisi.");
         }
     }
 }

@@ -14,6 +14,8 @@ public class TransactionMapper {
         t.setDate(request.getDate());
         t.setCategory(request.getCategory());
         t.setDescription(request.getDescription());
+        t.setType(request.getType());
+        
         return t;
     }
 
@@ -24,6 +26,9 @@ public class TransactionMapper {
         r.setDate(entity.getDate());
         r.setCategory(entity.getCategory());
         r.setDescription(entity.getDescription());
+        
+        r.setType(entity.getType());
+        
         return r;
     }
 }

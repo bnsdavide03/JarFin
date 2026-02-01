@@ -6,8 +6,8 @@ import lombok.Data;
 
 @Data
 public class TransactionDTO {
-    // Mappiamo solo i campi che ci servono per le statistiche
     private BigDecimal amount;
     private String category;
     private LocalDate date;
+    private TransactionType type;
 }

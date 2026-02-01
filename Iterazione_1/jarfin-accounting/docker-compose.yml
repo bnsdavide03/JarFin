@@ -5,7 +5,7 @@ services:
     container_name: jarfin_db
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-password_segreta} # Valore default se manca env
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password_segreta}
       POSTGRES_DB: jarfin_db
     ports:
       - "5432:5432"

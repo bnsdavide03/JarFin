@@ -24,13 +24,10 @@ public class TransactionController {
 
     @PostMapping
     public ResponseEntity<TransactionResponse> create(@Valid @RequestBody TransactionRequest request) {
-        // 1. DTO -> Entity (L'ID non esiste nel Request, quindi è sicuro)
         Transaction entity = mapper.toEntity(request);
-        
-        // 2. Business Logic
+
         Transaction saved = service.saveTransaction(entity);
-        
-        // 3. Entity -> Response DTO
+       
         return ResponseEntity.status(HttpStatus.CREATED)
                              .body(mapper.toResponse(saved));
     }

@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Slf4j // Aggiunge logging
+@Slf4j
 @Service
-@RequiredArgsConstructor // Genera costruttore automaticamente per i campi final
+@RequiredArgsConstructor
 public class TransactionService {
 
     private final TransactionRepository repository;

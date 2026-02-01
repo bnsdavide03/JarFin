@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class AnalyticsServiceApplication {
 
     public static void main(String[] args) {
-        // Avvia il microservizio sulla porta definita nelle properties (8081)
         SpringApplication.run(AnalyticsServiceApplication.class, args);
     }
 }
