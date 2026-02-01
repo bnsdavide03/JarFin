@@ -1,35 +1,51 @@
 package it.unibg.jarfin.accounting_service.controller;
 
+import it.unibg.jarfin.accounting_service.dto.TransactionRequest;
+import it.unibg.jarfin.accounting_service.dto.TransactionResponse;
+import it.unibg.jarfin.accounting_service.mapper.TransactionMapper;
 import it.unibg.jarfin.accounting_service.model.Transaction;
 import it.unibg.jarfin.accounting_service.service.TransactionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/transactions")
+@RequiredArgsConstructor
 public class TransactionController {
 
-    @Autowired
-    private TransactionService service;
+    private final TransactionService service;
+    private final TransactionMapper mapper;
 
-    // CREATE
     @PostMapping
-    public Transaction addTransaction(@RequestBody Transaction transaction) {
-        return service.saveTransaction(transaction);
+    public ResponseEntity<TransactionResponse> create(@Valid @RequestBody TransactionRequest request) {
+        // 1. DTO -> Entity (L'ID non esiste nel Request, quindi è sicuro)
+        Transaction entity = mapper.toEntity(request);
+        
+        // 2. Business Logic
+        Transaction saved = service.saveTransaction(entity);
+        
+        // 3. Entity -> Response DTO
+        return ResponseEntity.status(HttpStatus.CREATED)
+                             .body(mapper.toResponse(saved));
     }
 
-    // READ ALL
     @GetMapping
-    public List<Transaction> getTransactions() {
-        return service.getAllTransactions();
+    public ResponseEntity<List<TransactionResponse>> findAll() {
+        List<TransactionResponse> response = service.getAllTransactions().stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 
-    // DELETE (Aggiunta per completare il CRUD)
     @DeleteMapping("/{id}")
-    public String deleteTransaction(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.deleteTransaction(id);
-        return "Transazione eliminata con successo: " + id;
+        return ResponseEntity.noContent().build();
     }
 }

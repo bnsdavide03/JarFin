@@ -49,7 +49,7 @@ Jarfin è basato su un ecosistema di **microservizi**, orchestrati tramite un **
   * Statistiche, report e proiezioni
 
 * **Database**
-  * PostgreSQL / MongoDB
+  * PostgreSQL
 
 
 ## 🧠 Algoritmi Principali

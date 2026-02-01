@@ -2,10 +2,8 @@
 ## **Indice**
 1. [**Sprint Planning**](#sprint-planning)
 2. [**Backlog del Prodotto**](#backlog-del-prodotto)
-5. [**Sprint n°1**](#sprint-n1--19112024---03122024)
-6. [**Sprint n°2**](#sprint-n2--03122024---17122024)
-7. [**Sprint n°3**](#sprint-n3--17122024---10012025)
-7. [**Sprint n°4**](#sprint-n4--10012025---17012025)
+3. [**Sprint n°1**](#sprint-n1--23122025---06012025)
+
 
 &nbsp;
 
@@ -60,7 +58,7 @@
 | Sequence Diagram                 | Implementazione del Sequence Diagram                                                             | Davide Bonsembiante      |
 | Class Diagram                    | Implementazione del Class Diagram                                                                | Alessandro Rocco         |
 | Deployment Diagram               | Implementazione del Deployment Diagram                                                           | Alessandro Biscaro       |
-| Documentazione Iterazione 0      | Implementazione della Documentazione per Iterazione 0                                            |                          |
+| Documentazione Iterazione 0      | Implementazione della Documentazione per Iterazione 0                                            | Tutti                    |
 &nbsp;
 
 # 2° Week Scrum 29 Dicembre 2025
