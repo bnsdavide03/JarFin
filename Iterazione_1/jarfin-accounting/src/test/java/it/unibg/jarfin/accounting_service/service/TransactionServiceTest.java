@@ -2,7 +2,9 @@ package it.unibg.jarfin.accounting_service.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,7 +13,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import it.unibg.jarfin.accounting_service.exception.EntityNotFoundException;
 import it.unibg.jarfin.accounting_service.model.Transaction;
 import it.unibg.jarfin.accounting_service.repository.TransactionRepository;
 
@@ -99,5 +101,20 @@ public class TransactionServiceTest {
         
         // Verifico che il metodo findAll del repository sia stato chiamato 1 volta
         verify(repository, times(1)).findAll();
+    }
+    
+    @Test
+    public void testDeleteTransaction_NotFound() {
+        Long idNonEsistente = 99L;
+        // Simulo che il DB risponda "false" (non esiste)
+        when(repository.existsById(idNonEsistente)).thenReturn(false);
+
+        // Verifico che lanci l'eccezione
+        assertThrows(EntityNotFoundException.class, () -> {
+            service.deleteTransaction(idNonEsistente);
+        });
+
+        // Verifico che NON abbia chiamato il metodo delete reale
+        verify(repository, never()).deleteById(any());
     }
 }

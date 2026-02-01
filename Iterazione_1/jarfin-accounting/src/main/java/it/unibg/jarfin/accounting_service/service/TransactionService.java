@@ -2,7 +2,7 @@ package it.unibg.jarfin.accounting_service.service;
 
 import it.unibg.jarfin.accounting_service.model.Transaction;
 import it.unibg.jarfin.accounting_service.repository.TransactionRepository;
-import jakarta.persistence.EntityNotFoundException;
+import it.unibg.jarfin.accounting_service.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

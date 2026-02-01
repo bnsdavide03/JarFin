@@ -1,136 +1,198 @@
-# 📗 Documentazione Ufficiale: Iterazione 1 – Core Accounting
+# Iterazione 1 – Accounting Service
 
-## 1. Decisioni Architetturali (Il "Perché")
+## Introduzione generale
 
-In questa fase, abbiamo trasformato la *Logical View* dell'Iterazione 0 in codice eseguibile. Le scelte tecnologiche sono state guidate dai requisiti di **manutenibilità** e **scalabilità**.
+L’Iterazione 1 del progetto **JarFin** è stata dedicata alla progettazione e allo sviluppo del microservizio **Accounting Service**. Questo servizio rappresenta uno dei componenti fondamentali dell’architettura complessiva del sistema, in quanto è responsabile della gestione delle transazioni finanziarie, ovvero la registrazione, la consultazione e la cancellazione delle operazioni economiche effettuate dall’utente.
 
-### 1.1 Perché Spring Boot 3.2?
+L’obiettivo principale di questa iterazione non è stato solo “far funzionare” il servizio, ma costruirlo seguendo criteri di buona progettazione software, in modo che il codice risultasse chiaro, manutenibile, estendibile e pronto per essere integrato, nelle iterazioni successive, con altri microservizi (in particolare l’Analytics Service).
 
-Abbiamo scelto Spring Boot come "orchestratore" del microservizio perché:
+Per questo motivo sono state adottate diverse scelte architetturali e implementative che verranno spiegate in dettaglio nelle sezioni successive.
 
-* **Auto-configurazione:** Riduce drasticamente il codice di setup (boilerplate), permettendoci di concentrarci sulla logica di business (le transazioni).
-* **Embedded Server:** Include un server Tomcat preconfigurato, rendendo il microservizio un'unità indipendente e facilmente containerizzabile.
 
-### 1.2 Perché Jakarta EE e JPA?
 
-Invece di usare driver di basso livello o framework specifici come Hibernate in modo diretto (che creerebbero un forte accoppiamento), abbiamo utilizzato **Jakarta Persistence (JPA)**:
+## Scelte tecnologiche
 
-* **Astrazione (ORM):** JPA ci permette di interagire con il database usando oggetti Java (`Transaction`) invece di query SQL manuali. Questo riduce gli errori e rende il codice più leggibile.
-* **Indipendenza dal DB:** Se decidessimo di passare da PostgreSQL a MySQL, non dovremmo cambiare una sola riga di codice Java, ma solo una proprietà nella configurazione.
-* **Spring Data JPA:** Abbiamo adottato le interfacce `Repository` perché implementano automaticamente le operazioni CRUD standard, garantendo un'implementazione pulita e veloce.
+Il microservizio è stato sviluppato utilizzando **Java 17** e **Spring Boot 3.2.0**, che rappresentano una combinazione moderna e ampiamente utilizzata per lo sviluppo di applicazioni backend e microservizi. Spring Boot consente di ridurre la configurazione manuale, fornendo un’infrastruttura pronta all’uso per la creazione di API REST e per l’integrazione con database relazionali.
 
-### 1.3 Perché PostgreSQL 15?
+Per l’esposizione delle API è stato utilizzato **Spring Web**, mentre la persistenza dei dati è stata gestita tramite **Spring Data JPA** e **Hibernate**, che permettono di mappare le classi Java su tabelle di database senza scrivere query SQL esplicite nella maggior parte dei casi.
 
-A differenza di un database NoSQL, PostgreSQL è stato scelto per:
+Il database scelto è **PostgreSQL**, eseguito all’interno di un container Docker. L’uso di Docker garantisce un ambiente di sviluppo riproducibile e coerente tra diversi sviluppatori e sistemi operativi.
 
-* **Proprietà ACID:** Fondamentali per un'app finanziaria. Garantiscono che una transazione sia salvata completamente o per nulla, evitando dati corrotti.
-* **Integrità Referenziale:** Permette di definire vincoli precisi sui dati (es. importi non nulli).
+A supporto dello sviluppo sono state utilizzate anche:
 
-<br>
+* **Lombok**, per ridurre il codice boilerplate (getter, setter, costruttori)
+* **Jakarta Validation**, per validare i dati in ingresso alle API
+* **Maven**, per la gestione delle dipendenze e del ciclo di build
 
-## 2. Implementazione Dettagliata (Il "Come")
 
-### 2.1 Il Modello dei Dati (`Transaction.java`)
 
-L'entità è il cuore del sistema. Abbiamo utilizzato le annotazioni Jakarta Persistence per mappare la classe al database:
+## Architettura del microservizio
 
-* `@Entity`: Indica a JPA che questa classe deve essere trasformata in una tabella.
-* `@GeneratedValue(strategy = GenerationType.IDENTITY)`: Delega al database la creazione degli ID univoci, garantendo l'integrità anche in caso di accessi multipli.
+L’Accounting Service è stato progettato seguendo una classica architettura a strati, che separa in modo chiaro le responsabilità delle diverse componenti. Questa scelta è fondamentale per evitare l’accoppiamento eccessivo tra parti del codice e per facilitare l’evoluzione futura del sistema.
 
-### 2.2 Il Layer di Servizio (`TransactionService.java`)
+Il flusso principale delle richieste è il seguente:
 
-Abbiamo isolato la logica di business dal Controller.
+Controller → Service → Repository → Database
 
-* **Decisione:** Il Service non conosce l'esistenza del Web o di HTTP. Si occupa solo di gestire le regole delle transazioni. Questo facilita il riutilizzo del codice (es. se volessimo aggiungere un'interfaccia a riga di comando).
+Il **Controller** si occupa esclusivamente della gestione delle richieste HTTP e della costruzione delle risposte. Non contiene logica di business.
 
-### 2.3 Layer Controller (`TransactionController.java`)
+Il **Service** rappresenta il cuore applicativo del microservizio: qui risiede la logica di dominio e vengono effettuati i controlli applicativi (ad esempio verificare l’esistenza di una transazione prima di eliminarla).
 
-Espone le funzionalità tramite API RESTful:
+Il **Repository** incapsula l’accesso ai dati e delega a Spring Data JPA la gestione delle operazioni CRUD.
 
-* **Scelta degli Endpoint:** Abbiamo seguito gli standard REST (POST per creare, GET per leggere, DELETE per eliminare) per rendere l'API intuitiva per il futuro sviluppo del Gateway e della UI.
+Questa separazione rende il codice più leggibile, più semplice da testare e più resistente ai cambiamenti.
 
-<br>
 
-## 3. Infrastruttura e Deploy
 
-### 3.1 Dockerization (`docker-compose.yml`)
+## Configurazione del database e Docker
 
-Abbiamo applicato il principio di **isolamento dell'ambiente**:
+Il database PostgreSQL viene avviato tramite un file `docker-compose.yml`. Questa scelta permette di evitare installazioni manuali del database sulla macchina locale e garantisce che l’ambiente di sviluppo sia sempre coerente.
 
-* **Container jarfin_db:** Invece di installare PostgreSQL sul PC, usiamo un'immagine Docker ufficiale. Questo assicura che ogni client/utilizzatore lavori esattamente con la stessa versione del database.
-* **Environment Variables:** Nel file `application.properties`, abbiamo usato la sintassi `${VAR:default}`.
-* **Decisione:** Questo permette di cambiare le credenziali del database (URL, password) al volo tramite Docker senza dover ricompilare il codice Java.
+Nel file di configurazione vengono definiti:
 
-<br>
+* l’immagine Docker di PostgreSQL
+* le credenziali di accesso
+* il nome del database
+* un volume persistente per i dati
 
-## 4. Validazione della Qualità
+Le credenziali del database non sono fissate rigidamente nel codice, ma vengono lette tramite variabili d’ambiente, con valori di default utilizzabili in fase di sviluppo. Questo approccio è importante perché separa la configurazione sensibile dal codice applicativo e rende il servizio più sicuro e facilmente distribuibile in ambienti diversi.
 
-### 4.1 Unit Testing con JUnit e Mockito
 
-In linea con l'AMDD, ogni incremento deve essere validato:
 
-* **Mocking del Repository:** In `TransactionServiceTest.java`, abbiamo usato Mockito per "simulare" il database.
-* **Decisione:** Questo ci permette di testare la logica del Service in millisecondi, senza dover effettivamente scrivere sul disco, rendendo il ciclo di sviluppo estremamente rapido.
+## Gestione delle dipendenze (pom.xml)
 
-<br>
+Il file `pom.xml` definisce tutte le dipendenze necessarie al funzionamento del microservizio. L’uso dello starter parent di Spring Boot garantisce la compatibilità tra le versioni delle librerie.
 
-## 5. Logica di Business e Interfacce REST
+Le dipendenze principali includono:
 
-Il servizio segue il pattern **Controller-Service-Repository**:
-- **Repository**: Interfaccia che estende `JpaRepository` per fornire metodi CRUD standard.
-- **Service**: `TransactionService.java` incapsula la logica di business. Qui viene gestita la delega delle operazioni al repository.
-- **Controller**: `TransactionController.java` espone gli endpoint RESTful sotto il path `/api/transactions`.
+* lo starter web per la creazione di API REST
+* lo starter JPA per la persistenza
+* il driver PostgreSQL per la connessione al database
+* Lombok per ridurre il codice ripetitivo
+* lo starter per la validazione degli input
 
-    - *POST*: Creazione transazione.
-    - *GET*: Recupero lista completa.
-    - *DELETE*: Rimozione tramite ID.
+La versione di Java è impostata a 17, in linea con le versioni più recenti di Spring Boot.
 
-<br>
 
-## 6. Tracciabilità dei Modelli (AMDD Check)
 
-### 6.1 Validazione Empirica con Postman
+## Modellazione del dominio: Transaction
 
-Oltre ai test unitari, il sistema è stato validato tramite **Postman** per verificare il corretto funzionamento degli endpoint REST e la persistenza effettiva su PostgreSQL. Questa fase conferma l'integrità del flusso: `Client -> HTTP -> Controller -> Service -> DB`.
+La classe `Transaction` rappresenta il concetto centrale del dominio dell’Accounting Service. Ogni istanza corrisponde a una transazione finanziaria salvata nel database.
 
-#### **Scenario A: Registrazione di una nuova spesa (POST)**
+Una scelta particolarmente importante è stata l’adozione di **BigDecimal** per rappresentare l’importo (`amount`) della transazione. L’uso di tipi floating-point come `Double` può introdurre errori di precisione nei calcoli monetari, che in un contesto finanziario sono inaccettabili. BigDecimal garantisce invece una rappresentazione esatta dei valori decimali.
 
-È stata simulata la creazione di una transazione finanziaria inviando un payload JSON al path `/api/transactions`.
+La classe è annotata come entità JPA e viene mappata alla tabella `transactions`. L’identificatore è generato automaticamente dal database.
 
-* **Endpoint:** `POST http://localhost:8080/api/transactions`
-* **Payload Inviato:**
-```json
-{
-    "amount": -15.50,
-    "description": "Pranzo di lavoro",
-    "category": "Cibo",
-    "date": "2024-05-20"
-}
+I metodi `equals` e `hashCode` sono stati implementati manualmente basandosi sull’identificatore. Questa scelta evita problemi noti legati all’uso automatico di `equals` e `hashCode` con entità JPA e proxy Hibernate, rendendo il comportamento dell’entità più prevedibile.
 
-```
 
-![Testing metodo con ...] (images/screen2.png)
 
-* **Risultato:** HTTP 200 OK. Il sistema restituisce l'oggetto creato con l'ID autogenerato (es. `id: 1`), confermando il successo dell'operazione e il corretto intervento del driver PostgreSQL.
+## Repository
 
-#### **Scenario B: Recupero dello storico (GET)**
+Il repository `TransactionRepository` estende `JpaRepository`. In questo modo Spring Data JPA fornisce automaticamente tutte le operazioni CRUD di base senza la necessità di scrivere query esplicite.
 
-Verifica della capacità del sistema di interrogare il database e restituire i dati strutturati.
+Questa scelta riduce il codice necessario e permette di concentrarsi sulla logica di business piuttosto che sull’accesso ai dati.
 
-* **Endpoint:** `GET http://localhost:8080/api/transactions`
-* **Risultato:** HTTP 200 OK. Restituisce un array JSON contenente tutte le transazioni salvate.
 
-#### **Scenario C: Rimozione di una transazione (DELETE)**
 
-Test della funzionalità di eliminazione tramite Path Variable.
+## Uso dei DTO e separazione dell’API
 
-* **Endpoint:** `DELETE http://localhost:8080/api/transactions/1`
-* **Risultato:** Messaggio di conferma: *"Transazione eliminata con successo: 1"*.
+Un aspetto fondamentale dell’iterazione è l’introduzione dei **DTO (Data Transfer Object)**. Le entità JPA non vengono esposte direttamente tramite le API REST, ma vengono utilizzati oggetti dedicati per l’input e l’output.
 
-<br>
+Il `TransactionRequest` rappresenta i dati necessari per creare una nuova transazione. Non contiene l’ID, in modo da impedire che un client possa forzare l’aggiornamento di una transazione esistente tramite una richiesta POST.
 
-### 7. Analisi delle Decisioni Tecniche (Refinement)
+Il `TransactionResponse` rappresenta invece i dati restituiti al client. Questa separazione consente di modificare internamente l’entità senza impattare il contratto dell’API.
 
-* **Perché Hibernate (via JPA):** Abbiamo utilizzato l'implementazione Hibernate di JPA per la gestione automatica del database (`spring.jpa.hibernate.ddl-auto=update`). Questa scelta permette al sistema di adattare automaticamente lo schema delle tabelle se modifichiamo la classe `Transaction`, riducendo i tempi di manutenzione durante le iterazioni rapide.
-* **Perché Jakarta Persistence API:** Utilizzare lo standard Jakarta (ex Java EE) garantisce che il nostro codice sia portabile. Se in futuro volessimo cambiare framework (es. passare da Spring Boot a Quarkus), le nostre annotazioni `@Entity` e `@Id` rimarrebbero valide.
-* **Perché le Variabili d'Ambiente in Docker:** Nel file `docker-compose.yml`, abbiamo isolato il DB. La decisione di mappare la porta `5432:5432` permette sia la comunicazione interna tra container, sia l'accesso esterno per tool di debugging (come DBeaver o pgAdmin), facilitando la trasparenza dei dati durante lo sviluppo.
+La validazione degli input viene effettuata direttamente sui DTO tramite annotazioni di Jakarta Validation. In questo modo i dati errati vengono intercettati prima di raggiungere il livello di business.
+
+
+
+## Mapper
+
+La conversione tra DTO ed entità è gestita dalla classe `TransactionMapper`. Questa scelta evita di inserire logica di mapping all’interno del controller o del service, mantenendo il codice più pulito e organizzato.
+
+Centralizzare il mapping rende inoltre più semplice modificare la struttura dei DTO o dell’entità in futuro.
+
+
+
+## Service layer e logica di business
+
+Il `TransactionService` rappresenta il livello in cui risiede la logica applicativa. Qui vengono gestite le operazioni di salvataggio, recupero ed eliminazione delle transazioni.
+
+Prima di eliminare una transazione viene verificata l’esistenza dell’ID. In caso contrario viene sollevata un’eccezione, evitando operazioni inconsistenti sul database.
+
+È stato inoltre introdotto il logging per tracciare le operazioni principali. Il logging è uno strumento fondamentale per il debug e per il monitoraggio del comportamento del servizio.
+
+
+
+## Controller REST
+
+Il `TransactionController` espone le API REST del microservizio. Il controller si limita a:
+
+* ricevere le richieste HTTP
+* validare i dati in ingresso
+* delegare la logica al service
+* restituire le risposte HTTP appropriate
+
+Ogni endpoint restituisce uno status code coerente con l’operazione eseguita (201 per la creazione, 200 per la lettura, 204 per la cancellazione).
+
+
+
+## Gestione centralizzata delle eccezioni
+
+La classe `GlobalExceptionHandler` consente di intercettare le eccezioni a livello globale e di trasformarle in risposte HTTP significative.
+
+Le eccezioni di validazione producono una risposta con codice 400 e una descrizione dettagliata degli errori, mentre le richieste a risorse inesistenti producono una risposta 404.
+
+Questo approccio migliora l’esperienza del client e rende il comportamento dell’API più prevedibile.
+
+
+
+## Testing e Quality Assurance
+
+La qualità del software sviluppato nell’Iterazione 1 è stata affrontata considerando sia l’affidabilità della logica di business sia il corretto comportamento dell’API REST esposta. In questa fase del progetto, l’obiettivo principale non è stato raggiungere una copertura di test esaustiva, ma garantire che i flussi critici del servizio di accounting funzionassero correttamente e in modo prevedibile, riducendo il rischio di regressioni nelle iterazioni successive.
+
+### Unit Testing (JUnit 5 e Mockito)
+
+Il livello di unit testing è stato concentrato sul **service layer**, in particolare sulla classe `TransactionService`, poiché rappresenta il cuore della logica applicativa e costituisce il punto di intersezione tra il controller REST e il layer di persistenza.
+
+I test unitari sono stati progettati per essere **completamente isolati dal database**. A questo scopo è stato utilizzato **Mockito** per simulare (`mock`) il comportamento di `TransactionRepository`. Questa scelta consente di verificare la correttezza della logica di business senza introdurre dipendenze esterne, rendendo i test più veloci, deterministici e facili da manutenere.
+
+In particolare, il mocking del repository permette di:
+
+* simulare il salvataggio di una transazione senza eseguire query reali;
+* controllare esplicitamente i valori restituiti dal repository;
+* verificare il comportamento del servizio in presenza di condizioni di errore, difficilmente riproducibili in modo affidabile su un database reale.
+
+I casi di test implementati coprono:
+
+* **Scenari di successo**, come il salvataggio di una nuova transazione e il recupero della lista delle transazioni;
+* **Scenari di errore**, in particolare il tentativo di eliminare una transazione inesistente, verificando il corretto lancio dell’eccezione `EntityNotFoundException`.
+
+Questo approccio consente di validare che il service layer applichi correttamente le regole di business indipendentemente dall’infrastruttura sottostante, seguendo le buone pratiche del testing a piramide.
+
+### Test Manuali e di Integrazione (Postman)
+
+Accanto ai test unitari, sono stati effettuati test manuali di tipo **black-box** utilizzando **Postman**, con l’obiettivo di validare il comportamento complessivo dell’applicazione dal punto di vista di un client esterno.
+
+Questa fase di test ha permesso di verificare:
+
+* la corretta esposizione degli endpoint REST;
+* il rispetto dei codici di stato HTTP;
+* l’integrazione reale tra controller, service, repository e database PostgreSQL.
+
+In particolare, sono stati testati i seguenti aspetti:
+
+* **Creazione di una risorsa** tramite endpoint `POST /api/transactions`, verificando la restituzione dello status code `201 Created` e del payload corretto;
+* **Sicurezza dei DTO**, simulando richieste contenenti campi non previsti (come un `id` forzato dal client) e verificando che tali valori vengano ignorati dal sistema;
+* **Persistenza effettiva dei dati**, controllando che le transazioni create siano realmente salvate nel database PostgreSQL e recuperabili tramite l’endpoint `GET`.
+
+I test di integrazione manuali hanno svolto un ruolo fondamentale nel confermare che le scelte architetturali (DTO, mapper, validazione, gestione delle eccezioni) funzionino correttamente quando il sistema viene utilizzato come servizio REST reale.
+
+Nel complesso, la combinazione di unit test isolati e test di integrazione manuali fornisce una base solida di quality assurance per l’Iterazione 1, preparando il progetto alle successive estensioni funzionali e all’integrazione con l’`analytics-service`.
+
+
+
+## Conclusione dell’iterazione
+
+Al termine dell’Iterazione 1, l’Accounting Service risulta completamente funzionante e progettato secondo buone pratiche di sviluppo software. Il servizio è pronto per essere esteso e integrato con altri microservizi, in particolare con l’Analytics Service, che verrà affrontato nelle iterazioni successive.

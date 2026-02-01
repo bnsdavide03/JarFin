@@ -13,12 +13,11 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
-// @EqualsAndHashCode RIMOSSO per evitare il bug di Eclipse
 public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // RIMOSSO @EqualsAndHashCode.Include
+    private Long id;
 
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal amount;
@@ -31,17 +30,18 @@ public class Transaction {
     @Column(nullable = false)
     private String category;
 
-    // Codice generato manualmente (più sicuro per JPA)
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Transaction that = (Transaction) o;
-        return Objects.equals(id, that.id);
+        // Se entrambi gli ID sono null, sono diversi (a meno che non sia lo stesso oggetto in memoria)
+        return id != null && Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        // Usa la classe corrente + id per l'hash
+        return getClass().hashCode();
     }
 }
