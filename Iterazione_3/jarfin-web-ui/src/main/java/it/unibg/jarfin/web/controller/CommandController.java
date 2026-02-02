@@ -36,6 +36,7 @@ public class CommandController {
             ParsedTransaction parsed = nluService.parse(text);
 
             String accountingUrl = gatewayUrl + "/api/transactions";
+            
             restTemplate.postForEntity(accountingUrl, parsed, Object.class);
             
             log.info("Transaction saved successfully: {} - {}€", parsed.getCategory(), parsed.getAmount());

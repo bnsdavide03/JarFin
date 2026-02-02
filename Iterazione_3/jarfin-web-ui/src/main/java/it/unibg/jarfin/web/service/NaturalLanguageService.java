@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.time.LocalDate;
+import lombok.Data;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -59,6 +61,8 @@ public class NaturalLanguageService {
     public ParsedTransaction parse(String text) {
         ParsedTransaction result = new ParsedTransaction();
         result.setDescription(text);
+
+        result.setDate(java.time.LocalDate.now());
         
         String lowerCaseText = text.toLowerCase();
 

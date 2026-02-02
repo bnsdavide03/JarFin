@@ -1,6 +1,8 @@
 package it.unibg.jarfin.web.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+
 import lombok.Data;
 
 @Data
@@ -9,4 +11,6 @@ public class ParsedTransaction {
     private String type;
     private String category;
     private String description;
+
+    private LocalDate date;
 }
