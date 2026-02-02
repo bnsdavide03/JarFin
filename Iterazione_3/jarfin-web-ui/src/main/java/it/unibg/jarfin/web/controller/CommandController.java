@@ -18,7 +18,7 @@ public class CommandController {
     private final NaturalLanguageService nluService;
     private final RestTemplate restTemplate;
 
-    @Value("${api.gateway.url}")
+    @Value("${api.gateway.url:http://localhost:8080}")
     private String gatewayUrl;
 
     public CommandController(NaturalLanguageService nluService, RestTemplate restTemplate) {
