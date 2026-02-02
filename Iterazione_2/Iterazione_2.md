@@ -11,7 +11,7 @@ L'intero sviluppo è stato guidato da principi di **Design for Testability** e *
 
 ## Scelte tecnologiche
 
-In perfetta continuità con l’Iterazione 1, lo stack tecnologico si basa su **Java 17** e **Spring Boot 3.2.0**. Questa scelta garantisce omogeneità nell’ecosistema JarFin, semplificando la manutenzione e il deployment.
+In perfetta continuità con l’Iterazione 1, lo stack tecnologico si basa su **Java 21** e **Spring Boot 3.2.0**. Questa scelta garantisce omogeneità nell’ecosistema JarFin, semplificando la manutenzione e il deployment.
 
 Per soddisfare i requisiti specifici di un servizio "consumatore" di dati, sono state adottate le seguenti tecnologie:
 

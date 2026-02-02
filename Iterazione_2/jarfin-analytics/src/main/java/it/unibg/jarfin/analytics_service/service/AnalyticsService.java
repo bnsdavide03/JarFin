@@ -90,9 +90,15 @@ public class AnalyticsService {
                 report.setFinancialAdvice("Attenzione: le uscite superano le entrate.");
             }
         } else {
-            report.setSavingsRate(BigDecimal.ZERO);
-            report.setAlertLevel("RED - Nessuna entrata rilevata");
-            report.setFinancialAdvice("Registra delle entrate per ottenere analisi.");
+            if (expenses.compareTo(BigDecimal.ZERO) > 0) {
+                report.setSavingsRate(new BigDecimal("-100")); 
+                report.setAlertLevel("RED - Critical");
+                report.setFinancialAdvice("⚠️ Attenzione! Stai spendendo senza alcuna entrata registrata.");
+            } else {
+                report.setSavingsRate(BigDecimal.ZERO);
+                report.setAlertLevel("GRAY - Nessun dato");
+                report.setFinancialAdvice("Registra delle transazioni per iniziare l'analisi.");
+            }
         }
     }
 }
