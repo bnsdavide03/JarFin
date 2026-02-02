@@ -1,12 +1,15 @@
 package it.unibg.jarfin.web.service;
 
-import it.unibg.jarfin.web.dto.ParsedTransaction;
-import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import it.unibg.jarfin.web.dto.ParsedTransaction;
 
 @Service
 public class NaturalLanguageService {
@@ -86,8 +89,10 @@ public class NaturalLanguageService {
             finalCategory = cleanText(lowerCaseText);
         }
 
-        if (!finalCategory.isEmpty()) {
-            result.setCategory(finalCategory.substring(0, 1).toUpperCase() + finalCategory.substring(1));
+        if (finalCategory != null && !finalCategory.isEmpty()) {
+            result.setCategory(StringUtils.capitalize(finalCategory));
+        } else {
+        	result.setCategory("Generale");
         }
 
         return result;
