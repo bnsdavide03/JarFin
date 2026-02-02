@@ -30,18 +30,20 @@ public class Transaction {
     @Column(nullable = false)
     private String category;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TransactionType type;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Transaction that = (Transaction) o;
-        // Se entrambi gli ID sono null, sono diversi (a meno che non sia lo stesso oggetto in memoria)
         return id != null && Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        // Usa la classe corrente + id per l'hash
         return getClass().hashCode();
     }
 }
