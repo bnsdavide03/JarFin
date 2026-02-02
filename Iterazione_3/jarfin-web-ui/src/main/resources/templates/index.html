@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>JarFin Analytics Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        
+        /* Dashboard Cards */
+        .card { border: none; border-radius: 12px; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .card:hover { transform: translateY(-3px); }
+        
+        /* Sezione Categorie */
+        .category-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background-color: #e9ecef; color: #495057; }
+        
+        /* Microfono */
+        .mic-btn {
+            width: 80px; height: 80px; border-radius: 50%;
+            font-size: 30px; transition: all 0.3s;
+            background: white; border: 2px solid #e9ecef; color: #0d6efd;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .mic-btn:hover { transform: scale(1.1); color: #0b5ed7; }
+        .mic-btn.listening { background: #dc3545; color: white; border-color: #dc3545; animation: pulse 1.5s infinite; }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
+    <div class="container">
+        <span class="navbar-brand fw-bold"><i class="fas fa-wallet me-2 text-warning"></i>JarFin Enterprise</span>
+        <span class="navbar-text text-white-50 small">Advanced Analytics Module</span>
+    </div>
+</nav>
+
+<div class="container">
+    
+    <div class="row text-center mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card border-start border-success border-5 h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-muted small">Entrate Totali</h6>
+                    <h2 class="fw-bold text-success">
+                        <span th:text="${#numbers.formatDecimal(report.totalIncome, 1, 'POINT', 2, 'COMMA')}">0,00</span> €
+                    </h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-start border-danger border-5 h-100">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-muted small">Uscite Totali</h6>
+                    <h2 class="fw-bold text-danger">
+                        <span th:text="${#numbers.formatDecimal(report.totalExpense, 1, 'POINT', 2, 'COMMA')}">0,00</span> €
+                    </h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-start border-primary border-5 h-100 bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-white-50 small">Saldo Disponibile</h6>
+                    <h2 class="fw-bold">
+                        <span th:text="${#numbers.formatDecimal(report.balance, 1, 'POINT', 2, 'COMMA')}">0,00</span> €
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        
+        <div class="col-lg-6 mb-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-robot me-2 text-primary"></i>JarFin AI Advisor</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info border-0 shadow-sm">
+                        <h6 class="alert-heading fw-bold"><i class="fas fa-info-circle me-2"></i>Analisi Finanziaria</h6>
+                        <p class="mb-0" th:text="${report.financialAdvice}">Analisi in corso...</p>
+                        <hr>
+                        <small class="text-muted">Status: <strong th:text="${report.alertLevel}">CALCULATING</strong></small>
+                    </div>
+
+                    <h6 class="mt-4">Tasso di Risparmio</h6>
+                    <div class="progress" style="height: 25px;">
+						<div class="progress-bar progress-bar-striped progress-bar-animated" 
+						     role="progressbar" 
+						     th:classappend="${report.savingsRate < 0} ? 'bg-danger' : (${report.savingsRate < 20} ? 'bg-warning text-dark' : 'bg-success')"
+						     th:style="'width: ' + ${report.savingsRate < 0 ? 100 : report.savingsRate} + '%'"
+						     th:text="${#numbers.formatDecimal(report.savingsRate, 1, 'POINT', 1, 'COMMA')} + '%'">
+						    0%
+						</div>
+                    </div>
+                    <p class="text-muted small mt-2">Obiettivo consigliato: > 20%</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2 text-warning"></i>Spese per Categoria</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div th:each="entry : ${report.expenseByCategory}" class="list-group-item d-flex justify-content-between align-items-center py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="category-icon me-3">
+                                    <i class="fas fa-tag"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold text-capitalize" 
+                                        th:text="${#strings.trim(#strings.replace(entry.key, '€', ''))}">
+                                        Categoria
+                                    </h6>
+                                </div>
+                            </div>
+                            <span class="badge bg-light text-dark fs-6">
+                                <span th:text="${#numbers.formatDecimal(entry.value, 1, 'POINT', 2, 'COMMA')}">0,00</span> €
+                            </span>
+                        </div>
+                        
+                        <div th:if="${report.expenseByCategory == null or report.expenseByCategory.isEmpty()}" class="p-4 text-center text-muted">
+                            <i class="fas fa-folder-open mb-2 fs-3"></i><br>
+                            Nessuna spesa registrata.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center text-center">
+        <div class="col-md-8">
+            <div class="card bg-light border-0">
+                <div class="card-body">
+                    <p id="final_span" class="fs-5 text-secondary fst-italic mb-3">Premi e parla...</p>
+                    
+                    <button id="micBtn" class="mic-btn mb-3" onclick="toggleDictation()">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    
+                    <p id="status" class="fw-bold small text-muted">Microfono spento</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var recognition;
+    var isListening = false;
+    
+    // Configurazione Web Speech API
+    if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "it-IT";
+    } else {
+        alert("Attenzione: Il tuo browser non supporta il riconoscimento vocale. Usa Chrome o Edge.");
+        document.getElementById('micBtn').disabled = true;
+    }
+
+    // Toggle Microfono
+    function toggleDictation() {
+        if (!recognition) return;
+
+        if (isListening) {
+            recognition.stop();
+            return;
+        }
+
+        recognition.start();
+        
+        isListening = true;
+        document.getElementById('micBtn').classList.add('listening');
+        document.getElementById('status').innerText = "Ti ascolto... parla pure!";
+        document.getElementById('final_span').innerText = "...";
+    }
+
+    // Risultato Vocale
+    recognition.onresult = function(event) {
+        var transcript = event.results[0][0].transcript;
+        
+        document.getElementById('final_span').innerText = transcript;
+        document.getElementById('status').innerText = "Elaborazione in corso...";
+        
+        sendToBackend(transcript);
+    };
+    
+    // Invio al Backend
+    function sendToBackend(text) {
+        fetch('/api/voice/process', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text })
+        })
+        .then(response => {
+            if(response.ok) return response.json();
+            throw new Error("Errore Backend");
+        })
+        .then(data => {
+            let msg = "✅ Salvato: " + data.amount + "€ (" + data.category + ")";
+            document.getElementById('status').innerHTML = '<span class="text-success fw-bold">' + msg + '</span>';
+            
+            // Refresh automatico dopo 2 secondi
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        })
+        .catch(error => {
+            document.getElementById('status').innerHTML = '<span class="text-danger">❌ Errore: ' + error + '</span>';
+        });
+    }
+
+    // Fine Ascolto
+    recognition.onend = function() {
+        isListening = false;
+        document.getElementById('micBtn').classList.remove('listening');
+        if(document.getElementById('status').innerText === "Ti ascolto... parla pure!") {
+             document.getElementById('status').innerText = "Microfono spento";
+        }
+    };
+
+    // Gestione Errori
+    recognition.onerror = function(event) {
+        console.error("Errore STT:", event.error);
+        document.getElementById('status').innerText = "Errore: " + event.error;
+        isListening = false;
+        document.getElementById('micBtn').classList.remove('listening');
+    };
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
