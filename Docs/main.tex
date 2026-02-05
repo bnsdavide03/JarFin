@@ -1,0 +1,65 @@
+\documentclass{jarfin}
+
+\providecommand{\textLaTeX}{\LaTeX}
+
+\graphicspath{{./3_Images/}}
+
+\begin{document}
+
+% ==============================
+% FRONTESPIZIO
+% ==============================
+\input{1_Frontmatter/titlepage.tex}
+
+% ==============================
+% ABSTRACT
+% ==============================
+\input{1_Frontmatter/abstract.tex}
+
+\newpage
+
+% ==============================
+% INDICI
+% ==============================
+\tableofcontents
+
+\newpage
+
+% ==============================
+% CAPITOLI
+% ==============================
+
+% 1. Introduzione (Il file che hai fatto tu)
+\input{2_Chapters/01_introduzione.tex}
+
+% 2. Metodologia (Processo Scrum, AMDD, Toolchain)
+\input{2_Chapters/02_metodologia.tex}
+
+% 3. Iterazione 0 (Requisiti, Architettura 4+1)
+\input{2_Chapters/03_iterazione_0.tex}
+
+% 4. Iterazione 1 (Accounting Service, Docker, Testing)
+\input{2_Chapters/04_iterazione_1.tex}
+
+% 5. Iterazione 2 (Analytics, Algoritmi, DDD)
+\input{2_Chapters/05_iterazione_2.tex}
+
+% 6. Iterazione 3 (NLU, Integrazione, UI) + Conclusioni
+\input{2_Chapters/06_iterazione_3.tex}
+
+% 7. Analisi Statica e Dinamica
+\input{2_Chapters/07_testing.tex}
+
+% 8. Conclusioni
+\input{2_Chapters/08_conclusioni.tex}
+
+% ==============================
+% BIBLIOGRAFIA
+% ==============================
+\newpage
+\nocite{*}
+
+\bibliographystyle{IEEEtran}
+\bibliography{bibliography}
+
+\end{document}
