@@ -100,9 +100,9 @@ Dal **30 Gennaio al 4 Febbraio 2026**, al fine di rispettare la consegna del **1
 ### **4° Day Scrum – 03–04 Febbraio 2026**
 *Chiusura Fase di Sviluppo*
 
-- Refactoring generale  
-- Test End-to-End  
-- Aggiornamento backlog  
+- Refactoring generale
+- Test End-to-End
+- Aggiornamento backlog
 
 &nbsp;
 
@@ -119,7 +119,7 @@ Con il rientro operativo di **Alessandro Biscaro** e **Alessandro Rocco**, l’o
 
 &nbsp;
 
-# **Sprint n°2: 06/02/2026 – 12/02/2026**
+# **Sprint n°2: 06/02/2026 – 11/02/2026**
 ***Focus: Quality Assurance e Documentazione***
 
 ## **Week Scrum – 06 Febbraio 2026**
@@ -136,7 +136,7 @@ Con il rientro operativo di **Alessandro Biscaro** e **Alessandro Rocco**, l’o
 
 &nbsp;
 
-# **Sprint n°3: 13/02/2026 – 15/02/2026**
+# **Sprint n°3: 12/02/2026 – 15/02/2026**
 ***Focus: Chiusura Progetto e Presentazione***
 
 ## **Week Scrum – 13 Febbraio 2026**
