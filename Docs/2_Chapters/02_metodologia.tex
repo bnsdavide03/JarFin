@@ -1,0 +1,56 @@
+\chapter{Metodologia di sviluppo e tecnologie adottate}
+
+\section{Metodologia di sviluppo}
+
+Lo sviluppo del sistema \textit{JarFin} è stato condotto adottando una metodologia Agile, con l’obiettivo di favorire un processo di progettazione incrementale, flessibile e orientato al cambiamento. In particolare, il progetto ha seguito i principi di \textbf{SCRUM}, integrati con l’approccio \textbf{AMDD} (Agile Model Driven Development), al fine di bilanciare la necessità di una progettazione architetturale solida con i vantaggi dell’iterazione continua e del feedback costante.
+
+SCRUM è stato utilizzato come framework di riferimento per l’organizzazione del lavoro, la pianificazione delle attività e la gestione delle iterazioni di sviluppo. Il progetto è stato suddiviso in sprint successivi, ciascuno caratterizzato da obiettivi ben definiti e da un incremento funzionale del sistema. Questa impostazione ha consentito di monitorare costantemente l’avanzamento del progetto e di adattare le scelte progettuali in base alle esigenze emerse durante lo sviluppo \cite{scrum}.
+
+Parallelamente, l’approccio AMDD ha guidato le attività di modellazione e progettazione. Invece di definire in modo esaustivo l’intera architettura nelle fasi iniziali, la modellazione è stata condotta in maniera incrementale, producendo modelli essenziali e sufficienti a supportare le decisioni architetturali di ciascuna iterazione \cite{amdd}. Questo approccio ha permesso di evitare un’eccessiva rigidità progettuale, mantenendo al contempo una visione coerente dell’architettura complessiva del sistema.
+
+\section{Organizzazione delle iterazioni}
+
+Il ciclo di sviluppo di JarFin è stato articolato in una serie di iterazioni successive, ciascuna focalizzata su specifici obiettivi funzionali e architetturali:
+
+\begin{itemize}
+\item \textbf{Iterazione 0 – Envisioning e Analisi}: definizione del dominio applicativo, raccolta e analisi dei requisiti funzionali e non funzionali, identificazione dei principali casi d’uso e progettazione dell’architettura di alto livello;
+\item \textbf{Iterazione 1 – Core Services}: progettazione e implementazione dei servizi fondamentali del sistema, con particolare riferimento al servizio di accounting e alla gestione della persistenza dei dati;
+\item \textbf{Iterazione 2 – Analytics e Algoritmi}: sviluppo del servizio di analytics e implementazione degli algoritmi per l’elaborazione e l’analisi dei dati finanziari;
+\item \textbf{Iterazione 3 – Integrazione e Interazione}: integrazione del modulo di Natural Language Understanding, dell’API Gateway e dell’interfaccia web.
+\end{itemize}
+
+Questa suddivisione ha consentito di affrontare progressivamente la complessità del sistema, validando le scelte progettuali a ogni iterazione e riducendo il rischio di errori architetturali nelle fasi avanzate dello sviluppo.
+
+\section{Architettura generale del sistema}
+
+L’architettura di JarFin è basata su un paradigma a microservizi, in cui il sistema è scomposto in un insieme di componenti indipendenti, ciascuno responsabile di una specifica area funzionale. Tale scelta architetturale è motivata dall’esigenza di garantire modularità, scalabilità e manutenibilità, oltre a facilitare l’evoluzione futura del sistema.
+
+Ogni microservizio è progettato come un’unità autonoma, dotata di una propria logica applicativa e, ove necessario, di un proprio livello di persistenza. La comunicazione tra i servizi avviene tramite API REST e scambio di messaggi in formato JSON, secondo i principi dello stile architetturale REST \cite{fieldingRest}.
+
+L’adozione di un’architettura distribuita consente inoltre di isolare le responsabilità dei singoli componenti, riducendo l’impatto delle modifiche e migliorando la resilienza complessiva del sistema in caso di malfunzionamenti localizzati.
+
+\section{Tecnologie adottate}
+
+\subsection{Spring Boot}
+
+Per l’implementazione dei microservizi è stato utilizzato il framework \textbf{Spring Boot}, che fornisce un ambiente di sviluppo semplificato per la realizzazione di applicazioni Java basate su architettura a servizi. Spring Boot consente di ridurre significativamente la configurazione manuale, favorendo lo sviluppo rapido di applicazioni standalone e facilmente deployabili \cite{springboot}.
+
+Il framework supporta nativamente la creazione di API REST, l’integrazione con sistemi di persistenza e la gestione della configurazione dei servizi, risultando particolarmente adatto allo sviluppo di sistemi a microservizi.
+
+\subsection{Database PostgreSQL}
+
+La persistenza dei dati è affidata a un database relazionale \textbf{PostgreSQL}, scelto per la sua affidabilità, conformità agli standard SQL e supporto a funzionalità avanzate di gestione dei dati. PostgreSQL garantisce l’integrità dei dati finanziari e supporta operazioni di interrogazione efficienti, fondamentali per le funzionalità di analisi offerte dal sistema.
+
+\subsection{Containerizzazione e ambiente di esecuzione}
+
+Per facilitare il deployment e garantire la riproducibilità dell’ambiente di esecuzione, il sistema è stato containerizzato mediante \textbf{Docker}. L’utilizzo di container consente di isolare i singoli microservizi e le relative dipendenze, semplificando la gestione dell’infrastruttura e favorendo la portabilità del sistema tra ambienti di sviluppo e produzione.
+
+\section{Toolchain di sviluppo}
+
+Lo sviluppo del progetto ha fatto uso di una toolchain composta da strumenti ampiamente diffusi nel contesto dell’ingegneria del software. In particolare, il controllo di versione è stato gestito tramite \textbf{Git}, con repository ospitato su piattaforma GitHub, consentendo una gestione collaborativa del codice sorgente e il tracciamento delle modifiche.
+
+Per la gestione delle dipendenze e la build dei progetti Java è stato utilizzato \textbf{Maven}, mentre l’ambiente di sviluppo integrato (IDE) ha supportato le attività di implementazione, debugging e testing del sistema.
+
+\section{Considerazioni finali}
+
+L’adozione di una metodologia Agile, combinata con una toolchain tecnologica moderna e un’architettura a microservizi, ha permesso di affrontare lo sviluppo di JarFin in modo strutturato e progressivo. Le scelte metodologiche e tecnologiche descritte in questo capitolo costituiscono la base su cui si innestano le successive fasi di analisi, progettazione dettagliata e implementazione del sistema, descritte nei capitoli seguenti.

@@ -1,0 +1,120 @@
+\chapter{Analisi dei requisiti e architettura del sistema}
+
+\section{Introduzione all’Iterazione 0}
+
+Il presente capitolo descrive l’attività di analisi dei requisiti e la progettazione architetturale del sistema \textit{JarFin}, svolte durante l’Iterazione 0 del progetto.  
+L’obiettivo di questa fase è stato quello di comprendere il dominio applicativo, identificare in modo strutturato i requisiti del sistema e definire un’architettura di alto livello in grado di supportare le successive iterazioni di sviluppo.
+
+Le attività di analisi e progettazione sono state condotte seguendo i principi dell’Agile Model Driven Development (AMDD), privilegiando modelli essenziali ma sufficientemente espressivi da supportare le decisioni architetturali e guidare l’implementazione incrementale del sistema.
+
+\section{Analisi del dominio applicativo}
+
+JarFin si colloca nel dominio delle applicazioni per la gestione delle finanze personali, con l’obiettivo di supportare l’utente nel monitoraggio delle entrate e delle spese, nella loro organizzazione e nell’analisi dell’andamento finanziario nel tempo.
+
+Il dominio applicativo è caratterizzato dalla presenza di entità fondamentali quali transazioni finanziarie, categorie di spesa e di entrata, periodi temporali e report aggregati.  
+Un elemento distintivo del sistema è rappresentato dall’integrazione di un’interfaccia conversazionale, che consente all’utente di interrogare il sistema tramite linguaggio naturale.
+
+L’inclusione di una componente di Natural Language Understanding (NLU) introduce ulteriori complessità, legate all’interpretazione di richieste non strutturate, alla loro traduzione in operazioni formali e alla necessità di garantire coerenza e correttezza delle risposte fornite dal sistema.
+
+\section{Analisi dei requisiti}
+
+\subsection{Requisiti funzionali}
+
+Sulla base dell’analisi del dominio e delle esigenze individuate, sono stati definiti i seguenti requisiti funzionali:
+
+\begin{itemize}
+\item inserire, modificare ed eliminare transazioni finanziarie;
+\item associare le transazioni a categorie di spesa o di entrata;
+\item visualizzare il riepilogo delle spese e delle entrate per specifici periodi temporali;
+\item generare report e statistiche sull’andamento finanziario;
+\item interrogare il sistema tramite comandi in linguaggio naturale;
+\item ottenere risposte sintetiche e strutturate alle richieste dell’utente.
+\end{itemize}
+
+\subsection{Requisiti non funzionali}
+
+Oltre ai requisiti funzionali, sono stati identificati i seguenti requisiti non funzionali:
+
+\begin{itemize}
+\item \textbf{Scalabilità}: il sistema deve supportare un aumento del volume di dati e del numero di richieste;
+\item \textbf{Manutenibilità}: l’architettura deve favorire l’evoluzione del sistema e l’introduzione di nuove funzionalità;
+\item \textbf{Affidabilità}: i dati finanziari devono essere gestiti in modo coerente e persistente;
+\item \textbf{Usabilità}: l’interazione con il sistema deve risultare semplice e intuitiva;
+\item \textbf{Estendibilità}: il sistema deve consentire l’integrazione di nuovi servizi.
+\end{itemize}
+
+\section{Vista dei casi d’uso}
+
+La vista dei casi d’uso descrive le funzionalità offerte dal sistema dal punto di vista dell’utente finale e rappresenta il collegamento tra i requisiti funzionali e le successive scelte architetturali.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{../3_Images/3.5_use_case_diagram.png}
+    \caption{Diagramma dei casi d’uso del sistema JarFin}
+\end{figure}
+
+Nel diagramma sono rappresentate le principali interazioni tra l’utente e il sistema, tra cui la gestione delle transazioni, la consultazione dei report e l’interrogazione del sistema tramite interfaccia conversazionale.
+
+\section{Progettazione architetturale}
+
+\subsection{Scelta dell’architettura}
+
+Per soddisfare i requisiti individuati, è stata adottata un’architettura a microservizi, in cui il sistema è suddiviso in componenti indipendenti, ciascuno responsabile di una specifica area funzionale.  
+Questa scelta consente di ridurre l’accoppiamento tra i componenti, migliorare la scalabilità e facilitare la manutenibilità del sistema.
+
+\subsection{Modello architetturale 4+1}
+
+La progettazione architetturale di JarFin è stata condotta utilizzando il modello \textbf{4+1 View Model}, che consente di descrivere il sistema attraverso cinque viste complementari: vista dei casi d’uso, vista logica, vista di processo, vista di sviluppo e vista fisica.
+
+\subsection{Vista logica}
+
+La vista logica descrive la struttura statica del sistema e le relazioni tra i principali componenti software.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{../3_Images/3.2_component_diagram.png}
+    \caption{Vista logica del sistema JarFin}
+\end{figure}
+
+Il diagramma dei componenti evidenzia la suddivisione del sistema nei principali moduli: Web Application, API Gateway, Accounting Service, Analytics Service e NLU Service, ciascuno con responsabilità ben definite.
+
+\subsection{Vista di processo}
+
+La vista di processo descrive il comportamento dinamico del sistema e le interazioni tra i servizi durante l’esecuzione delle operazioni.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{../3_Images/3.4_sequence_diagram.png}
+    \caption{Vista di processo: flusso delle richieste}
+\end{figure}
+
+Il diagramma mostra come le richieste dell’utente vengano inoltrate all’API Gateway e successivamente instradate verso i microservizi appropriati, includendo il coinvolgimento del servizio NLU per le richieste conversazionali.
+
+\subsection{Vista di sviluppo}
+
+La vista di sviluppo rappresenta l’organizzazione del codice sorgente e dei moduli software.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{../3_Images/3.1_class_diagram.png}
+    \caption{Vista di sviluppo del sistema}
+\end{figure}
+
+Ogni microservizio è sviluppato come progetto indipendente, facilitando il lavoro collaborativo e la gestione delle dipendenze.
+
+\subsection{Vista fisica (Deployment View)}
+
+La vista fisica descrive la distribuzione del sistema sull’infrastruttura di esecuzione.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{../3_Images/3.3_deployment_diagram.png}
+    \caption{Vista fisica e diagramma di deployment}
+\end{figure}
+
+Il diagramma di deployment mostra come ciascun microservizio venga eseguito all’interno di un container dedicato, garantendo isolamento, portabilità e scalabilità.
+
+\section{Considerazioni conclusive}
+
+L’analisi dei requisiti e la progettazione architetturale svolte durante l’Iterazione 0 hanno permesso di definire una base solida e coerente per il sistema JarFin.  
+Le scelte architetturali adottate costituiscono il fondamento delle successive iterazioni di implementazione e integrazione, descritte nei capitoli successivi.
