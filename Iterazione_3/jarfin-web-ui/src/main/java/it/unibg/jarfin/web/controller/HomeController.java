@@ -1,8 +1,12 @@
 package it.unibg.jarfin.web.controller;
 
 import it.unibg.jarfin.web.dto.FinancialReport;
+import it.unibg.jarfin.web.dto.ParsedTransaction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,4 +40,22 @@ public class HomeController {
         
         return "index";
     }
+
+    @GetMapping("/transactions")
+public String allTransactions(Model model) {
+    try {
+        // Chiamata al microservizio di accounting (porta 8080)
+        String transactionsUrl = gatewayUrl + "/api/transactions";
+        
+        // Riceviamo la lista delle transazioni
+        // Nota: Assicurati che il backend restituisca ParsedTransaction[] o una lista di oggetti simili
+        ParsedTransaction[] transactions = restTemplate.getForObject(transactionsUrl, ParsedTransaction[].class);
+        
+        model.addAttribute("transactions", transactions);
+    } catch (Exception e) {
+        log.error("Errore recupero transazioni: {}", e.getMessage());
+        model.addAttribute("transactions", List.of());
+    }
+    return "transactions"; // Nome del file .html
+}
 }

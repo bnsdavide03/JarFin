@@ -5,6 +5,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 @Data
 public class FinancialReport {
@@ -19,7 +20,7 @@ public class FinancialReport {
     private BigDecimal balance = BigDecimal.ZERO;
 
     @JsonProperty("breakdownByCategory")
-    private Map<String, BigDecimal> expenseByCategory = new HashMap<>();
+    private Map<String, BigDecimal> expenseByCategory = new LinkedHashMap<>();
 
     @JsonProperty("savingsRate")
     private BigDecimal savingsRate = BigDecimal.ZERO;

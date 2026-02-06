@@ -4,6 +4,9 @@ import it.unibg.jarfin.web.dto.ParsedTransaction;
 import it.unibg.jarfin.web.service.NaturalLanguageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -35,9 +38,22 @@ public class CommandController {
         try {
             ParsedTransaction parsed = nluService.parse(text);
 
+            // Se l'NLU restituisce null (es. comando "stop", "nulla" o senza importo)
+            // non inviamo nulla al database e rispondiamo con uno status "ignored"
+            if (parsed == null || parsed.getAmount() == null) {
+                log.info("Voice command ignored (null or no amount detected)");
+                return ResponseEntity.ok(Map.of("status", "ignored", "message", "Comando non riconosciuto o annullato"));
+            }
+
             String accountingUrl = gatewayUrl + "/api/transactions";
             
-            restTemplate.postForEntity(accountingUrl, parsed, Object.class);
+            // RISOLUZIONE ERRORE 415: Specifichiamo esplicitamente che mandiamo un JSON
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            
+            HttpEntity<ParsedTransaction> request = new HttpEntity<>(parsed, headers);
+            
+            restTemplate.postForEntity(accountingUrl, request, Object.class);
             
             log.info("Transaction saved successfully: {} - {}€", parsed.getCategory(), parsed.getAmount());
 
