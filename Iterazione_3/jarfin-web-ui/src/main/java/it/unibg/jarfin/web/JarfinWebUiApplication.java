@@ -12,6 +12,7 @@ public class JarfinWebUiApplication {
 		SpringApplication.run(JarfinWebUiApplication.class, args);
 	}
 
+
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
