@@ -2,58 +2,46 @@
 
 \section{Contesto e motivazione}
 
-Negli ultimi anni, lo sviluppo di sistemi software complessi ha visto una progressiva transizione da architetture monolitiche verso architetture distribuite basate su servizi indipendenti. Questo cambiamento è stato guidato dalla necessità di migliorare la scalabilità, la manutenibilità e la capacità evolutiva dei sistemi software \cite{sommerville2016software}.
+Negli ultimi anni, la progettazione di sistemi software complessi ha registrato una progressiva transizione da architetture monolitiche verso architetture distribuite basate su servizi indipendenti. Tale evoluzione è stata guidata dall’esigenza di realizzare sistemi più scalabili, manutenibili e capaci di adattarsi a requisiti in continua evoluzione.
 
+In questo contesto, l’architettura a microservizi si è affermata come uno dei paradigmi più rilevanti. Essa propone la scomposizione di un’applicazione in un insieme di servizi autonomi, ciascuno responsabile di una specifica funzionalità e comunicante tramite interfacce ben definite. Questo approccio consente di ridurre l’accoppiamento tra componenti, facilitare l’evoluzione incrementale del sistema e migliorare la resilienza complessiva dell’architettura \cite{fowlerMicroservices}.
 
-[Image of monolithic vs microservices architecture diagram]
+Parallelamente, la diffusione di tecnologie web standard ha favorito l’adozione di modelli architetturali basati su API REST (Representational State Transfer), che costituiscono uno stile architetturale ampiamente utilizzato per la comunicazione tra sistemi distribuiti. Le API REST si basano su interazioni stateless, risorse identificabili e interfacce uniformi, favorendo interoperabilità e semplicità di integrazione tra componenti eterogenei \cite{fieldingRest}.
 
+Un ulteriore sviluppo significativo riguarda l’integrazione di interfacce conversazionali, che consentono agli utenti di interagire con i sistemi software tramite linguaggio naturale. Questo paradigma migliora l’accessibilità e l’usabilità delle applicazioni, riducendo la complessità dell’interazione e rendendo i sistemi più intuitivi anche per utenti non esperti \cite{nlpSurvey}.
 
-Tra i paradigmi architetturali più diffusi, l'architettura a microservizi rappresenta un approccio in cui un'applicazione è strutturata come un insieme di servizi autonomi, ciascuno responsabile di una specifica funzionalità e comunicante tramite interfacce ben definite \cite{newman2021microservices}. Questo modello consente di ridurre l'accoppiamento tra componenti, facilitare la manutenzione e migliorare la scalabilità del sistema \cite{fowler2014microservices}.
-
-
-[Image dei vantaggi di avere un'architettura del genere]
-
-
-Parallelamente, l'adozione di architetture basate su servizi è stata resa possibile dalla diffusione di tecnologie web standard, in particolare dalle API REST (Representational State Transfer), che costituiscono un modello architetturale per la comunicazione tra sistemi distribuiti basato su protocolli stateless e interfacce uniformi \cite{fielding2000rest}.
-
-Un ulteriore sviluppo significativo riguarda l'integrazione di interfacce conversazionali, che consentono agli utenti di interagire con i sistemi software tramite linguaggio naturale. Questo approccio migliora l'accessibilità e l'usabilità, riducendo la complessità dell'interazione e rendendo i sistemi più intuitivi \cite{jurafsky2021speech}.
-
-Nel contesto delle applicazioni per la gestione delle finanze personali, queste tecnologie offrono nuove opportunità per progettare sistemi modulari, scalabili e facilmente utilizzabili, capaci di integrare funzionalità avanzate di analisi e interazione.
+Nel dominio delle applicazioni per la gestione delle finanze personali, l’adozione combinata di architetture a microservizi, API REST e interfacce conversazionali apre nuove opportunità per la progettazione di sistemi modulari, scalabili e orientati all’utente, capaci di integrare funzionalità avanzate di analisi dei dati e di interazione.
 
 \section{Problema}
 
-I sistemi tradizionali per la gestione delle finanze personali presentano spesso limitazioni architetturali e funzionali. In particolare, molti di questi sistemi sono progettati come applicazioni monolitiche, caratterizzate da un forte accoppiamento tra componenti e da una scarsa separazione delle responsabilità. Questo approccio rende difficile l'evoluzione del sistema, la manutenzione del codice e l'introduzione di nuove funzionalità \cite{newman2021microservices}.
+I sistemi tradizionali per la gestione delle finanze personali presentano spesso limitazioni architetturali e funzionali. In particolare, molti di essi sono progettati come applicazioni monolitiche, caratterizzate da un forte accoppiamento tra componenti e da una limitata separazione delle responsabilità. Questo approccio rende complessa l’evoluzione del sistema, ostacola la manutenzione del codice e limita l’introduzione di nuove funzionalità.
 
-[Immagini dei contro dello stile monolitico]
+Inoltre, l’interazione con tali sistemi avviene prevalentemente tramite interfacce grafiche tradizionali, che richiedono all’utente di navigare manualmente tra diverse schermate e inserire dati in modo strutturato. Questo processo può risultare poco intuitivo e inefficiente, soprattutto per utenti non esperti o in presenza di grandi quantità di dati.
 
-Inoltre, l'interazione con questi sistemi avviene generalmente tramite interfacce grafiche tradizionali, che richiedono all'utente di navigare manualmente tra diverse schermate e inserire dati in modo strutturato. Questo processo può risultare inefficiente e poco intuitivo, soprattutto per utenti non esperti.
-
-Dal punto di vista architetturale, la mancanza di modularità limita la scalabilità del sistema e ne riduce la robustezza, rendendo più complessa la gestione dei dati e l'integrazione con nuovi servizi.
+Dal punto di vista architetturale, la mancanza di modularità limita la scalabilità del sistema e ne riduce la robustezza, rendendo più complessa l’integrazione con nuovi servizi e l’evoluzione futura dell’applicazione.
 
 Pertanto, emerge la necessità di progettare un sistema software che consenta di:
-
 \begin{itemize}
 \item gestire le finanze personali in modo strutturato e affidabile;
 \item garantire modularità e separazione delle responsabilità;
 \item supportare architetture distribuite scalabili;
-\item fornire un'interfaccia utente intuitiva, inclusa l'interazione tramite linguaggio naturale;
-\item consentire l'analisi efficiente dei dati finanziari.
+\item fornire un’interfaccia utente intuitiva, inclusa l’interazione tramite linguaggio naturale;
+\item consentire un’analisi efficiente dei dati finanziari.
 \end{itemize}
 
+\newpage
 \section{Obiettivi del progetto}
 
-L'obiettivo del presente lavoro è la progettazione e lo sviluppo di \textit{JarFin} (Java Artificial Financial Intelligence), un sistema software distribuito per la gestione e l'analisi delle finanze personali, basato su un'architettura a microservizi.
-
+L’obiettivo del presente lavoro è la progettazione e lo sviluppo di \textit{JarFin} (Java Artificial Financial Intelligence), un sistema software distribuito per la gestione e l’analisi delle finanze personali, basato su un’architettura a microservizi.
 
 Gli obiettivi specifici del progetto includono:
-
 \begin{itemize}
-\item la progettazione di un'architettura software modulare basata su microservizi;
-\item la realizzazione di servizi indipendenti per la gestione delle transazioni e l'analisi dei dati;
-\item l'implementazione di un sistema di comunicazione basato su API REST;
-\item l'integrazione di un modulo di Natural Language Understanding per l'elaborazione di comandi in linguaggio naturale;
-\item la realizzazione di un'interfaccia web per l'interazione con il sistema;
-\item l'applicazione dei principi di progettazione algoritmica e modellazione software.
+\item la progettazione di un’architettura software modulare basata su microservizi;
+\item la realizzazione di servizi indipendenti per la gestione delle transazioni e l’analisi dei dati;
+\item l’implementazione di un sistema di comunicazione basato su API REST;
+\item l’integrazione di un modulo di Natural Language Understanding per l’elaborazione di comandi in linguaggio naturale;
+\item la realizzazione di un’interfaccia web per l’interazione con il sistema;
+\item l’applicazione di principi di progettazione algoritmica e modellazione software.
 \end{itemize}
 
 \section{Soluzione proposta}
@@ -61,42 +49,39 @@ Gli obiettivi specifici del progetto includono:
 Per soddisfare gli obiettivi definiti, è stato progettato e sviluppato JarFin come sistema distribuito basato su architettura a microservizi.
 
 Il sistema è composto dai seguenti componenti principali:
-
 \begin{itemize}
-\item \textbf{Web Application}, che rappresenta l'interfaccia utente e consente l'interazione con il sistema tramite browser;
-\item \textbf{API Gateway}, che funge da punto di accesso centralizzato e gestisce l'instradamento delle richieste verso i microservizi appropriati;
-\item \textbf{Accounting Service}, responsabile della gestione e della persistenza delle transazioni finanziarie all'interno di un database PostgreSQL;
+\item \textbf{Web Application}, che rappresenta l’interfaccia utente e consente l’interazione con il sistema tramite browser;
+\item \textbf{API Gateway}, che funge da punto di accesso centralizzato e gestisce l’instradamento delle richieste verso i microservizi appropriati;
+\item \textbf{Accounting Service}, responsabile della gestione e della persistenza delle transazioni finanziarie all’interno di un database PostgreSQL;
 \item \textbf{Analytics Service}, che elabora i dati finanziari e genera report e statistiche;
-\item \textbf{NLU Service}, che consente l'elaborazione di comandi in linguaggio naturale e la loro traduzione in operazioni eseguibili;
-\item \textbf{Database PostgreSQL}, che garantisce la persistenza e l'integrità dei dati.
+\item \textbf{NLU Service}, che consente l’elaborazione di comandi in linguaggio naturale e la loro traduzione in operazioni eseguibili;
+\item \textbf{Database PostgreSQL}, che garantisce la persistenza e l’integrità dei dati.
 \end{itemize}
 
-La comunicazione tra i componenti avviene tramite API REST e scambio di dati in formato JSON, secondo i principi architetturali definiti nello stile REST \cite{fielding2000rest}.
-L'utilizzo del framework Spring Boot consente lo sviluppo di microservizi indipendenti e facilmente configurabili, migliorando la modularità e la manutenibilità del sistema \cite{springboot}.
+La comunicazione tra i componenti avviene tramite API REST e scambio di dati in formato JSON, secondo i principi architetturali definiti nello stile REST \cite{fieldingRest}.  
+L’utilizzo del framework Spring Boot consente lo sviluppo di microservizi indipendenti e facilmente configurabili, migliorando la modularità e la manutenibilità complessiva del sistema \cite{springboot}.
 
 \section{Contributi del lavoro}
 
 I principali contributi del presente lavoro includono:
-
 \begin{itemize}
-\item la progettazione di un'architettura software distribuita basata su microservizi;
+\item la progettazione di un’architettura software distribuita basata su microservizi;
 \item la definizione di un sistema modulare per la gestione delle finanze personali;
-\item l'integrazione di un sistema di comprensione del linguaggio naturale per l'interazione con l'utente;
-\item la progettazione e implementazione di servizi software indipendenti;
-\item l'applicazione di principi di progettazione algoritmica e architetturale in un sistema reale;
-\item la validazione dell'architettura attraverso implementazione e testing.
+\item l’integrazione di un sistema di comprensione del linguaggio naturale per l’interazione con l’utente;
+\item la progettazione e l’implementazione di servizi software indipendenti;
+\item l’applicazione di principi di progettazione algoritmica e architetturale in un sistema reale;
+\item la validazione dell’architettura attraverso implementazione e testing.
 \end{itemize}
 
 \section{Struttura del documento}
 
-Il presente elaborato è organizzato seguendo l'iter di sviluppo del progetto:
-
+Il presente elaborato è organizzato seguendo l’iter di sviluppo del progetto:
 \begin{itemize}
 \item Il \textbf{Capitolo 2} presenta il contesto metodologico (SCRUM/AMDD) e la toolchain tecnologica utilizzata;
-\item Il \textbf{Capitolo 3} (Iterazione 0) descrive l'analisi dei requisiti e l'architettura del sistema (Modello 4+1);
-\item Il \textbf{Capitolo 4} (Iterazione 1) presenta l'implementazione dei servizi Core (Accounting) e la persistenza;
-\item Il \textbf{Capitolo 5} (Iterazione 2) analizza gli algoritmi di Business Intelligence e il servizio Analytics;
-\item Il \textbf{Capitolo 6} (Iterazione 3) descrive l'integrazione NLU, l'API Gateway e l'interfaccia utente;
-\item Il \textbf{Capitolo 7} (Testing) presenta i testing effettuati mediante analisi statica / analisi dinamica e la validazione dell'architettura.
-\item Il \textbf{Capitolo 8} (Conclusione) riporta le conclusioni e le prossime azioni da svolgere.
+\item Il \textbf{Capitolo 3} (Iterazione 0) descrive l’analisi dei requisiti e l’architettura del sistema secondo il modello 4+1;
+\item Il \textbf{Capitolo 4} (Iterazione 1) presenta l’implementazione dei servizi core e la gestione della persistenza;
+\item Il \textbf{Capitolo 5} (Iterazione 2) analizza gli algoritmi di business intelligence e il servizio di analytics;
+\item Il \textbf{Capitolo 6} (Iterazione 3) descrive l’integrazione del modulo NLU, dell’API Gateway e dell’interfaccia utente;
+\item Il \textbf{Capitolo 7} presenta le attività di testing e la validazione dell’architettura;
+\item Il \textbf{Capitolo 8} riporta le conclusioni e le possibili evoluzioni future del sistema.
 \end{itemize}
