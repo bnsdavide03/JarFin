@@ -23,8 +23,22 @@ public class NaturalLanguageService {
     private static final Pattern EXPLICIT_DESC_PATTERN = Pattern.compile("descrizione\\s+(.*)", Pattern.CASE_INSENSITIVE);
 
     private static final Map<String, String> CATEGORY_MAP = new HashMap<>();
+    private static final Map<String, String> CATEGORY_DEFAULT_DESC = new HashMap<>();
+    private static final Map<String, String> VERB_TO_NOUN = new HashMap<>();
 
     static {
+        VERB_TO_NOUN.put("stipendiato", "stipendio");
+        VERB_TO_NOUN.put("regalato", "regalo");
+        VERB_TO_NOUN.put("comprato", "acquisto");
+        VERB_TO_NOUN.put("mangiato", "pranzo");
+        VERB_TO_NOUN.put("bevuto", "bevanda");
+        VERB_TO_NOUN.put("viaggiato", "viaggio");
+        VERB_TO_NOUN.put("pagato", "pagamento");
+        VERB_TO_NOUN.put("speso", "spesa");
+        VERB_TO_NOUN.put("ricevuto", "entrata");
+        VERB_TO_NOUN.put("accreditato", "accredito");
+        VERB_TO_NOUN.put("bonifico", "bonifico");
+        
         CATEGORY_MAP.put("mcdonald", "Ristorante");
         CATEGORY_MAP.put("burger", "Ristorante");
         CATEGORY_MAP.put("pizza", "Ristorante");
@@ -91,11 +105,40 @@ public class NaturalLanguageService {
         CATEGORY_MAP.put("dentista", "Salute");
         CATEGORY_MAP.put("visita", "Salute");
         
+        CATEGORY_MAP.put("parrucchiere", "Cura Personale");
+        CATEGORY_MAP.put("barbiere", "Cura Personale");
+        CATEGORY_MAP.put("estetista", "Cura Personale");
+        CATEGORY_MAP.put("trucco", "Cura Personale");
+        CATEGORY_MAP.put("makeup", "Cura Personale");
+        CATEGORY_MAP.put("manicure", "Cura Personale");
+        CATEGORY_MAP.put("pedicure", "Cura Personale");
+        CATEGORY_MAP.put("massaggio", "Cura Personale");
+        CATEGORY_MAP.put("spa", "Cura Personale");
+        CATEGORY_MAP.put("centro estetico", "Cura Personale");
+        CATEGORY_MAP.put("salone", "Cura Personale");
+        CATEGORY_MAP.put("profumeria", "Cura Personale");
+        CATEGORY_MAP.put("cosmetica", "Cura Personale");
+        
         CATEGORY_MAP.put("stipendio", "Stipendio");
         CATEGORY_MAP.put("bonifico", "Bonifico");
         CATEGORY_MAP.put("rimborso", "Entrata");
         CATEGORY_MAP.put("regalo", "Entrata");
         CATEGORY_MAP.put("vendita", "Entrata");
+        
+        CATEGORY_DEFAULT_DESC.put("Ristorante", "Pranzo/Cena");
+        CATEGORY_DEFAULT_DESC.put("Bar/Colazione", "Caffè");
+        CATEGORY_DEFAULT_DESC.put("Supermercato", "Spesa");
+        CATEGORY_DEFAULT_DESC.put("Trasporti", "Trasporto");
+        CATEGORY_DEFAULT_DESC.put("Bollette", "Utenze");
+        CATEGORY_DEFAULT_DESC.put("Casa", "Casa");
+        CATEGORY_DEFAULT_DESC.put("Svago", "Intrattenimento");
+        CATEGORY_DEFAULT_DESC.put("Shopping", "Acquisto");
+        CATEGORY_DEFAULT_DESC.put("Salute", "Salute");
+        CATEGORY_DEFAULT_DESC.put("Salute/Sport", "Sport");
+        CATEGORY_DEFAULT_DESC.put("Cura Personale", "Estetica");
+        CATEGORY_DEFAULT_DESC.put("Stipendio", "Stipendio");
+        CATEGORY_DEFAULT_DESC.put("Bonifico", "Bonifico");
+        CATEGORY_DEFAULT_DESC.put("Entrata", "Entrata");
     }
 
     public ParsedTransaction parse(String text) {
@@ -103,6 +146,8 @@ public class NaturalLanguageService {
         
         String[] stopWords = {"stop", "nulla", "niente", "annulla", "chiudi", "jar", "giar"};
         for (String w : stopWords) if (text.toLowerCase().equals(w)) return null;
+
+        text = convertVerbsToNouns(text);
 
         ParsedTransaction result = new ParsedTransaction();
         String lowerCaseText = text.toLowerCase();
@@ -144,12 +189,14 @@ public class NaturalLanguageService {
         }
 
         String foundCategory = null;
+        String matchedKeyword = null;
         int maxMatchLength = 0;
 
         for (Map.Entry<String, String> entry : CATEGORY_MAP.entrySet()) {
             if (lowerCaseText.contains(entry.getKey())) {
                 if (entry.getKey().length() > maxMatchLength) {
                     foundCategory = entry.getValue();
+                    matchedKeyword = entry.getKey();
                     maxMatchLength = entry.getKey().length();
                 }
             }
@@ -164,18 +211,19 @@ public class NaturalLanguageService {
                 result.setDescription(null);
             }
         } else {
-            String cleanedDesc = cleanText(lowerCaseText);
-            
-            if (cleanedDesc.isEmpty() && foundCategory != null) {
-                result.setDescription(foundCategory); 
-            } else if (!cleanedDesc.isEmpty()) {
-                result.setDescription(StringUtils.capitalize(cleanedDesc));
-            } else {
-                result.setDescription("Generale");
-            }
+            String description = extractSmartDescription(lowerCaseText, foundCategory, matchedKeyword);
+            result.setDescription(description);
         }
 
         return result;
+    }
+
+    private String convertVerbsToNouns(String text) {
+        String converted = text;
+        for (Map.Entry<String, String> entry : VERB_TO_NOUN.entrySet()) {
+            converted = converted.replaceAll("(?i)\\b" + entry.getKey() + "\\b", entry.getValue());
+        }
+        return converted;
     }
 
     private Long extractId(String text) {
@@ -184,23 +232,139 @@ public class NaturalLanguageService {
         return null;
     }
 
+    private String extractSmartDescription(String text, String category, String matchedKeyword) {
+        String specificNoun = extractSpecificNoun(text);
+        
+        if (specificNoun != null && !specificNoun.isEmpty()) {
+            return StringUtils.capitalize(specificNoun);
+        }
+        
+        String cleaned = cleanText(text);
+        
+        String[] words = cleaned.split("\\s+");
+        StringBuilder result = new StringBuilder();
+        int count = 0;
+        
+        for (String word : words) {
+            if (word.length() > 2 && count < 2) {  // Max 2 parole
+                if (result.length() > 0) result.append(" ");
+                result.append(word);
+                count++;
+            }
+        }
+        
+        String finalDesc = result.toString().trim();
+        
+        if (finalDesc.isEmpty() || finalDesc.length() < 3) {
+            if (category != null && CATEGORY_DEFAULT_DESC.containsKey(category)) {
+                return CATEGORY_DEFAULT_DESC.get(category);
+            }
+            return category != null ? category : "Generale";
+        }
+        
+        finalDesc = StringUtils.capitalize(finalDesc);
+        if (finalDesc.length() > 30) {
+            finalDesc = finalDesc.substring(0, 27) + "...";
+        }
+        
+        return finalDesc;
+    }
+    
+    private String extractSpecificNoun(String text) {
+        String lowerText = text.toLowerCase();
+        
+        String[] specificNouns = {
+            "stipendio", "regalo", "bonifico", "pagamento", "acquisto",
+            "netflix", "spotify", "amazon", "prime", "disney",
+            "cinema", "teatro", "concerto", "museo",
+            "pizza", "sushi", "hamburger", "panino", "kebab", "pranzo", "cena", "colazione",
+            "mcdonald", "burger king", "kfc",
+            "esselunga", "coop", "lidl", "conad", "carrefour", "eurospin",
+            "benzina", "diesel", "carburante", "metano", "gpl",
+            "treno", "bus", "metro", "taxi", "uber", "aereo", "viaggio",
+            "farmacia", "parafarmacia", "ospedale",
+            "palestra", "piscina", "padel", "tennis", "calcio",
+            "parrucchiere", "barbiere", "estetista", "manicure", "pedicure", 
+            "massaggio", "spa", "trucco", "makeup", "profumeria",
+            "enel", "tim", "vodafone", "wind", "fastweb",
+            "affitto", "mutuo", "condominio",
+            "zalando", "zara", "h&m", "shein", "vinted",
+            "ikea", "leroy", "obi",
+            "libro", "libri", "rivista", "giornale",
+            "abbonamento", "biglietto", "biglietti",
+            "regalo", "regali", "fiori",
+            "parrucchiere", "barbiere", "estetista",
+            "cambio", "riparazione", "manutenzione"
+        };
+        
+        for (String noun : specificNouns) {
+            if (lowerText.contains(noun)) {
+                return noun;
+            }
+        }
+        
+        return null;
+    }
+
     private String cleanText(String text) {
         String cleaned = text.replaceAll("(\\d+([.,]\\d{1,2})?)", "");
         cleaned = cleaned.replaceAll("[€$]|euro", "");
         
         cleaned = cleaned.replaceAll("(?:id|numero|codice|transazione)\\s+\\d+", "");
-        
         cleaned = cleaned.replaceAll("(modifica|cambia|aggiorna|elimina|cancella|rimuovi)", "");
 
         String regex = "\\b(" +
-            "johnny|jonny|gionni|gianni|joni|jarfin|" + 
-            "aggiungi|inserisci|crea|nuova|nuovo|registra|segna|metti|aggiung|" + 
-            "ho|hai|ha|abbiamo|avete|hanno|" + 
+            "johnny|jonny|gionni|gianni|joni|jarfin|jar|" + 
+            "aggiungi|inserisci|crea|nuova|nuovo|registra|segna|metti|aggiung|" +
+            
+            "ho|hai|ha|abbiamo|avete|hanno|" +
+            "sono|sei|è|siamo|siete|" +
+            "sto|stai|sta|stiamo|state|stanno|" +
             "speso|pagato|comprato|preso|ricevuto|accreditato|accredito|uscito|entrato|" +
-            "spesa|spes|costo|uscita|entrata|importo|prezzo|valore|soldi|denaro|credito|debito|" + 
-            "per|di|a|in|il|lo|la|i|gli|le|un|una|uno|delle|dei|del|al|allo|alla|agli|alle|da|con|su|m|" + 
-            "mi|ti|ci|vi|si|me|te|ce|ve|se|mio|tuo|suo|nostro|vostro|loro|" + 
-            "rega|ragazzi|raga" + 
+            "fatto|faccio|fai|fa|facciamo|fate|fanno|" +
+            "dato|do|dai|da|diamo|date|danno|" +
+            "andato|vado|vai|va|andiamo|andate|vanno|" +
+            "venuto|vengo|vieni|viene|veniamo|venite|vengono|" +
+            "devo|devi|deve|dobbiamo|dovete|devono|" +
+            "posso|puoi|può|possiamo|potete|possono|" +
+            "voglio|vuoi|vuole|vogliamo|volete|vogliono|" +
+            "arrivo|arrivato|arriva|arrivano|" +
+            "dire|detto|dico|dici|dice|diciamo|dicono|" +
+            "stavo|stavi|stava|stavamo|stavate|stavano|" +
+            
+            "spesa|spes|costo|uscita|entrata|importo|prezzo|valore|soldi|denaro|credito|debito|" +
+            "cosa|cose|tipo|roba|" +
+            
+            "il|lo|la|i|gli|le|un|una|uno|" +
+            
+            "per|di|a|in|con|su|da|fra|tra|" +
+            "del|dello|della|dei|degli|delle|" +
+            "al|allo|alla|ai|agli|alle|" +
+            "dal|dallo|dalla|dai|dagli|dalle|" +
+            "nel|nello|nella|nei|negli|nelle|" +
+            "sul|sullo|sulla|sui|sugli|sulle|" +
+            
+            "mi|ti|ci|vi|si|me|te|ce|ve|se|" +
+            "mio|tuo|suo|nostro|vostro|loro|mia|tua|sua|nostra|vostra|" +
+            
+            "e|o|ma|però|quindi|allora|anche|ancora|" +
+            "non|no|sì|si|" +
+            "molto|poco|tanto|troppo|più|meno|" +
+            "bene|male|meglio|peggio|" +
+            "sempre|mai|spesso|raramente|" +
+            "qui|qua|lì|là|" +
+            "oggi|ieri|domani|ora|adesso|" +
+            
+            "oh|ah|eh|uhm|" +
+            "solo|solamente|soltanto|" +
+            "amore|finanziario|ragazzo|ragazza|" +
+            "rega|ragazzi|raga|" +
+            "giusto|giusti|giusta|giuste|" +
+            "niente|nulla|" +
+            "specie|specialmente|" +
+            "schiavo|" +
+            
+            "zero|uno|due|tre|quattro|cinque|sei|sette|otto|nove|dieci" +
             ")\\b";
 
         cleaned = cleaned.replaceAll(regex, " ");
