@@ -25,9 +25,9 @@ public class TransactionController {
     @PostMapping
     public ResponseEntity<TransactionResponse> create(@Valid @RequestBody TransactionRequest request) {
         Transaction entity = mapper.toEntity(request);
-
+        
         Transaction saved = service.saveTransaction(entity);
-       
+        
         return ResponseEntity.status(HttpStatus.CREATED)
                              .body(mapper.toResponse(saved));
     }
@@ -38,6 +38,24 @@ public class TransactionController {
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<TransactionResponse> getById(@PathVariable Long id) {
+        Transaction transaction = service.getTransactionById(id);
+        return ResponseEntity.ok(mapper.toResponse(transaction));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TransactionResponse> update(
+            @PathVariable Long id, 
+            @Valid @RequestBody TransactionRequest request) {
+        
+        Transaction transactionDetails = mapper.toEntity(request);
+
+        Transaction updatedTransaction = service.updateTransaction(id, transactionDetails);
+
+        return ResponseEntity.ok(mapper.toResponse(updatedTransaction));
     }
 
     @DeleteMapping("/{id}")
