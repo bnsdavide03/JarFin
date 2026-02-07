@@ -53,17 +53,83 @@ La scelta di una soluzione interna, anziché basata su servizi cloud esterni, co
 
 Per facilitare il deployment e garantire la riproducibilità dell’ambiente di esecuzione, il sistema è stato containerizzato mediante \textbf{Docker}. L’utilizzo di container consente di isolare i singoli microservizi e le relative dipendenze, semplificando la gestione dell’infrastruttura e favorendo la portabilità del sistema tra ambienti di sviluppo e produzione.
 
-\section{Toolchain di sviluppo}
+\section{Toolchain di progetto}
 
-Lo sviluppo del progetto ha fatto uso di una toolchain composta da strumenti ampiamente diffusi nel contesto dell’ingegneria del software:
+Lo sviluppo del sistema \textit{JarFin} è stato supportato da una toolchain articolata, composta da strumenti dedicati alla modellazione, allo sviluppo, al versioning, al testing e all’analisi della qualità del codice.  
+La scelta degli strumenti è stata guidata dall’obiettivo di garantire un processo di sviluppo strutturato, tracciabile e conforme alle buone pratiche dell’ingegneria del software.
 
+\subsection{Strumenti di modellazione}
+
+Per la modellazione del sistema è stato utilizzato \textbf{UMLet}, uno strumento leggero per la creazione di diagrammi UML. UMLet è stato impiegato per la realizzazione dei principali artefatti di modellazione previsti dall’approccio AMDD, in particolare:
 \begin{itemize}
-\item \textbf{Git e GitHub}: per il controllo di versione distribuito, la gestione collaborativa del codice sorgente e il tracciamento delle attività di sviluppo;
-\item \textbf{Maven}: per l’automazione della build e la gestione delle dipendenze dei progetti Java;
-\item \textbf{Eclipse/Visual Studio Code}: come ambiente di sviluppo integrato (IDE) per le attività di implementazione e debugging;
-\item \textbf{Postman}: per il testing manuale e la validazione degli endpoint API REST.
+\item diagrammi dei casi d’uso, per rappresentare le funzionalità offerte dal sistema e le interazioni con gli attori;
+\item diagrammi delle classi, per descrivere la struttura statica dei principali componenti software;
+\item diagrammi dei componenti, per modellare l’architettura a microservizi;
+\item diagrammi di sequenza, per analizzare il comportamento dinamico del sistema nei casi d’uso critici.
 \end{itemize}
 
-\section{Considerazioni finali}
+L’utilizzo di UMLet ha consentito di produrre modelli essenziali e facilmente modificabili, in linea con i principi della modellazione incrementale promossi dall’Agile Model Driven Development.
 
-L’adozione di una metodologia Agile, combinata con una toolchain tecnologica moderna e un’architettura a microservizi, ha permesso di affrontare lo sviluppo di JarFin in modo strutturato e progressivo. Le scelte metodologiche e tecnologiche descritte in questo capitolo costituiscono la base su cui si innestano le successive fasi di analisi, progettazione dettagliata e implementazione del sistema, presentate nei capitoli seguenti.
+\subsection{Versioning e Project Management}
+
+Il controllo di versione del codice sorgente e la gestione del progetto sono stati affidati a \textbf{GitHub}.  
+Git è stato utilizzato come sistema di versioning distribuito, permettendo di tracciare l’evoluzione del codice, gestire rami di sviluppo separati e mantenere uno storico completo delle modifiche.
+
+GitHub è stato inoltre impiegato come strumento di supporto al project management, sfruttando:
+\begin{itemize}
+\item repository centralizzato per il codice sorgente;
+\item Kanban board per la pianificazione delle attività e il tracciamento delle iterazioni;
+\item Pull Request per la revisione del codice e l’integrazione controllata delle funzionalità.
+\end{itemize}
+
+Questa impostazione ha favorito un processo di sviluppo ordinato e trasparente, coerente con la metodologia SCRUM adottata.
+
+\subsection{Sviluppo backend}
+
+Il backend del sistema è stato sviluppato utilizzando il linguaggio \textbf{Java} e il framework \textbf{Spring Boot}.  
+Spring Boot è stato scelto per la sua capacità di semplificare lo sviluppo di applicazioni basate su architettura a microservizi, riducendo la configurazione manuale e favorendo la realizzazione di servizi REST standalone.
+
+Ogni microservizio di JarFin è implementato come applicazione Spring Boot indipendente, responsabile di una specifica area funzionale del sistema, in linea con i principi di separazione delle responsabilità e modularità.
+
+\subsection{Testing delle API REST}
+
+Per la verifica manuale e il testing degli endpoint REST è stato utilizzato \textbf{Postman}.  
+Lo strumento ha permesso di:
+\begin{itemize}
+\item testare le operazioni CRUD esposte dai microservizi;
+\item validare il corretto formato delle richieste e delle risposte JSON;
+\item simulare scenari di utilizzo reali durante le fasi di sviluppo e integrazione.
+\end{itemize}
+
+L’uso di Postman ha facilitato l’individuazione precoce di errori di comunicazione tra i servizi e ha supportato la fase di debugging dell’API Gateway.
+
+\subsection{Unit Testing}
+
+Il testing automatico della logica applicativa è stato realizzato tramite \textbf{JUnit 5}, framework di riferimento per il testing in ambiente Java.  
+JUnit è stato utilizzato per definire test unitari mirati a verificare il corretto funzionamento dei metodi di business logic, in particolare nei servizi di accounting, analytics e NLU.
+
+L’adozione del testing unitario ha contribuito a migliorare l’affidabilità del sistema e a ridurre il rischio di regressioni durante l’evoluzione del codice.
+
+\subsection{Analisi della copertura del codice}
+
+Per l’analisi della copertura dei test è stato utilizzato il plugin \textbf{EclEmma}, integrato nell’ambiente di sviluppo.  
+EclEmma consente di misurare dinamicamente la percentuale di codice eseguito durante l’esecuzione dei test, fornendo indicatori utili per valutare l’efficacia della suite di test.
+
+Le metriche di copertura hanno supportato l’identificazione delle porzioni di codice meno testate, guidando il miglioramento progressivo dei test unitari.
+
+\subsection{Analisi statica del codice}
+
+La qualità strutturale del codice è stata analizzata mediante \textbf{STAN4J}, strumento di analisi statica per applicazioni Java.  
+STAN4J è stato utilizzato per:
+\begin{itemize}
+\item valutare metriche di complessità e dipendenze tra classi;
+\item individuare potenziali criticità architetturali;
+\item supportare la verifica del rispetto dei principi di progettazione software.
+\end{itemize}
+
+L’analisi statica ha contribuito a mantenere un’architettura pulita e coerente con i principi di modularità e manutenibilità, aspetti fondamentali in un sistema a microservizi.
+
+\subsection{Considerazioni sulla toolchain}
+
+L’integrazione degli strumenti descritti ha permesso di coprire l’intero ciclo di vita del software, dalla modellazione iniziale alla verifica della qualità del codice.  
+La toolchain adottata rappresenta una soluzione completa e coerente con gli obiettivi del progetto, fornendo un supporto efficace sia allo sviluppo incrementale sia alla validazione tecnica del sistema.
