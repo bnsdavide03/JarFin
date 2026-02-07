@@ -12,7 +12,7 @@ Per questo motivo sono state adottate diverse scelte architetturali e implementa
 
 ## Scelte tecnologiche
 
-Il microservizio è stato sviluppato utilizzando **Java 17** e **Spring Boot 3.2.0**, che rappresentano una combinazione moderna e ampiamente utilizzata per lo sviluppo di applicazioni backend e microservizi. Spring Boot consente di ridurre la configurazione manuale, fornendo un’infrastruttura pronta all’uso per la creazione di API REST e per l’integrazione con database relazionali.
+Il microservizio è stato sviluppato utilizzando **Java 21** e **Spring Boot 3.2.0**, che rappresentano una combinazione moderna e ampiamente utilizzata per lo sviluppo di applicazioni backend e microservizi. Spring Boot consente di ridurre la configurazione manuale, fornendo un’infrastruttura pronta all’uso per la creazione di API REST e per l’integrazione con database relazionali.
 
 Per l’esposizione delle API è stato utilizzato **Spring Web**, mentre la persistenza dei dati è stata gestita tramite **Spring Data JPA** e **Hibernate**, che permettono di mappare le classi Java su tabelle di database senza scrivere query SQL esplicite nella maggior parte dei casi.
 
@@ -71,7 +71,7 @@ Le dipendenze principali includono:
 * Lombok per ridurre il codice ripetitivo
 * lo starter per la validazione degli input
 
-La versione di Java è impostata a 17, in linea con le versioni più recenti di Spring Boot.
+La versione di Java è impostata a 21, in linea con le versioni più recenti di Spring Boot.
 
 
 

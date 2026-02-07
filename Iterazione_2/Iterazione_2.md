@@ -5,13 +5,13 @@
 L’Iterazione 2 del progetto **JarFin** ha avuto come obiettivo la progettazione e l’implementazione dell’**Analytics Service**. Questo microservizio ricopre un ruolo cruciale nell’architettura del sistema: agisce come componente di *Business Intelligence*, trasformando i dati grezzi delle transazioni (gestiti dall'Accounting Service) in informazioni finanziarie strutturate e azionabili per l'utente finale.
 
 Il servizio non si limita a una passiva aggregazione di dati, ma applica algoritmi di proiezione e logiche di valutazione per fornire un quadro completo della salute finanziaria (bilanci, stime di fine mese, livelli di allerta).
-L'intero sviluppo è stato guidato da principi di **Design for Testability** e **Domain-Driven Design**, garantendo che il sistema risultasse robusto, semanticamente corretto e disaccoppiato dalle dipendenze esterne.
+L'intero sviluppo è stato guidato da principi principi di **Design for Testability** e una modellazione del dominio ispirata a **DDD**, con particolare attenzione alla semantica dei tipi e alla chiarezza del modello.
 
 
 
 ## Scelte tecnologiche
 
-In perfetta continuità con l’Iterazione 1, lo stack tecnologico si basa su **Java 17** e **Spring Boot 3.2.0**. Questa scelta garantisce omogeneità nell’ecosistema JarFin, semplificando la manutenzione e il deployment.
+In perfetta continuità con l’Iterazione 1, lo stack tecnologico si basa su **Java 21** e **Spring Boot 3.2.0**. Questa scelta garantisce omogeneità nell’ecosistema JarFin, semplificando la manutenzione e il deployment.
 
 Per soddisfare i requisiti specifici di un servizio "consumatore" di dati, sono state adottate le seguenti tecnologie:
 
@@ -29,7 +29,7 @@ L’Analytics Service è progettato come un microservizio **Stateless** (senza s
 ### Pattern di Comunicazione
 Il flusso dei dati segue un pattern di richiesta/risposta sincrono:
 1.  Il **Client** richiede un report all'Analytics Service.
-2.  L'**Analytics Service** invoca l'endpoint `GET /api/transactions` dell'Accounting Service tramite `RestTemplate`.
+2.  L'**Analytics Service** invoca l’endpoint dell’Accounting Service, configurato esternamente, `/api/transactions` tramite `RestTemplate`.
 3.  I dati JSON ricevuti vengono deserializzati in oggetti di dominio (DTO).
 4.  Il motore di calcolo elabora le metriche.
 5.  Il risultato viene restituito al Client.
@@ -66,7 +66,7 @@ Tutti gli importi monetari (`amount`, `totalBalance`, etc.) sono gestiti tramite
 
 ## Logica di Business e Algoritmi
 
-La classe `AnalyticsService` rappresenta il cuore funzionale dell'applicazione. Le logiche implementate non si limitano all'aritmetica di base, ma includono algoritmi predittivi.
+La classe `AnalyticsService` rappresenta il cuore funzionale dell'applicazione. Le logiche implementate non si limitano all'aritmetica di base, ma includono algoritmi di proiezione deterministica basati sull’andamento temporale delle spese.
 
 ### 1. Aggregazione Condizionale
 L'algoritmo di aggregazione itera sulle transazioni e applica una logica di smistamento basata sul tipo:
@@ -99,6 +99,7 @@ Il servizio calcola il *Savings Rate* (Tasso di Risparmio) percentuale e lo conf
 * **Risparmio > 0%**: Livello `YELLOW` (Avviso di prudenza).
 * **Bilancio Negativo**: Livello `RED` (Allarme critico).
 
+In assenza totale di entrate ma con spese registrate, il sistema entra in uno stato di allerta critica `RED - Critical`, forzando il savings rate a un valore negativo simbolico per evidenziare la gravità della situazione.
 
 
 ## Testing e Quality Assurance
