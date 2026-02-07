@@ -2,11 +2,11 @@
 
 \section{Metodologia di sviluppo}
 
-Lo sviluppo del sistema \textit{JarFin} è stato condotto adottando una metodologia Agile, con l’obiettivo di favorire un processo di progettazione incrementale, flessibile e orientato al cambiamento. In particolare, il progetto ha seguito i principi di \textbf{SCRUM}, integrati con l’approccio \textbf{AMDD} (Agile Model Driven Development), al fine di bilanciare la necessità di una progettazione architetturale solida con i vantaggi dell’iterazione continua e del feedback costante.
+Lo sviluppo del sistema \textit{JarFin} è stato condotto adottando una metodologia Agile, con l’obiettivo di favorire un processo di progettazione incrementale, flessibile e orientato al cambiamento. In particolare, il progetto ha seguito i principi di \textbf{SCRUM}, integrati con l’approccio \textbf{Agile Model Driven Development (AMDD)}, al fine di bilanciare la necessità di una progettazione architetturale solida con i vantaggi dell’iterazione continua e del feedback costante.
 
-SCRUM è stato utilizzato come framework di riferimento per l’organizzazione del lavoro, la pianificazione delle attività e la gestione delle iterazioni di sviluppo. Il progetto è stato suddiviso in sprint successivi, ciascuno caratterizzato da obiettivi ben definiti e da un incremento funzionale del sistema. Questa impostazione ha consentito di monitorare costantemente l’avanzamento del progetto e di adattare le scelte progettuali in base alle esigenze emerse durante lo sviluppo \cite{scrum}.
+SCRUM è stato utilizzato come framework di riferimento per l’organizzazione del lavoro, la pianificazione delle attività e la gestione delle iterazioni di sviluppo. Il ciclo di vita del progetto è stato articolato in sprint di durata indicativa pari a due settimane, ciascuno caratterizzato da obiettivi ben definiti e dalla produzione di un incremento funzionale del sistema. Questa impostazione ha consentito di monitorare costantemente l’avanzamento del progetto e di adattare le scelte progettuali in base alle esigenze emerse durante lo sviluppo \cite{scrum}.
 
-Parallelamente, l’approccio AMDD ha guidato le attività di modellazione e progettazione. Invece di definire in modo esaustivo l’intera architettura nelle fasi iniziali, la modellazione è stata condotta in maniera incrementale, producendo modelli essenziali e sufficienti a supportare le decisioni architetturali di ciascuna iterazione \cite{amdd}. Questo approccio ha permesso di evitare un’eccessiva rigidità progettuale, mantenendo al contempo una visione coerente dell’architettura complessiva del sistema.
+Parallelamente, l’approccio AMDD ha guidato le attività di modellazione e progettazione. Invece di definire in modo esaustivo l’intera architettura nelle fasi iniziali, la modellazione è stata condotta in maniera incrementale, producendo modelli essenziali e sufficienti a supportare le decisioni architetturali di ciascuna iterazione. In particolare, sono stati realizzati modelli di dominio e diagrammi UML (use case, componenti, classi e sequenza) per i casi d’uso più rilevanti, successivamente raffinati nel corso dello sviluppo \cite{amdd}. Questo approccio ha permesso di evitare un’eccessiva rigidità progettuale, mantenendo al contempo una visione coerente dell’architettura complessiva del sistema.
 
 \section{Organizzazione delle iterazioni}
 
@@ -31,15 +31,23 @@ L’adozione di un’architettura distribuita consente inoltre di isolare le res
 
 \section{Tecnologie adottate}
 
+La scelta dello stack tecnologico è stata guidata dalla necessità di utilizzare strumenti robusti, ampiamente supportati dalla community e adatti allo sviluppo di sistemi distribuiti.
+
 \subsection{Spring Boot}
 
 Per l’implementazione dei microservizi è stato utilizzato il framework \textbf{Spring Boot}, che fornisce un ambiente di sviluppo semplificato per la realizzazione di applicazioni Java basate su architettura a servizi. Spring Boot consente di ridurre significativamente la configurazione manuale, favorendo lo sviluppo rapido di applicazioni standalone e facilmente deployabili \cite{springboot}.
 
-Il framework supporta nativamente la creazione di API REST, l’integrazione con sistemi di persistenza e la gestione della configurazione dei servizi, risultando particolarmente adatto allo sviluppo di sistemi a microservizi.
+Il framework supporta nativamente la creazione di API REST, l’integrazione con sistemi di persistenza e la gestione della configurazione dei servizi, risultando particolarmente adatto allo sviluppo di architetture a microservizi.
 
 \subsection{Database PostgreSQL}
 
 La persistenza dei dati è affidata a un database relazionale \textbf{PostgreSQL}, scelto per la sua affidabilità, conformità agli standard SQL e supporto a funzionalità avanzate di gestione dei dati. PostgreSQL garantisce l’integrità dei dati finanziari e supporta operazioni di interrogazione efficienti, fondamentali per le funzionalità di analisi offerte dal sistema.
+
+\subsection{Modulo di Natural Language Understanding}
+
+Per l’elaborazione del linguaggio naturale è stato sviluppato un modulo di Natural Language Understanding implementato in Java come microservizio dedicato. Il sistema utilizza tecniche di analisi lessicale e \textit{pattern matching} per identificare intenti e parametri rilevanti a partire dalle frasi dell’utente, consentendo l’esecuzione di operazioni finanziarie tramite comandi in linguaggio naturale.
+
+La scelta di una soluzione interna, anziché basata su servizi cloud esterni, consente di ridurre la latenza, mantenere il controllo sui dati sensibili dell’utente e garantire una maggiore integrazione con l’architettura complessiva del sistema.
 
 \subsection{Containerizzazione e ambiente di esecuzione}
 
@@ -47,10 +55,15 @@ Per facilitare il deployment e garantire la riproducibilità dell’ambiente di 
 
 \section{Toolchain di sviluppo}
 
-Lo sviluppo del progetto ha fatto uso di una toolchain composta da strumenti ampiamente diffusi nel contesto dell’ingegneria del software. In particolare, il controllo di versione è stato gestito tramite \textbf{Git}, con repository ospitato su piattaforma GitHub, consentendo una gestione collaborativa del codice sorgente e il tracciamento delle modifiche.
+Lo sviluppo del progetto ha fatto uso di una toolchain composta da strumenti ampiamente diffusi nel contesto dell’ingegneria del software:
 
-Per la gestione delle dipendenze e la build dei progetti Java è stato utilizzato \textbf{Maven}, mentre l’ambiente di sviluppo integrato (IDE) ha supportato le attività di implementazione, debugging e testing del sistema.
+\begin{itemize}
+\item \textbf{Git e GitHub}: per il controllo di versione distribuito, la gestione collaborativa del codice sorgente e il tracciamento delle attività di sviluppo;
+\item \textbf{Maven}: per l’automazione della build e la gestione delle dipendenze dei progetti Java;
+\item \textbf{Eclipse/Visual Studio Code}: come ambiente di sviluppo integrato (IDE) per le attività di implementazione e debugging;
+\item \textbf{Postman}: per il testing manuale e la validazione degli endpoint API REST.
+\end{itemize}
 
 \section{Considerazioni finali}
 
-L’adozione di una metodologia Agile, combinata con una toolchain tecnologica moderna e un’architettura a microservizi, ha permesso di affrontare lo sviluppo di JarFin in modo strutturato e progressivo. Le scelte metodologiche e tecnologiche descritte in questo capitolo costituiscono la base su cui si innestano le successive fasi di analisi, progettazione dettagliata e implementazione del sistema, descritte nei capitoli seguenti.
+L’adozione di una metodologia Agile, combinata con una toolchain tecnologica moderna e un’architettura a microservizi, ha permesso di affrontare lo sviluppo di JarFin in modo strutturato e progressivo. Le scelte metodologiche e tecnologiche descritte in questo capitolo costituiscono la base su cui si innestano le successive fasi di analisi, progettazione dettagliata e implementazione del sistema, presentate nei capitoli seguenti.
