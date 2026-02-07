@@ -59,9 +59,7 @@ Gli obiettivi specifici del progetto includono:
 
 \section{Soluzione proposta}
 
-Per soddisfare gli obiettivi definiti, è stato progettato e sviluppato JarFin come sistema distribuito basato su architettura a microservizi.
-
-Il sistema è composto dai seguenti componenti principali:
+Per soddisfare gli obiettivi definiti, il sistema è stato principalmente suddiviso nei seguenti componenti:
 \begin{itemize}
 \item \textbf{Web Application}, che rappresenta l’interfaccia utente e consente l’interazione con il sistema tramite browser;
 \item \textbf{API Gateway}, che funge da punto di accesso centralizzato e gestisce l’instradamento delle richieste verso i microservizi appropriati;
@@ -74,7 +72,7 @@ Il sistema è composto dai seguenti componenti principali:
 La comunicazione tra i componenti avviene tramite API REST e scambio di dati in formato JSON, secondo i principi architetturali definiti nello stile REST \cite{fieldingRest}. 
 L’utilizzo del framework Spring Boot consente lo sviluppo di microservizi indipendenti e facilmente configurabili, migliorando la modularità e la manutenibilità complessiva del sistema \cite{springboot}.
 
-L’architettura complessiva del sistema è illustrata nel diagramma di alto livello presentato nei capitoli successivi, che evidenzia le relazioni tra i diversi microservizi e il ruolo centrale dell’API Gateway.
+L’architettura complessiva del sistema è illustrata nei diagrammi presenti nei capitoli successivi, che evidenziano le relazioni tra i diversi microservizi e il ruolo centrale dell’API Gateway.
 
 \section{Contributi del lavoro}
 
@@ -86,18 +84,4 @@ I principali contributi del presente lavoro includono:
 \item l’adozione di un’architettura basata su API REST e API Gateway per migliorare la scalabilità e ridurre l’accoppiamento tra componenti;
 \item l’applicazione di principi di progettazione algoritmica e architetturale in un contesto concreto e funzionante;
 \item la validazione dell’approccio proposto attraverso implementazione e testing.
-\end{itemize}
-
-\newpage
-\section{Struttura del documento}
-
-Il presente elaborato è organizzato seguendo l’iter di sviluppo del progetto:
-\begin{itemize}
-\item Il \textbf{Capitolo 2} presenta il contesto metodologico adottato (SCRUM/AMDD) e la toolchain tecnologica utilizzata;
-\item Il \textbf{Capitolo 3} (Iterazione 0) descrive l’analisi dei requisiti e l’architettura del sistema secondo il modello 4+1;
-\item Il \textbf{Capitolo 4} (Iterazione 1) presenta l’implementazione dei servizi core e la gestione della persistenza;
-\item Il \textbf{Capitolo 5} (Iterazione 2) analizza gli algoritmi di business intelligence e il servizio di analytics;
-\item Il \textbf{Capitolo 6} (Iterazione 3) descrive l’integrazione del modulo NLU, dell’API Gateway e dell’interfaccia utente;
-\item Il \textbf{Capitolo 7} presenta le attività di testing e la validazione dell’architettura;
-\item Il \textbf{Capitolo 8} riporta le conclusioni e le possibili evoluzioni future del sistema.
 \end{itemize}

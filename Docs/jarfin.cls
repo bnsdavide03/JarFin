@@ -23,6 +23,12 @@
 \definecolor{accentGold}{RGB}{200, 150, 50}
 \definecolor{codeBg}{RGB}{245, 245, 245}
 
+\usepackage{longtable}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[italian]{babel}
+
 % ---------- Spaziatura ----------
 \onehalfspacing
 \setlength{\parindent}{0pt}
