@@ -52,7 +52,6 @@ class TransactionControllerTest {
     @MockBean
     private TransactionMapper mapper;
 
-    // Oggetti di test riutilizzabili
     private TransactionRequest requestDto;
     private TransactionResponse responseDto;
     private Transaction entity;
@@ -67,6 +66,7 @@ class TransactionControllerTest {
         requestDto.setType(TransactionType.EXPENSE);
 
         entity = new Transaction();
+        entity.setId(1L);
         entity.setAmount(new BigDecimal("150.00"));
         entity.setCategory("Spesa");
         entity.setDescription("Test JUnit");

@@ -65,7 +65,7 @@ class AnalyticsServiceTest {
         
         assertEquals(new BigDecimal("1500.00"), report.getTotalBalance());
         
-        assertEquals(new BigDecimal("75.00"), report.getSavingsRate());
+        assertEquals(new BigDecimal("75.0000"), report.getSavingsRate());
         
         assertTrue(report.getAlertLevel().contains("GREEN"));
         
