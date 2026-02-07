@@ -9,53 +9,57 @@
         body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
         .card { border: none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .type-badge { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+        .btn-action { color: #6c757d; cursor: pointer; }
+        .btn-action:hover { color: #0d6efd; }
+        .btn-action.delete:hover { color: #dc3545; }
     </style>
 </head>
 <body>
-
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
     <div class="container">
         <a class="navbar-brand fw-bold" href="/"><i class="fas fa-arrow-left me-2 text-warning"></i> Torna alla Dashboard</a>
     </div>
 </nav>
-
 <div class="container">
     <div class="card shadow-sm">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0"><i class="fas fa-list-ul me-2 text-primary"></i>Storico Completo Transazioni</h5>
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-list-ul me-2 text-primary"></i>Storico Completo</h5>
+            <span class="badge bg-light text-dark">Totale: <span th:text="${#lists.size(transactions)}">0</span></span>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-4">Data</th>
+                            <th class="ps-4" style="width: 60px;">#ID</th>
+                            <th>Data</th>
                             <th>Descrizione</th>
                             <th>Categoria</th>
-                            <th class="text-end pe-4">Importo</th>
+                            <th class="text-end">Importo</th>
+                            <th class="text-center" style="width: 100px;">Azioni</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:each="t : ${transactions}">
-                            <td class="ps-4">
-                                <div class="d-flex align-items-center">
-                                    <div th:class="${t.type == 'INCOME' ? 'type-badge bg-success-subtle text-success' : 'type-badge bg-danger-subtle text-danger'} " class="me-3">
-                                        <i th:class="${t.type == 'INCOME' ? 'fas fa-arrow-up' : 'fas fa-arrow-down'}"></i>
-                                    </div>
-                                    <span th:text="${t.date}">2026-02-02</span>
-                                </div>
+                            <td class="ps-4 fw-bold text-muted small" th:text="${t.id}">1</td>
+                            <td th:text="${t.date}"></td>
+                            <td class="fw-bold" th:text="${t.description}"></td>
+                            <td><span class="badge bg-light text-dark" th:text="${t.category}"></span></td>
+                            <td class="text-end fw-bold" th:classappend="${t.type == 'INCOME'} ? 'text-success' : 'text-danger'">
+                                <span th:text="${t.type == 'INCOME' ? '+' : '-'}"></span>
+                                <span th:text="${#numbers.formatDecimal(t.amount, 1, 'POINT', 2, 'COMMA')}">0.00</span> €
                             </td>
-                            <td><span class="fw-bold" th:text="${t.description}">Descrizione</span></td>
-                            <td><span class="badge bg-light text-dark text-capitalize" th:text="${t.category}">Categoria</span></td>
-                            <td class="text-end pe-4">
-                                <span th:class="${t.type == 'INCOME' ? 'text-success fw-bold' : 'text-danger fw-bold'}">
-                                    <span th:text="${t.type == 'INCOME' ? '+' : '-'}"></span>
-                                    <span th:text="${#numbers.formatDecimal(t.amount, 1, 'POINT', 2, 'COMMA')}">0,00</span> €
-                                </span>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-link btn-action" 
+                                        th:onclick="openEditModal([[${t.id}]], [[${t.amount}]], [[${t.description}]], [[${t.category}]], [[${t.date}]], [[${t.type}]])">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                
+                                <button class="btn btn-sm btn-link btn-action delete" 
+                                        th:onclick="openDeleteModal([[${t.id}]])">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(transactions)}">
-                            <td colspan="4" class="text-center py-5 text-muted">Nessuna transazione registrata.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -64,5 +68,81 @@
     </div>
 </div>
 
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="/update" method="post">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Modifica</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="modalId" name="id">
+                    <input type="text" class="form-control mb-2" id="modalDesc" name="description" placeholder="Descrizione" required>
+                    <input type="number" step="0.01" class="form-control mb-2" id="modalAmount" name="amount" required>
+                    <input type="date" class="form-control mb-2" id="modalDate" name="date" required>
+                    <select class="form-select mb-2" id="modalCategory" name="category">
+                        <option value="Ristorante">Ristorante</option>
+                        <option value="Supermercato">Supermercato</option>
+                        <option value="Trasporti">Trasporti</option>
+                        <option value="Casa">Casa</option>
+                        <option value="Svago">Svago</option>
+                        <option value="Salute">Salute</option>
+                        <option value="Stipendio">Stipendio</option>
+                        <option value="Bonifico">Bonifico</option>
+                        <option value="Bollette">Bollette</option>
+                        <option value="Altro">Altro</option>
+                    </select>
+                    <select class="form-select" id="modalType" name="type">
+                        <option value="EXPENSE">Uscita</option>
+                        <option value="INCOME">Entrata</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button>
+                    <button type="submit" class="btn btn-primary">Salva Modifiche</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Conferma Eliminazione</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Sei sicuro di voler eliminare questa transazione?</p>
+                <p class="small text-muted">L'operazione non è reversibile.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button>
+                <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Elimina Definitivamente</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function openEditModal(id, amount, description, category, date, type) {
+        document.getElementById('modalId').value = id;
+        document.getElementById('modalAmount').value = amount;
+        document.getElementById('modalDesc').value = description;
+        document.getElementById('modalCategory').value = category;
+        document.getElementById('modalDate').value = date;
+        document.getElementById('modalType').value = type;
+        new bootstrap.Modal(document.getElementById('editModal')).show();
+    }
+
+    function openDeleteModal(id) {
+        const deleteBtn = document.getElementById('confirmDeleteBtn');
+        deleteBtn.href = '/delete/' + id;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+</script>
 </body>
 </html>

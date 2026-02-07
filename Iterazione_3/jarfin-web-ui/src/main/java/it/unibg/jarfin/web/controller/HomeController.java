@@ -4,14 +4,19 @@ import it.unibg.jarfin.web.dto.FinancialReport;
 import it.unibg.jarfin.web.dto.ParsedTransaction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -25,37 +30,66 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model) {
-        try {
-            String analyticsUrl = gatewayUrl + "/api/analytics/report";
-            
-            FinancialReport report = restTemplate.getForObject(analyticsUrl, FinancialReport.class);
-            model.addAttribute("report", report);
-            
-        } catch (Exception e) {
-            log.error("Impossibile recuperare Analytics: {}", e.getMessage());
-            
-            model.addAttribute("report", new FinancialReport());
-            model.addAttribute("error", "Backend non raggiungibile");
-        }
-        
+        loadFinancialReport(model);
         return "index";
     }
 
     @GetMapping("/transactions")
-public String allTransactions(Model model) {
-    try {
-        // Chiamata al microservizio di accounting (porta 8080)
-        String transactionsUrl = gatewayUrl + "/api/transactions";
-        
-        // Riceviamo la lista delle transazioni
-        // Nota: Assicurati che il backend restituisca ParsedTransaction[] o una lista di oggetti simili
-        ParsedTransaction[] transactions = restTemplate.getForObject(transactionsUrl, ParsedTransaction[].class);
-        
-        model.addAttribute("transactions", transactions);
-    } catch (Exception e) {
-        log.error("Errore recupero transazioni: {}", e.getMessage());
-        model.addAttribute("transactions", List.of());
+    public String allTransactions(Model model) {
+        loadTransactionsList(model);
+        return "transactions";
     }
-    return "transactions"; // Nome del file .html
-}
+
+    @GetMapping("/delete/{id}")
+    public String deleteTransaction(@PathVariable Long id) {
+        try {
+            restTemplate.delete(gatewayUrl + "/api/transactions/" + id);
+        } catch (RestClientException e) {
+            log.error("Errore delete: {}", e.getMessage());
+        }
+        return "redirect:/transactions";
+    }
+
+    @PostMapping("/update")
+    public String updateTransaction(@ModelAttribute ParsedTransaction transaction) {
+        try {
+            restTemplate.put(gatewayUrl + "/api/transactions/" + transaction.getId(), transaction);
+        } catch (RestClientException e) {
+            log.error("Errore update: {}", e.getMessage());
+        }
+        return "redirect:/transactions";
+    }
+
+    private void loadFinancialReport(Model model) {
+        try {
+            FinancialReport report = restTemplate.getForObject(gatewayUrl + "/api/analytics/report", FinancialReport.class);
+            model.addAttribute("report", report != null ? report : new FinancialReport());
+        } catch (RestClientException e) {
+            model.addAttribute("report", new FinancialReport());
+            model.addAttribute("error", "Servizio Analytics non disponibile.");
+        }
+    }
+
+    private void loadTransactionsList(Model model) {
+        try {
+            ResponseEntity<List<ParsedTransaction>> response = restTemplate.exchange(
+                    gatewayUrl + "/api/transactions",
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<List<ParsedTransaction>>() {}
+            );
+            
+            List<ParsedTransaction> list = response.getBody() != null ? response.getBody() : new ArrayList<>();
+
+            list.sort((t1, t2) -> {
+                if (t1.getId() == null || t2.getId() == null) return 0;
+                return t2.getId().compareTo(t1.getId());
+            });
+
+            model.addAttribute("transactions", list);
+
+        } catch (RestClientException e) {
+            model.addAttribute("transactions", Collections.emptyList());
+        }
+    }
 }
