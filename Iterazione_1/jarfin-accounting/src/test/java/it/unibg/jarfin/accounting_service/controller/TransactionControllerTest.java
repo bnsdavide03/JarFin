@@ -80,8 +80,7 @@ class TransactionControllerTest {
 
     @Test
     @DisplayName("POST /api/transactions - Dovrebbe ritornare 201 Created e Location Header")
-    void create_ShouldReturnCreatedAndLocationHeader() throws Exception {
-        // Mocking
+    void createTest() throws Exception {
         when(mapper.toEntity(any(TransactionRequest.class))).thenReturn(entity);
         when(service.saveTransaction(any(Transaction.class))).thenReturn(entity);
         when(mapper.toResponse(any(Transaction.class))).thenReturn(responseDto);
@@ -94,14 +93,13 @@ class TransactionControllerTest {
                 
                 .andExpect(header().string("Location", containsString("/api/transactions/1")))
                 
-                // Verifica Body JSON
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.description").value("Test JUnit"));
     }
 
     @Test
     @DisplayName("GET /api/transactions - Dovrebbe ritornare lista di transazioni")
-    void findAll_ShouldReturnList() throws Exception {
+    void findAllTest() throws Exception {
         List<Transaction> transactions = Collections.singletonList(entity);
         
         when(service.getAllTransactions()).thenReturn(transactions);
@@ -116,7 +114,7 @@ class TransactionControllerTest {
 
     @Test
     @DisplayName("GET /api/transactions/{id} - Dovrebbe ritornare singola transazione")
-    void getById_ShouldReturnTransaction() throws Exception {
+    void getByIdTest() throws Exception {
         Long id = 1L;
         when(service.getTransactionById(id)).thenReturn(entity);
         when(mapper.toResponse(entity)).thenReturn(responseDto);
@@ -129,7 +127,7 @@ class TransactionControllerTest {
 
     @Test
     @DisplayName("PUT /api/transactions/{id} - Dovrebbe aggiornare e ritornare 200 OK")
-    void update_ShouldReturnUpdatedTransaction() throws Exception {
+    void updateTest() throws Exception {
         Long id = 1L;
         
         when(mapper.toEntity(any(TransactionRequest.class))).thenReturn(entity);
@@ -145,7 +143,7 @@ class TransactionControllerTest {
 
     @Test
     @DisplayName("DELETE /api/transactions/{id} - Dovrebbe ritornare 204 No Content")
-    void delete_ShouldReturnNoContent() throws Exception {
+    void deleteTest() throws Exception {
         Long id = 1L;
         doNothing().when(service).deleteTransaction(id);
 
@@ -157,7 +155,7 @@ class TransactionControllerTest {
     
     @Test
     @DisplayName("POST /api/transactions - Validazione input errato (Amount null)")
-    void create_ShouldReturnBadRequest_WhenInvalidInput() throws Exception {
+    void createInvalidInputTest() throws Exception {
         requestDto.setAmount(null);
 
         mockMvc.perform(post("/api/transactions")
