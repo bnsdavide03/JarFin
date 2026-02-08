@@ -16,6 +16,8 @@
             box-sizing: border-box;
         }
 
+        
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #f0f2f5;
@@ -793,7 +795,7 @@
 
         .reports-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+            box-shadow: 0 8px 20px rgba(89, 88, 100, 0.3);
             color: white;
         }
 
@@ -979,6 +981,22 @@
                 width: 4px;
             }
         }
+
+        #alertLevel.text-success {
+            color: #10b981 !important;
+        }
+
+        #alertLevel.text-warning {
+            color: #f59e0b !important;
+        }
+
+        #alertLevel.text-danger {
+            color: #ef4444 !important;
+        }
+
+        #alertLevel.text-secondary {
+            color: #6b7280 !important;
+        }
     </style>
 </head>
 <body>
@@ -1033,9 +1051,6 @@
                 <button class="btn-icon" onclick="showReportsModal()" title="Report Mensili">
                     <i class="fa-solid fa-chart-line"></i>
                 </button>
-                <a href="/transactions" class="btn-icon" title="Tutte le transazioni">
-                    <i class="fa-solid fa-list"></i>
-                </a>
             </div>
         </div>
 
@@ -1097,7 +1112,10 @@
                     </div>
                 </div>
                 <div class="mt-3 text-center">
-                    <small class="text-muted">Status: <strong id="alertLevel" th:text="${report.alertLevel}">NORMAL</strong></small>
+                    <small class="text-muted">Status: </small><strong id="alertLevel" 
+                        class="fw-bold"
+                        th:text="${report.alertLevel}"
+                        th:classappend="${report.alertLevel == 'GREEN'} ? 'text-success' : (${report.alertLevel == 'YELLOW'} ? 'text-warning' : (${report.alertLevel == 'RED'} ? 'text-danger' : 'text-secondary'))">NORMAL</strong>
                 </div>
             </div>
 
@@ -1346,6 +1364,8 @@
         let isJarfinActivated = false;
         let silenceTimer;
         let reportsModalInstance;
+        let cooldownTimer;
+        let inCooldown = false;
 
         const WAKE_WORDS = ["johnny", "jonny", "gionni", "gianni", "joni", "jarfin", "giammi", "gio", "jo", "ehi"];
         const STOP_WORDS = ["stop", "basta", "grazie", "chiudi", "annulla", "niente", "a posto", "silenzio", "dormi"];
@@ -1477,7 +1497,7 @@
                             if (transcript.length > 1) {
                                 processVoiceCommand(transcript);
                             }
-                        }, 800);
+                        }, 1500);
                     } else if (interim.length > 0) {
 
                         console.log("Parlando...");
@@ -1487,7 +1507,7 @@
                         silenceTimer = setTimeout(() => {
                             console.log("Timeout 5s - chiusura");
                             closeOverlay();
-                        }, 5000);
+                        }, 10000);
                     }
                 }
             };
@@ -1525,7 +1545,7 @@
         }
 
         async function activateJohnny() {
-            if(isJarfinActivated) return;
+            if(isJarfinActivated || inCooldown) return;
             
             isJarfinActivated = true;
             document.getElementById('voiceButton').classList.add('listening');
@@ -1541,7 +1561,7 @@
             silenceTimer = setTimeout(() => {
                 console.log("Timeout 5s dopo attivazione - chiusura overlay");
                 closeOverlay();
-            }, 5000);
+            }, 10000);
         }
 
         function processVoiceCommand(text) {
@@ -1614,10 +1634,18 @@
             isJarfinActivated = false;
             lastTranscript = "";
             clearTimeout(silenceTimer);
+            inCooldown = true;
+            clearTimeout(cooldownTimer);
+            cooldownTimer = setTimeout(() => {
+                inCooldown = false;
+                console.log("Cooldown terminato - posso riattivare");
+            }, 3000);
             document.getElementById('voiceButton').classList.remove('listening');
             document.getElementById('voiceOverlay').classList.remove('active');
             document.getElementById('overlayTranscript').innerText = 'Sto ascoltando...';
             updateVoiceStatus("In ascolto...");
+
+            console.log("Overlay chiuso - cooldown attivo per 3 secondi");
         }
 
         function updateDashboard() {
