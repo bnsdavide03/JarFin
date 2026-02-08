@@ -1,0 +1,245 @@
+\chapter{Iterazione 3: API Gateway, Web UI e NLU Engine}
+\label{chap:iterazione3}
+
+\section{Obiettivi e Integrazione di Sistema}
+
+L'Iterazione 3 segna il passaggio da una collezione di microservizi backend disgiunti a una piattaforma applicativa integrata. L'obiettivo primario è stato chiudere il cerchio architetturale, fornendo all'utente un punto di accesso unico e un'interfaccia naturale per interagire con i dati finanziari.
+
+Le attività si sono concentrate su tre pilastri fondamentali:
+\begin{itemize}
+    \item \textbf{Centralizzazione dell'accesso}: Introduzione di un API Gateway per astrarre la topologia dei microservizi e risolvere le problematiche di CORS.
+    \item \textbf{Interfaccia Utente (Web UI)}: Sviluppo di un frontend server-side (Thymeleaf) integrato con le API di riconoscimento vocale del browser.
+    \item \textbf{Intelligenza Semantica (NLU)}: Implementazione di un motore deterministico per la traduzione del linguaggio naturale in comandi transazionali strutturati.
+\end{itemize}
+
+\section{API Gateway: Centralizzazione del Routing}
+
+Nelle iterazioni precedenti, i servizi rispondevano su porte diverse (\texttt{8081}, \texttt{8082}), costringendo il client a conoscere la topologia della rete. Per disaccoppiare il frontend dal backend, è stato introdotto il microservizio \texttt{jarfin-api-gateway}, basato su Spring Cloud Gateway.
+
+\subsection{Configurazione Dichiarativa delle Rotte}
+Il Gateway espone un unico entry-point sulla porta 8080 e instrada le richieste ai servizi interni tramite regole definite nel file \texttt{application.yml}.
+
+\begin{lstlisting}[language=yaml, label={lst:gateway_yml}]
+server:
+  port: 8080
+spring:
+  cloud:
+    gateway:
+      routes:
+        # Rotta verso il Core Accounting
+        - id: accounting-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/transactions/**
+
+        # Rotta verso la Business Intelligence
+        - id: analytics-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/analytics/**
+
+        # Rotta verso il Frontend (Web UI)
+        - id: web-ui
+          uri: http://localhost:8083
+          predicates:
+            - Path=/**
+\end{lstlisting}
+
+Questa configurazione implementa il pattern \textbf{Reverse Proxy}: il browser dialoga esclusivamente con \texttt{localhost:8080}, ignorando l'esistenza dei servizi sottostanti. Questo semplifica la gestione della sicurezza e centralizza il logging delle richieste.
+
+\section{Web UI e Riconoscimento Vocale Ibrido}
+
+L'interfaccia utente è stata sviluppata utilizzando \textbf{Thymeleaf} e \textbf{Bootstrap 5}, servita dal microservizio \texttt{jarfin-web-ui}.
+Una scelta architetturale critica ha riguardato l'implementazione del riconoscimento vocale (Speech-to-Text).
+
+\subsection{Strategia "Edge AI" (Client-Side Processing)}
+Invece di inviare flussi audio pesanti al server (che richiederebbero larghezza di banda e costose GPU per la trascrizione), si è optato per l'utilizzo delle \textbf{Web Speech API} native del browser.
+La trascrizione avviene localmente sul dispositivo dell'utente (Edge), e solo il testo risultante viene inviato al backend.
+
+Nel file \texttt{index.html}, la logica JavaScript gestisce il ciclo di vita del microfono e l'attivazione tramite "Wake Word" ("Johnny"):
+
+\begin{lstlisting}[language=JavaScript, label={lst:js_stt}]
+recognition.onresult = (event) => {
+    // Concatenazione risultati parziali
+    let transcript = "";
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) 
+            transcript += event.results[i][0].transcript.toLowerCase();
+    }
+    
+    // Rilevamento Wake Word locale
+    if (!isJarfinActivated && WAKE_WORDS.some(w => transcript.includes(w))) {
+        activateJohnny(); // Attiva la UI di ascolto
+    } 
+    // Invio comando al backend
+    else if (isJarfinActivated) {
+        sendToBackend(transcript.trim());
+    }
+};
+\end{lstlisting}
+
+Questa architettura ibrida garantisce \textbf{latenza zero} nell'attivazione e maggiore \textbf{privacy}, poiché l'audio raw non lascia mai il dispositivo dell'utente.
+
+\newpage
+
+% SONO ARRIVATO QUA
+
+\section{Natural Language Understanding (NLU) Engine}
+
+Il cuore intelligente del sistema è il servizio \texttt{NaturalLanguageService}. A differenza degli approcci basati su LLM (Large Language Models), che sono probabilisticamente corretti ma lenti e costosi, JarFin adotta un motore **deterministico basato su regole**.
+
+Questa scelta garantisce:
+\begin{itemize}
+    \item \textbf{Velocità}: Elaborazione in $O(N)$.
+    \item \textbf{Affidabilità}: A parità di input, l'output è sempre identico.
+    \item \textbf{Interpretabilità}: Ogni estrazione è giustificata da una regola regex o keyword.
+\end{itemize}
+
+\subsection{Implementazione: Regex e Keyword Mapping}
+Il servizio utilizza espressioni regolari pre-compilate per l'estrazione di importi e ID, e una mappa hash per la classificazione semantica.
+
+\begin{lstlisting}[language=Java, caption={Costanti e Pattern nel NaturalLanguageService}, label={lst:nlu_constants}]
+private static final Pattern NUMBER_PATTERN = 
+    Pattern.compile("(\\d+([.,]\\d{1,2})?)"); // Supporta 10.50 e 10,50
+    
+private static final Pattern DELETE_CMD = 
+    Pattern.compile("(elimina|cancella|rimuovi|togli)", Pattern.CASE_INSENSITIVE);
+
+private static final Map<String, String> CATEGORY_MAP = new HashMap<>();
+static {
+    CATEGORY_MAP.put("mcdonald", "Ristorante");
+    CATEGORY_MAP.put("benzina", "Trasporti");
+    // ... mappatura estesa di oltre 50 keyword
+}
+\end{lstlisting}
+
+\section{Design in Piccolo: Analisi dell'Algoritmo NLU}
+
+L'algoritmo di parsing (\texttt{parse}) trasforma una stringa naturale non strutturata in un oggetto \texttt{ParsedTransaction} pronto per il database.
+
+\subsection{Pseudocodice Formale}
+L'algoritmo segue una pipeline sequenziale di estrazione e pulizia.
+
+\begin{lstlisting}[mathescape=true, caption={Pseudocodice Parser NLU}, label={lst:pseudocode_nlu}, basicstyle=\small\ttfamily]
+Algoritmo ParseNaturalLanguage(text):
+    Input: Stringa $S$ (comando utente)
+    Output: Oggetto $T$ (Transazione strutturata) o NULL
+
+    // 1. Pre-validazione
+    IF $S$ is NULL OR length($S$) < 2 OR contains(STOP_WORDS, $S$) THEN
+        RETURN NULL
+    END IF
+    $S_{lower} \leftarrow$ ToLowerCase($S$)
+
+    // 2. Identificazione Intento (Command Classification)
+    IF Match($P_{delete}$, $S$) THEN 
+        $T.command \leftarrow$ DELETE
+        $T.targetId \leftarrow$ ExtractId($S$)
+    ELSE IF Match($P_{update}$, $S$) THEN
+        $T.command \leftarrow$ UPDATE
+        $T.targetId \leftarrow$ ExtractId($S$)
+    ELSE
+        $T.command \leftarrow$ CREATE
+        $T.date \leftarrow$ CurrentDate()
+    END IF
+
+    // 3. Estrazione Importo (Regex)
+    Match $M_{num} \leftarrow$ Find($P_{number}$, $S$ without IDs)
+    IF $M_{num}$ found THEN
+        $T.amount \leftarrow$ ParseDecimal($M_{num}.value$)
+    END IF
+
+    // 4. Classificazione Categoria (Keyword Matching)
+    FOR each ($Key$, $Cat$) in $Map_{categories}$ DO:
+        IF $S_{lower}$ contains $Key$ THEN
+            $T.category \leftarrow Cat$
+            BREAK // Match trovato (Priority First)
+        END IF
+    END FOR
+
+    // 5. Pulizia Descrizione (Stop-word Removal)
+    $T.description \leftarrow$ CleanText($S_{lower}$) 
+    IF $T.description$ is empty THEN
+        $T.description \leftarrow T.category$ OR "Generale"
+    END IF
+
+    RETURN $T$
+\end{lstlisting}
+
+\subsection{Analisi della Complessità Computazionale}
+Analizziamo il costo temporale $T(n)$ dell'algoritmo, dove $n$ è la lunghezza della stringa di input.
+
+\begin{enumerate}
+    \item \textbf{Regex Matching}: L'applicazione di pattern regex semplici (senza backtracking annidato o ricorsivo) su una stringa di lunghezza $n$ ha complessità lineare $O(n)$.
+    \item \textbf{Keyword Matching}: L'algoritmo itera su una mappa di $K$ parole chiave. Per ogni parola chiave, l'operazione `contains` ha un costo proporzionale alla lunghezza della stringa.
+    \[ T_{match} \approx K \cdot O(n) \]
+    Poiché $K$ è una costante di configurazione (circa 50 entry) e non dipende dall'input utente, asintoticamente questo termine si riduce a $O(n)$.
+    \item \textbf{Clean Text}: La rimozione delle stop-word avviene tramite una serie di \texttt{replaceAll}, ciascuno dei quali scorre la stringa una volta.
+    \[ T_{clean} = \sum_{regex} O(n) \approx C \cdot O(n) \]
+\end{enumerate}
+
+\textbf{Complessità Totale}:
+\[ T(n) = O(n) + K \cdot O(n) + C \cdot O(n) \]
+\[ T(n) = O(n) \]
+
+L'algoritmo è **Lineare**. Questo garantisce che il tempo di elaborazione sia trascurabile (< 1ms) per frasi di lunghezza standard (es. 10-100 caratteri), rendendo l'esperienza utente percepita come "istantanea".
+
+\section{Orchestrazione: CommandController}
+
+Il \texttt{CommandController} funge da orchestratore backend. Riceve il testo dal frontend, invoca il servizio NLU e instrada il comando strutturato verso l'API Gateway.
+
+Il metodo \texttt{processVoiceCommand} gestisce la logica di fallback e l'invio al Core Accounting:
+
+\begin{lstlisting}[language=Java, caption={Processamento comando vocale}, label={lst:command_controller}]
+@PostMapping("/process")
+public ResponseEntity<?> processVoiceCommand(@RequestBody Map<String, String> payload) {
+    String text = payload.get("text");
+    ParsedTransaction parsed = nluService.parse(text);
+
+    // Instradamento dinamico basato sul tipo di comando
+    switch (parsed.getCommandType()) {
+        case CREATE:
+            // Fallback: se la categoria non e' dedotta, usa "Altro"
+            if (parsed.getCategory() == null) parsed.setCategory("Altro");
+            if (parsed.getAmount() == null) parsed.setAmount(BigDecimal.ZERO);
+            
+            // Chiamata all'Accounting Service via Gateway
+            restTemplate.postForEntity(gatewayUrl + "/api/transactions", 
+                                       parsed, Object.class);
+            break;
+            
+        case DELETE:
+            // Logica di eliminazione transazione
+            break;
+    }
+    return ResponseEntity.ok(Map.of("message", "Salvato"));
+}
+\end{lstlisting}
+
+\section{Strategia di Validazione e Testing}
+
+Allo stato attuale dello sviluppo, la validazione dell'Iterazione 3 è in fase di completamento. Di seguito viene illustrata la **Strategia di Test** progettata per garantire la robustezza dei nuovi componenti integrati.
+
+\subsection{Unit Testing: NLU Engine}
+L'obiettivo primario è verificare la precisione dell'algoritmo di parsing. Sono previsti test parametrizzati con JUnit 5 per coprire i seguenti scenari:
+\begin{itemize}
+    \item \textbf{Scenario Base}: Input "Ho speso 10 euro per pizza" $\rightarrow$ \texttt{Amount=10.00}, \texttt{Category=Ristorante}.
+    \item \textbf{Edge Case}: Input con separatori decimali diversi ("10.50", "10,50") o valute miste.
+    \item \textbf{Comandi Complessi}: "Elimina la transazione 42" $\rightarrow$ \texttt{Command=DELETE}, \texttt{TargetId=42}.
+    \item \textbf{Input "Sporchi"}: Frasi lunghe con molte stop-word per verificare l'efficacia del metodo \texttt{cleanText}.
+\end{itemize}
+
+\subsection{Integration Testing: Gateway e Controller}
+Per validare l'orchestrazione, verranno eseguiti test di integrazione che coinvolgono il container del Gateway:
+\begin{itemize}
+    \item \textbf{Routing Test}: Verifica che le chiamate a \texttt{localhost:8080/api/transactions} vengano correttamente inoltrate al servizio Accounting.
+    \item \textbf{Flow Test}: Simulazione di una chiamata POST al \texttt{CommandController} con un payload testuale, verificando che l'Accounting Service riceva correttamente l'oggetto JSON strutturato.
+\end{itemize}
+
+Questa fase di Quality Assurance, attualmente in corso, certificherà la stabilità della piattaforma prima del rilascio finale.
+
+\section{Conclusione Iterazione 3}
+
+L'Iterazione 3 ha completato l'architettura JarFin.
+L'API Gateway ha fornito un layer di astrazione essenziale per la sicurezza e il routing.
+Il motore NLU, grazie alla sua natura algoritmica $O(n)$, offre un'alternativa robusta e performante all'IA generativa per compiti strutturati, garantendo un'esperienza utente fluida e priva di latenze significative.
