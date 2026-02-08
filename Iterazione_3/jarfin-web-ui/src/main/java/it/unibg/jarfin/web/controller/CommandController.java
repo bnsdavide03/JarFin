@@ -25,6 +25,8 @@ public class CommandController {
 
     private final NaturalLanguageService nluService;
     private final RestTemplate restTemplate;
+    
+    private String mex = "message";
 
     @Value("${api.gateway.url:http://localhost:8080}")
     private String gatewayUrl;
@@ -43,7 +45,7 @@ public class CommandController {
             ParsedTransaction parsed = nluService.parse(text);
             
             if (parsed == null || (parsed.getAmount() == null && parsed.getCommandType() == CommandType.CREATE)) {
-                 return ResponseEntity.ok(Map.of("status", "ignored", "message", "Ignorato"));
+                 return ResponseEntity.ok(Map.of("status", "ignored", mex, "Ignorato"));
             }
 
             String baseUrl = gatewayUrl + "/api/transactions";
@@ -60,7 +62,7 @@ public class CommandController {
                     HttpEntity<ParsedTransaction> request = new HttpEntity<>(parsed, headers);
                     restTemplate.postForEntity(baseUrl, request, Object.class);
                     
-                    return ResponseEntity.ok(Map.of("message", "Salvato", "amount", parsed.getAmount(), "category", parsed.getCategory()));
+                    return ResponseEntity.ok(Map.of(mex, "Salvato", "amount", parsed.getAmount(), "category", parsed.getCategory()));
 
                 case UPDATE:
                     if (parsed.getTargetId() == null) return ResponseEntity.badRequest().body("Specifica l'ID");
@@ -83,7 +85,7 @@ public class CommandController {
                     HttpEntity<ParsedTransaction> requestUp = new HttpEntity<>(existing, headers);
                     restTemplate.put(resourceUrl, requestUp);
                     
-                    return ResponseEntity.ok(Map.of("message", "Aggiornato ID " + parsed.getTargetId(), "amount", existing.getAmount(), "category", "Modifica salvata"));
+                    return ResponseEntity.ok(Map.of(mex, "Aggiornato ID " + parsed.getTargetId(), "amount", existing.getAmount(), "category", "Modifica salvata"));
 
                 case DELETE:
                     Long idToDelete = parsed.getTargetId();
@@ -93,10 +95,10 @@ public class CommandController {
                     if (idToDelete == null) return ResponseEntity.badRequest().body("Cosa elimino?");
 
                     restTemplate.delete(baseUrl + "/" + idToDelete);
-                    return ResponseEntity.ok(Map.of("message", "Eliminato ID " + idToDelete));
+                    return ResponseEntity.ok(Map.of(mex, "Eliminato ID " + idToDelete));
 
                 default:
-                    return ResponseEntity.badRequest().body("Comando sconosciuto");
+                    return ResponseEntity.status(400).body("Comando sconosciuto");
             }
 
         } catch (Exception e) {

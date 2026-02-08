@@ -33,11 +33,11 @@ class AnalyticsServiceTest {
     @InjectMocks
     private AnalyticsService analyticsService;
 
-    private final String FAKE_URL = "http://fake-accounting-service/api/transactions";
+    private final String fakeUrl = "http://fake-accounting-service/api/transactions";
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(analyticsService, "accountingUrl", FAKE_URL);
+        ReflectionTestUtils.setField(analyticsService, "accountingUrl", fakeUrl);
     }
 
     @Test
@@ -54,7 +54,7 @@ class AnalyticsServiceTest {
 
         TransactionDTO[] mockResponse = {income, expense};
 
-        when(restTemplate.getForObject(eq(FAKE_URL), eq(TransactionDTO[].class)))
+        when(restTemplate.getForObject(fakeUrl, eq(TransactionDTO[].class)))
                 .thenReturn(mockResponse);
 
         FinancialReportDTO report = analyticsService.generateReport();

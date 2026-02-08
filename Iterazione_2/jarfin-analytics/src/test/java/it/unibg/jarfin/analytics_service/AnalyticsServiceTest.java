@@ -24,7 +24,7 @@ import it.unibg.jarfin.analytics_service.dto.TransactionType;
 import it.unibg.jarfin.analytics_service.service.AnalyticsService;
 
 @ExtendWith(MockitoExtension.class)
-public class AnalyticsServiceTest {
+class AnalyticsServiceTest {
 
     @Mock
     private RestTemplate restTemplate;
@@ -33,12 +33,12 @@ public class AnalyticsServiceTest {
     private AnalyticsService service;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         ReflectionTestUtils.setField(service, "accountingUrl", "http://mock-url");
     }
 
     @Test
-    public void testGenerateReport_Success() {
+    void testGenerateReport_Success() {
         TransactionDTO t1 = new TransactionDTO();
         t1.setAmount(new BigDecimal("1000.00"));
         t1.setCategory("Stipendio");

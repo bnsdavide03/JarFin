@@ -26,7 +26,7 @@ import it.unibg.jarfin.accounting_service.model.Transaction;
 import it.unibg.jarfin.accounting_service.repository.TransactionRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class TransactionServiceTest {
+class TransactionServiceTest {
 
     @Mock
     private TransactionRepository repository;
@@ -35,7 +35,7 @@ public class TransactionServiceTest {
     private TransactionService service;
 
     @Test
-    public void testSaveTransaction() {
+    void testSaveTransaction() {
         Transaction inputTransaction = new Transaction();
         inputTransaction.setAmount(new BigDecimal("100.00"));
         inputTransaction.setDescription("Spesa Test");
@@ -57,7 +57,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void testDeleteTransaction() {
+    void testDeleteTransaction() {
         Long idToDelete = 1L;
         when(repository.existsById(idToDelete)).thenReturn(true);
 
@@ -67,7 +67,7 @@ public class TransactionServiceTest {
     }
     
     @Test
-    public void testGetAllTransactions() {
+    void testGetAllTransactions() {
         Transaction t1 = new Transaction();
         t1.setId(1L);
         t1.setAmount(new BigDecimal("50.00"));
@@ -94,7 +94,7 @@ public class TransactionServiceTest {
     }
     
     @Test
-    public void testDeleteTransaction_NotFound() {
+    void testDeleteTransaction_NotFound() {
         Long idNonEsistente = 99L;
         when(repository.existsById(idNonEsistente)).thenReturn(false);
 
@@ -106,7 +106,7 @@ public class TransactionServiceTest {
     }
     
     @Test
-    public void testGetTransactionById_Success() {
+    void testGetTransactionById_Success() {
         Long id = 1L;
         Transaction foundTransaction = new Transaction();
         foundTransaction.setId(id);
@@ -124,7 +124,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void testGetTransactionById_NotFound() {
+    void testGetTransactionById_NotFound() {
         Long idNonEsistente = 999L;
         
         when(repository.findById(idNonEsistente)).thenReturn(Optional.empty());
@@ -137,7 +137,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void testUpdateTransaction_Success() {
+    void testUpdateTransaction_Success() {
         Long id = 1L;
 
         Transaction existingTransaction = new Transaction();
@@ -168,7 +168,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void testUpdateTransaction_NotFound() {
+    void testUpdateTransaction_NotFound() {
         Long idNonEsistente = 999L;
         Transaction updateDetails = new Transaction();
 

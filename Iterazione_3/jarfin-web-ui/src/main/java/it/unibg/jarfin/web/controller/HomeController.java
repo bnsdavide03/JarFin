@@ -24,6 +24,8 @@ import java.util.List;
 public class HomeController {
 
     private final RestTemplate restTemplate;
+    
+    private String trans = "transactions";
 
     @Value("${api.gateway.url:http://localhost:8080}")
     private String gatewayUrl;
@@ -37,7 +39,7 @@ public class HomeController {
     @GetMapping("/transactions")
     public String allTransactions(Model model) {
         loadTransactionsList(model);
-        return "transactions";
+        return trans;
     }
 
     @GetMapping("/delete/{id}")
@@ -86,10 +88,10 @@ public class HomeController {
                 return t2.getId().compareTo(t1.getId());
             });
 
-            model.addAttribute("transactions", list);
+            model.addAttribute(trans, list);
 
         } catch (RestClientException e) {
-            model.addAttribute("transactions", Collections.emptyList());
+            model.addAttribute(trans, Collections.emptyList());
         }
     }
 }

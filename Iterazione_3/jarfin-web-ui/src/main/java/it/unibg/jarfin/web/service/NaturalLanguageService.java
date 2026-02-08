@@ -15,6 +15,17 @@ import it.unibg.jarfin.web.dto.CommandType;
 
 @Service
 public class NaturalLanguageService {
+	
+	public static final String RISTORANTE = "Ristorante";
+	public static final String BAR_COLAZIONE = "Bar/Colazione";
+	public static final String SUPERMERCATO = "Supermercato";
+	public static final String TRASPORTI = "Trasporti";
+	public static final String BOLLETTE = "Bollette";
+	public static final String CASA = "Casa";
+	public static final String SVAGO = "Svago";
+	public static final String SHOPPING = "Shopping";
+	public static final String SALUTE = "Salute";
+	
 
     private static final Pattern NUMBER_PATTERN = Pattern.compile("(\\d+([.,]\\d{1,2})?)");
     private static final Pattern DELETE_CMD = Pattern.compile("(elimina|cancella|rimuovi|togli)", Pattern.CASE_INSENSITIVE);
@@ -25,71 +36,71 @@ public class NaturalLanguageService {
     private static final Map<String, String> CATEGORY_MAP = new HashMap<>();
 
     static {
-        CATEGORY_MAP.put("mcdonald", "Ristorante");
-        CATEGORY_MAP.put("burger", "Ristorante");
-        CATEGORY_MAP.put("pizza", "Ristorante");
-        CATEGORY_MAP.put("sushi", "Ristorante");
-        CATEGORY_MAP.put("ristorante", "Ristorante");
-        CATEGORY_MAP.put("trattoria", "Ristorante");
-        CATEGORY_MAP.put("bar", "Bar/Colazione");
-        CATEGORY_MAP.put("colazione", "Bar/Colazione");
-        CATEGORY_MAP.put("aperitivo", "Bar/Colazione");
-        CATEGORY_MAP.put("caffè", "Bar/Colazione");
+        CATEGORY_MAP.put("mcdonald", RISTORANTE);
+        CATEGORY_MAP.put("burger", RISTORANTE);
+        CATEGORY_MAP.put("pizza", RISTORANTE);
+        CATEGORY_MAP.put("sushi", RISTORANTE);
+        CATEGORY_MAP.put("ristorante", RISTORANTE);
+        CATEGORY_MAP.put("trattoria", RISTORANTE);
+        CATEGORY_MAP.put("bar", BAR_COLAZIONE);
+        CATEGORY_MAP.put("colazione", BAR_COLAZIONE);
+        CATEGORY_MAP.put("aperitivo", BAR_COLAZIONE);
+        CATEGORY_MAP.put("caffè", BAR_COLAZIONE);
         
-        CATEGORY_MAP.put("esselunga", "Supermercato");
-        CATEGORY_MAP.put("coop", "Supermercato");
-        CATEGORY_MAP.put("lidl", "Supermercato");
-        CATEGORY_MAP.put("conad", "Supermercato");
-        CATEGORY_MAP.put("carrefour", "Supermercato");
-        CATEGORY_MAP.put("eurospin", "Supermercato");
-        CATEGORY_MAP.put("spesa", "Supermercato");
-        CATEGORY_MAP.put("supermercato", "Supermercato");
-        CATEGORY_MAP.put("alimentari", "Supermercato");
-        CATEGORY_MAP.put("ortofrutta", "Supermercato");
+        CATEGORY_MAP.put("esselunga", SUPERMERCATO);
+        CATEGORY_MAP.put("coop", SUPERMERCATO);
+        CATEGORY_MAP.put("lidl", SUPERMERCATO);
+        CATEGORY_MAP.put("conad", SUPERMERCATO);
+        CATEGORY_MAP.put("carrefour", SUPERMERCATO);
+        CATEGORY_MAP.put("eurospin", SUPERMERCATO);
+        CATEGORY_MAP.put("spesa", SUPERMERCATO);
+        CATEGORY_MAP.put("supermercato", SUPERMERCATO);
+        CATEGORY_MAP.put("alimentari", SUPERMERCATO);
+        CATEGORY_MAP.put("ortofrutta", SUPERMERCATO);
 
-        CATEGORY_MAP.put("benzina", "Trasporti");
-        CATEGORY_MAP.put("diesel", "Trasporti");
-        CATEGORY_MAP.put("treno", "Trasporti");
-        CATEGORY_MAP.put("trenitalia", "Trasporti");
-        CATEGORY_MAP.put("italo", "Trasporti");
-        CATEGORY_MAP.put("bus", "Trasporti");
-        CATEGORY_MAP.put("autostrada", "Trasporti");
-        CATEGORY_MAP.put("pedaggio", "Trasporti");
-        CATEGORY_MAP.put("parcheggio", "Trasporti");
-        CATEGORY_MAP.put("uber", "Trasporti");
-        CATEGORY_MAP.put("taxi", "Trasporti");
-        CATEGORY_MAP.put("aereo", "Trasporti");
-        CATEGORY_MAP.put("ryanair", "Trasporti");
+        CATEGORY_MAP.put("benzina", TRASPORTI);
+        CATEGORY_MAP.put("diesel", TRASPORTI);
+        CATEGORY_MAP.put("treno", TRASPORTI);
+        CATEGORY_MAP.put("trenitalia", TRASPORTI);
+        CATEGORY_MAP.put("italo", TRASPORTI);
+        CATEGORY_MAP.put("bus", TRASPORTI);
+        CATEGORY_MAP.put("autostrada", TRASPORTI);
+        CATEGORY_MAP.put("pedaggio", TRASPORTI);
+        CATEGORY_MAP.put("parcheggio", TRASPORTI);
+        CATEGORY_MAP.put("uber", TRASPORTI);
+        CATEGORY_MAP.put("taxi", TRASPORTI);
+        CATEGORY_MAP.put("aereo", TRASPORTI);
+        CATEGORY_MAP.put("ryanair", TRASPORTI);
 
-        CATEGORY_MAP.put("luce", "Bollette");
-        CATEGORY_MAP.put("gas", "Bollette");
-        CATEGORY_MAP.put("enel", "Bollette");
-        CATEGORY_MAP.put("a2a", "Bollette");
-        CATEGORY_MAP.put("internet", "Bollette");
-        CATEGORY_MAP.put("wifi", "Bollette");
-        CATEGORY_MAP.put("vodafone", "Bollette");
-        CATEGORY_MAP.put("tim", "Bollette");
-        CATEGORY_MAP.put("affitto", "Casa");
-        CATEGORY_MAP.put("mutuo", "Casa");
-        CATEGORY_MAP.put("ikea", "Casa");
-        CATEGORY_MAP.put("leroy", "Casa");
+        CATEGORY_MAP.put("luce", BOLLETTE);
+        CATEGORY_MAP.put("gas", BOLLETTE);
+        CATEGORY_MAP.put("enel", BOLLETTE);
+        CATEGORY_MAP.put("a2a", BOLLETTE);
+        CATEGORY_MAP.put("internet", BOLLETTE);
+        CATEGORY_MAP.put("wifi", BOLLETTE);
+        CATEGORY_MAP.put("vodafone", BOLLETTE);
+        CATEGORY_MAP.put("tim", BOLLETTE);
+        CATEGORY_MAP.put("affitto", CASA);
+        CATEGORY_MAP.put("mutuo", CASA);
+        CATEGORY_MAP.put("ikea", CASA);
+        CATEGORY_MAP.put("leroy", CASA);
         
-        CATEGORY_MAP.put("netflix", "Svago");
-        CATEGORY_MAP.put("spotify", "Svago");
-        CATEGORY_MAP.put("cinema", "Svago");
-        CATEGORY_MAP.put("amazon", "Shopping");
-        CATEGORY_MAP.put("zalando", "Shopping");
-        CATEGORY_MAP.put("vinted", "Shopping");
-        CATEGORY_MAP.put("shein", "Shopping");
-        CATEGORY_MAP.put("zara", "Shopping");
-        CATEGORY_MAP.put("h&m", "Shopping");
+        CATEGORY_MAP.put("netflix", SVAGO);
+        CATEGORY_MAP.put("spotify", SVAGO);
+        CATEGORY_MAP.put("cinema", SVAGO);
+        CATEGORY_MAP.put("amazon", SHOPPING);
+        CATEGORY_MAP.put("zalando", SHOPPING);
+        CATEGORY_MAP.put("vinted", SHOPPING);
+        CATEGORY_MAP.put("shein", SHOPPING);
+        CATEGORY_MAP.put("zara", SHOPPING);
+        CATEGORY_MAP.put("h&m", SHOPPING);
         CATEGORY_MAP.put("palestra", "Salute/Sport");
         CATEGORY_MAP.put("padel", "Salute/Sport");
         
-        CATEGORY_MAP.put("farmacia", "Salute");
-        CATEGORY_MAP.put("medico", "Salute");
-        CATEGORY_MAP.put("dentista", "Salute");
-        CATEGORY_MAP.put("visita", "Salute");
+        CATEGORY_MAP.put("farmacia", SALUTE);
+        CATEGORY_MAP.put("medico", SALUTE);
+        CATEGORY_MAP.put("dentista", SALUTE);
+        CATEGORY_MAP.put("visita", SALUTE);
         
         CATEGORY_MAP.put("stipendio", "Stipendio");
         CATEGORY_MAP.put("bonifico", "Bonifico");
@@ -147,11 +158,9 @@ public class NaturalLanguageService {
         int maxMatchLength = 0;
 
         for (Map.Entry<String, String> entry : CATEGORY_MAP.entrySet()) {
-            if (lowerCaseText.contains(entry.getKey())) {
-                if (entry.getKey().length() > maxMatchLength) {
-                    foundCategory = entry.getValue();
-                    maxMatchLength = entry.getKey().length();
-                }
+            if (lowerCaseText.contains(entry.getKey()) && entry.getKey().length() > maxMatchLength) {
+                foundCategory = entry.getValue();
+                maxMatchLength = entry.getKey().length();
             }
         }
         result.setCategory(foundCategory);
