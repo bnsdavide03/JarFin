@@ -19,6 +19,8 @@ L'applicazione condivide lo stack base (Java 21, Spring Boot 3.2.0, Lombok) ma i
 \subsection{Configurazione del Client HTTP (RestTemplate)}
 Per comunicare con l'Accounting Service, è stato scelto \textbf{RestTemplate}. Per evitare di istanziare manualmente l'oggetto in ogni classe (anti-pattern), è stato configurato come un Bean gestito dal container di Spring.
 
+\bigskip
+
 \begin{lstlisting}[language=Java, label={lst:resttemplate}]
 @Configuration
 public class RestTemplateConfig {
@@ -33,6 +35,8 @@ Questa scelta permette, in futuro, di iniettare configurazioni globali come time
 \subsection{Externalizzazione delle Dipendenze}
 Un aspetto critico nei sistemi distribuiti è evitare di "scrivere nel codice" gli indirizzi IP o gli URL degli altri servizi (\textit{Hardcoding}).
 Nel file \texttt{application.properties}, l'URL del servizio produttore è parametrizzato:
+
+\bigskip
 
 \begin{lstlisting}[language=bash, label={lst:props}]
 server.port=8082
@@ -53,6 +57,8 @@ Il cuore del servizio è la classe \texttt{AnalyticsService}. Analizziamo le dec
 Prima di eseguire calcoli, è stato necessario definire un contratto dati rigoroso.
 L'uso di \texttt{BigDecimal} è stato confermato per tutti i campi monetari. Inoltre, per gestire la distinzione tra entrate e uscite, si è evitato l'uso di convenzioni fragili (come il segno meno) a favore di un Enum esplicito.
 
+\bigskip
+
 \begin{lstlisting}[language=Java, label={lst:enum}]
 public enum TransactionType {
     INCOME,  // Entrata esplicita
@@ -66,6 +72,8 @@ Il metodo \texttt{generateReport()} implementa l'algoritmo principale. Il suo co
 
 \textbf{Fase 1: Fetching dei Dati}
 Il servizio esegue una chiamata HTTP GET. L'array JSON ricevuto viene automaticamente deserializzato in un array di oggetti \texttt{TransactionDTO}.
+
+\bigskip
 
 \begin{lstlisting}[language=Java, label={lst:fetch}]
 public FinancialReportDTO generateReport() {
@@ -82,6 +90,8 @@ public FinancialReportDTO generateReport() {
 \newpage
 \textbf{Fase 2: Scansione e Accumulo}
 L'algoritmo itera sulla lista una sola volta. Per ogni transazione, verifica il tipo e aggiorna i contatori. Contestualmente, popola una \texttt{HashMap} per raggruppare le spese per categoria.
+
+\bigskip
 
 \begin{lstlisting}[language=Java, caption={Core dell'algoritmo di aggregazione}, label={lst:algo_core}]
 BigDecimal incomes = BigDecimal.ZERO;
@@ -115,6 +125,8 @@ Il cuore dell'Analytics Service è l'algoritmo di elaborazione finanziaria imple
 \subsection{Pseudocodice Formale}
 
 Di seguito viene presentato lo pseudocodice completo dell'algoritmo, che evidenzia la complessità della logica di business implementata.
+
+\bigskip
 
 \begin{lstlisting}[mathescape=true, label={lst:pseudocode_analytics}]
 Algoritmo GenerateFinancialReport(transactions[]):
@@ -215,6 +227,8 @@ Oltre all'aggregazione, il servizio applica logiche di Business Intelligence.
 \subsection{Proiezione Temporale (Stima a fine mese)}
 Per calcolare la stima delle spese (\texttt{projectedMonthlyExpenses}), non è stata utilizzata una costante fissa (es. 30 giorni), ma la lunghezza esatta del mese corrente fornita da \texttt{java.time.LocalDate}.
 
+\bigskip
+
 \begin{lstlisting}[language=Java, label={lst:projection}]
 LocalDate now = LocalDate.now();
 int daysInMonth = now.lengthOfMonth(); // Es. 28, 30 o 31
@@ -231,6 +245,8 @@ Questa attenzione al dettaglio ("Design for Accuracy") evita distorsioni nelle s
 
 \subsection{Alert System (Savings Rate)}
 Il calcolo del livello di allerta implementa una logica a soglie. Il codice gestisce anche i casi limite (divisione per zero se non ci sono entrate).
+
+\bigskip
 
 \begin{lstlisting}[language=Java, caption={Logica di valutazione finanziaria}, label={lst:alert}]
 if (incomes.compareTo(BigDecimal.ZERO) > 0) {
@@ -268,6 +284,8 @@ La classe di test \texttt{AnalyticsServiceTest} utilizza le annotazioni:
 \end{itemize}
 
 Il test verifica la correttezza matematica dell'aggregatore fornendo dati fittizi ("Stubbing"):
+
+\bigskip
 
 \begin{lstlisting}[language=Java, label={lst:mocktest}]
 @Test

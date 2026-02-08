@@ -19,6 +19,8 @@ Nelle iterazioni precedenti, i servizi rispondevano su porte diverse (\texttt{80
 \subsection{Configurazione Dichiarativa delle Rotte}
 Il Gateway espone un unico entry-point sulla porta 8080 e instrada le richieste ai servizi interni tramite regole definite nel file \texttt{application.yml}.
 
+\bigskip
+
 \begin{lstlisting}[language=yaml, label={lst:gateway_yml}]
 server:
   port: 8080
@@ -47,16 +49,67 @@ spring:
 
 Questa configurazione implementa il pattern \textbf{Reverse Proxy}: il browser dialoga esclusivamente con \texttt{localhost:8080}, ignorando l'esistenza dei servizi sottostanti. Questo semplifica la gestione della sicurezza e centralizza il logging delle richieste.
 
-\section{Web UI e Riconoscimento Vocale Ibrido}
+\section{Sviluppo dell'Interfaccia Utente (Web UI)}
 
-L'interfaccia utente è stata sviluppata utilizzando \textbf{Thymeleaf} e \textbf{Bootstrap 5}, servita dal microservizio \texttt{jarfin-web-ui}.
-Una scelta architetturale critica ha riguardato l'implementazione del riconoscimento vocale (Speech-to-Text).
+Il frontend dell'applicazione è stato realizzato utilizzando \textbf{Thymeleaf} come motore di template server-side e \textbf{Bootstrap 5} per la componente stilistica responsive. Questa scelta ha permesso di mantenere la logica di rendering vicina al backend Java, evitando la complessità di gestione di una Single Page Application (SPA) separata.
+
+\subsection{Dashboard Principale (index.html)}
+La pagina \texttt{index.html} funge da cruscotto finanziario. I dati vengono iniettati nel modello HTML dal \texttt{HomeController}, che interroga l'Analytics Service.
+
+Il template utilizza la sintassi \texttt{th:text} e \texttt{th:style} per visualizzare dinamicamente le metriche:
+
+\bigskip
+
+\begin{lstlisting}[language=HTML, label={lst:thymeleaf_dashboard}]
+<div class="card bg-primary text-white">
+    <div class="card-body">
+        <h5>Saldo Attuale</h5>
+        <h2 th:text="${#numbers.formatCurrency(report.balance)}"></h2>
+    </div>
+</div>
+
+<div class="progress" style="height: 25px;">
+    <div class="progress-bar" role="progressbar"
+         th:style="'width: ' + ${report.savingsRate} + '%'"
+         th:text="${report.savingsRate} + '%'"
+         th:classappend="${report.alertLevel == 'GREEN'} ? 'bg-success' : 'bg-danger'">
+    </div>
+</div>
+\end{lstlisting}
+
+\subsection{Gestione Storico (transactions.html)}
+La pagina dello storico visualizza la lista delle transazioni in una tabella ordinabile. Include modali interattivi per la modifica e l'eliminazione dei record.
+Anche qui, l'integrazione è gestita lato server:
+
+\bigskip
+
+\begin{lstlisting}[language=HTML, label={lst:thymeleaf_list}]
+<tr th:each="t : ${transactions}">
+    <td th:text="${#temporals.format(t.date, 'dd/MM/yyyy')}"></td>
+    <td th:text="${t.category}"></td>
+    <td th:class="${t.type == 'INCOME'} ? 'text-success' : 'text-danger'"
+        th:text="${#numbers.formatCurrency(t.amount)}">
+    </td>
+    <td>
+        <button class="btn btn-sm btn-outline-primary"
+                th:onclick="'openEditModal(' + ${t.id} + ')'">
+            <i class="fas fa-edit"></i>
+        </button>
+    </td>
+</tr>
+\end{lstlisting}
+
+\section{Riconoscimento Vocale Ibrido}
+
+Una funzionalità distintiva della UI è l'integrazione con le \textbf{Web Speech API} native del browser per l'input vocale.
 
 \subsection{Strategia "Edge AI" (Client-Side Processing)}
 Invece di inviare flussi audio pesanti al server (che richiederebbero larghezza di banda e costose GPU per la trascrizione), si è optato per l'utilizzo delle \textbf{Web Speech API} native del browser.
 La trascrizione avviene localmente sul dispositivo dell'utente (Edge), e solo il testo risultante viene inviato al backend.
 
 Nel file \texttt{index.html}, la logica JavaScript gestisce il ciclo di vita del microfono e l'attivazione tramite "Wake Word" ("Johnny"):
+
+\bigskip
 
 \begin{lstlisting}[language=JavaScript, label={lst:js_stt}]
 recognition.onresult = (event) => {
@@ -71,6 +124,7 @@ recognition.onresult = (event) => {
     if (!isJarfinActivated && WAKE_WORDS.some(w => transcript.includes(w))) {
         activateJohnny(); // Attiva la UI di ascolto
     } 
+
     // Invio comando al backend
     else if (isJarfinActivated) {
         sendToBackend(transcript.trim());
@@ -80,25 +134,23 @@ recognition.onresult = (event) => {
 
 Questa architettura ibrida garantisce \textbf{latenza zero} nell'attivazione e maggiore \textbf{privacy}, poiché l'audio raw non lascia mai il dispositivo dell'utente.
 
-\newpage
-
-% SONO ARRIVATO QUA
-
 \section{Natural Language Understanding (NLU) Engine}
 
-Il cuore intelligente del sistema è il servizio \texttt{NaturalLanguageService}. A differenza degli approcci basati su LLM (Large Language Models), che sono probabilisticamente corretti ma lenti e costosi, JarFin adotta un motore **deterministico basato su regole**.
+Il cuore intelligente del sistema è il servizio \texttt{NaturalLanguageService}. A differenza degli approcci basati su LLM (Large Language Models), che sono probabilisticamente corretti ma lenti e costosi, JarFin adotta un motore \textbf{deterministico basato su regole}.
 
 Questa scelta garantisce:
 \begin{itemize}
     \item \textbf{Velocità}: Elaborazione in $O(N)$.
     \item \textbf{Affidabilità}: A parità di input, l'output è sempre identico.
-    \item \textbf{Interpretabilità}: Ogni estrazione è giustificata da una regola regex o keyword.
+    \item \textbf{Interpretabilità}: Ogni estrazione è giustificata da una regola regex/keyword.
 \end{itemize}
 
 \subsection{Implementazione: Regex e Keyword Mapping}
 Il servizio utilizza espressioni regolari pre-compilate per l'estrazione di importi e ID, e una mappa hash per la classificazione semantica.
 
-\begin{lstlisting}[language=Java, caption={Costanti e Pattern nel NaturalLanguageService}, label={lst:nlu_constants}]
+\bigskip
+
+\begin{lstlisting}[language=Java, label={lst:nlu_constants}]
 private static final Pattern NUMBER_PATTERN = 
     Pattern.compile("(\\d+([.,]\\d{1,2})?)"); // Supporta 10.50 e 10,50
     
@@ -120,7 +172,9 @@ L'algoritmo di parsing (\texttt{parse}) trasforma una stringa naturale non strut
 \subsection{Pseudocodice Formale}
 L'algoritmo segue una pipeline sequenziale di estrazione e pulizia.
 
-\begin{lstlisting}[mathescape=true, caption={Pseudocodice Parser NLU}, label={lst:pseudocode_nlu}, basicstyle=\small\ttfamily]
+\bigskip
+
+\begin{lstlisting}[mathescape=true, basicstyle=\small\ttfamily]
 Algoritmo ParseNaturalLanguage(text):
     Input: Stringa $S$ (comando utente)
     Output: Oggetto $T$ (Transazione strutturata) o NULL
@@ -182,7 +236,7 @@ Analizziamo il costo temporale $T(n)$ dell'algoritmo, dove $n$ è la lunghezza d
 \[ T(n) = O(n) + K \cdot O(n) + C \cdot O(n) \]
 \[ T(n) = O(n) \]
 
-L'algoritmo è **Lineare**. Questo garantisce che il tempo di elaborazione sia trascurabile (< 1ms) per frasi di lunghezza standard (es. 10-100 caratteri), rendendo l'esperienza utente percepita come "istantanea".
+L'algoritmo è \textbf{Lineare}. Questo garantisce che il tempo di elaborazione sia trascurabile (< 1ms) per frasi di lunghezza standard (es. 10-100 caratteri), rendendo l'esperienza utente percepita come "istantanea".
 
 \section{Orchestrazione: CommandController}
 
@@ -190,7 +244,9 @@ Il \texttt{CommandController} funge da orchestratore backend. Riceve il testo da
 
 Il metodo \texttt{processVoiceCommand} gestisce la logica di fallback e l'invio al Core Accounting:
 
-\begin{lstlisting}[language=Java, caption={Processamento comando vocale}, label={lst:command_controller}]
+\bigskip
+
+\begin{lstlisting}[language=Java, label={lst:command_controller}]
 @PostMapping("/process")
 public ResponseEntity<?> processVoiceCommand(@RequestBody Map<String, String> payload) {
     String text = payload.get("text");
@@ -204,8 +260,7 @@ public ResponseEntity<?> processVoiceCommand(@RequestBody Map<String, String> pa
             if (parsed.getAmount() == null) parsed.setAmount(BigDecimal.ZERO);
             
             // Chiamata all'Accounting Service via Gateway
-            restTemplate.postForEntity(gatewayUrl + "/api/transactions", 
-                                       parsed, Object.class);
+            restTemplate.postForEntity(gatewayUrl + "/api/transactions", parsed, Object.class);
             break;
             
         case DELETE:
@@ -218,28 +273,19 @@ public ResponseEntity<?> processVoiceCommand(@RequestBody Map<String, String> pa
 
 \section{Strategia di Validazione e Testing}
 
-Allo stato attuale dello sviluppo, la validazione dell'Iterazione 3 è in fase di completamento. Di seguito viene illustrata la **Strategia di Test** progettata per garantire la robustezza dei nuovi componenti integrati.
-
-\subsection{Unit Testing: NLU Engine}
-L'obiettivo primario è verificare la precisione dell'algoritmo di parsing. Sono previsti test parametrizzati con JUnit 5 per coprire i seguenti scenari:
-\begin{itemize}
-    \item \textbf{Scenario Base}: Input "Ho speso 10 euro per pizza" $\rightarrow$ \texttt{Amount=10.00}, \texttt{Category=Ristorante}.
-    \item \textbf{Edge Case}: Input con separatori decimali diversi ("10.50", "10,50") o valute miste.
-    \item \textbf{Comandi Complessi}: "Elimina la transazione 42" $\rightarrow$ \texttt{Command=DELETE}, \texttt{TargetId=42}.
-    \item \textbf{Input "Sporchi"}: Frasi lunghe con molte stop-word per verificare l'efficacia del metodo \texttt{cleanText}.
-\end{itemize}
-
-\subsection{Integration Testing: Gateway e Controller}
-Per validare l'orchestrazione, verranno eseguiti test di integrazione che coinvolgono il container del Gateway:
-\begin{itemize}
-    \item \textbf{Routing Test}: Verifica che le chiamate a \texttt{localhost:8080/api/transactions} vengano correttamente inoltrate al servizio Accounting.
-    \item \textbf{Flow Test}: Simulazione di una chiamata POST al \texttt{CommandController} con un payload testuale, verificando che l'Accounting Service riceva correttamente l'oggetto JSON strutturato.
-\end{itemize}
-
-Questa fase di Quality Assurance, attualmente in corso, certificherà la stabilità della piattaforma prima del rilascio finale.
+\bigskip
+\textbf{DA FARE}
+\bigskip
 
 \section{Conclusione Iterazione 3}
 
-L'Iterazione 3 ha completato l'architettura JarFin.
-L'API Gateway ha fornito un layer di astrazione essenziale per la sicurezza e il routing.
-Il motore NLU, grazie alla sua natura algoritmica $O(n)$, offre un'alternativa robusta e performante all'IA generativa per compiti strutturati, garantendo un'esperienza utente fluida e priva di latenze significative.
+L'Iterazione 3 ha rappresentato il punto di svolta per il progetto \textit{JarFin}, trasformando un insieme di microservizi backend in una \textbf{piattaforma applicativa completa}.
+
+I risultati raggiunti coprono l'intero stack architetturale:
+\begin{itemize}
+    \item \textbf{Infrastruttura}: L'API Gateway ha unificato i punti di accesso, garantendo sicurezza e disaccoppiamento tra client e microservizi.
+    \item \textbf{Frontend}: La Web UI ha reso tangibile il valore dei dati elaborati, offrendo una dashboard interattiva e un'esperienza utente moderna ("Voice First") grazie all'integrazione delle Web Speech API.
+    \item \textbf{Intelligenza}: Il motore NLU deterministico ha dimostrato che è possibile interpretare il linguaggio naturale con complessità $O(n)$, offrendo un'alternativa robusta, privata e priva di latenza rispetto ai modelli generativi cloud-based.
+\end{itemize}
+
+Il sistema è ora pienamente operativo in tutte le sue componenti: interfaccia, logica di business e persistenza.

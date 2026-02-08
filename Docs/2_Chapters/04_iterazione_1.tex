@@ -35,6 +35,8 @@ Una delle prime decisioni architetturali è stata quella di disaccoppiare l'appl
 
 Il file \texttt{docker-compose.yml} definisce il servizio di database e le sue configurazioni:
 
+\bigskip
+
 \begin{lstlisting}[language=yaml, label={lst:dockercompose}]
 services:
   db:
@@ -79,6 +81,8 @@ L'entità \texttt{Transaction} rappresenta il concetto centrale del dominio. Dur
 
 L'uso di tipi primitivi a virgola mobile come \texttt{double} o \texttt{float} è stato scartato a causa dell'imprecisione intrinseca nella rappresentazione binaria dei decimali (standard IEEE 754), che può portare a errori di arrotondamento inaccettabili in ambito finanziario.
 È stato quindi adottato \texttt{java.math.BigDecimal}, che garantisce una precisione arbitraria e operazioni aritmetiche esatte.
+
+\bigskip
 
 \begin{lstlisting}[language=Java, label={lst:transactionentity}]
 @Entity
@@ -125,6 +129,8 @@ Inoltre, è stato introdotto un sistema di logging (\texttt{@Slf4j}) per traccia
 Invece di disseminare blocchi \texttt{try-catch} nel codice, è stato implementato un Global Exception Handler utilizzando \texttt{@RestControllerAdvice}.
 Questo componente intercetta le eccezioni a livello globale e le trasforma in risposte JSON strutturate con i corretti codici di errore HTTP.
 
+\bigskip
+
 \begin{lstlisting}[language=Java, label={lst:globalhandler}]
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -153,6 +159,8 @@ Questo approccio migliora drasticamente l'usabilità dell'API: se un client invi
 
 Il \texttt{TransactionController} espone le funzionalità tramite endpoint RESTful standard. È stata posta particolare cura nel rispetto della semantica HTTP.
 Il metodo \texttt{create}, in particolare, implementa il livello 2 del modello di maturità di Richardson (HTTP Verbs), restituendo l'header \texttt{Location} con l'URI della risorsa appena creata.
+
+\bigskip
 
 \begin{lstlisting}[language=Java, label={lst:createcontroller}]
 @PostMapping
