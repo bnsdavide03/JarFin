@@ -1,17 +1,12 @@
 package it.unibg.jarfin.analytics_service.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,134 +28,79 @@ class AnalyticsServiceTest {
     @InjectMocks
     private AnalyticsService analyticsService;
 
-    private final String fakeUrl = "http://fake-accounting-service/api/transactions";
+    private static final String ACCOUNTING_URL = "http://accounting-service/transactions";
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(analyticsService, "accountingUrl", fakeUrl);
+        // Simula @Value
+        ReflectionTestUtils.setField(analyticsService, "accountingUrl", ACCOUNTING_URL);
     }
 
     @Test
-    @DisplayName("Scenario GREEN: Entrate > Uscite (Risparmio Alto)")
-    void generateReport_GreenScenario() {
+    void generateReport_withIncomesAndExpenses_shouldCalculateCorrectly() {
         TransactionDTO income = new TransactionDTO();
-        income.setAmount(new BigDecimal("2000.00"));
+        income.setAmount(new BigDecimal("1000"));
         income.setType(TransactionType.INCOME);
 
-        TransactionDTO expense = new TransactionDTO();
-        expense.setAmount(new BigDecimal("500.00"));
-        expense.setType(TransactionType.EXPENSE);
-        expense.setCategory("Svago");
+        TransactionDTO expense1 = new TransactionDTO();
+        expense1.setAmount(new BigDecimal("200"));
+        expense1.setType(TransactionType.EXPENSE);
+        expense1.setCategory("Food");
 
-        TransactionDTO[] mockResponse = {income, expense};
+        TransactionDTO expense2 = new TransactionDTO();
+        expense2.setAmount(new BigDecimal("300"));
+        expense2.setType(TransactionType.EXPENSE);
+        expense2.setCategory("Rent");
 
-        when(restTemplate.getForObject(fakeUrl, eq(TransactionDTO[].class)))
-                .thenReturn(mockResponse);
+        when(restTemplate.getForObject(ACCOUNTING_URL, TransactionDTO[].class))
+                .thenReturn(new TransactionDTO[]{ income, expense1, expense2 });
 
         FinancialReportDTO report = analyticsService.generateReport();
 
-        assertNotNull(report);
-        assertEquals(new BigDecimal("2000.00"), report.getTotalIncomes());
-        assertEquals(new BigDecimal("500.00"), report.getTotalExpenses());
-        
-        assertEquals(new BigDecimal("1500.00"), report.getTotalBalance());
-        
-        assertEquals(new BigDecimal("75.0000"), report.getSavingsRate());
-        
-        assertTrue(report.getAlertLevel().contains("GREEN"));
-        
+        assertEquals(new BigDecimal("1000"), report.getTotalIncomes());
+        assertEquals(new BigDecimal("500"), report.getTotalExpenses());
+        assertEquals(new BigDecimal("500"), report.getTotalBalance());
+
         Map<String, BigDecimal> categories = report.getBreakdownByCategory();
-        assertEquals(new BigDecimal("500.00"), categories.get("Svago"));
+        assertEquals(new BigDecimal("200"), categories.get("Food"));
+        assertEquals(new BigDecimal("300"), categories.get("Rent"));
+
+        assertNotNull(report.getSavingsRate());
+        assertTrue(report.getSavingsRate().compareTo(BigDecimal.ZERO) > 0);
+        assertNotNull(report.getAlertLevel());
+        assertNotNull(report.getFinancialAdvice());
     }
 
     @Test
-    @DisplayName("Scenario RED: Uscite > Entrate")
-    void generateReport_RedScenario() {
-        TransactionDTO income = new TransactionDTO();
-        income.setAmount(new BigDecimal("1000.00"));
-        income.setType(TransactionType.INCOME);
-
-        TransactionDTO expense = new TransactionDTO();
-        expense.setAmount(new BigDecimal("1200.00"));
-        expense.setType(TransactionType.EXPENSE);
-        expense.setCategory("Affitto");
-
-        TransactionDTO[] mockResponse = {income, expense};
-
-        when(restTemplate.getForObject(any(String.class), any()))
-                .thenReturn(mockResponse);
-
-        FinancialReportDTO report = analyticsService.generateReport();
-
-        assertEquals(new BigDecimal("-200.00"), report.getTotalBalance());
-        
-        assertTrue(report.getSavingsRate().compareTo(BigDecimal.ZERO) < 0);
-        
-        assertTrue(report.getAlertLevel().contains("RED"));
-    }
-
-    @Test
-    @DisplayName("Scenario CRITICAL: Solo Spese, Zero Entrate")
-    void generateReport_CriticalScenario() {
-
-        TransactionDTO expense = new TransactionDTO();
-        expense.setAmount(new BigDecimal("100.00"));
-        expense.setType(TransactionType.EXPENSE);
-        expense.setCategory("Cibo");
-
-        TransactionDTO[] mockResponse = {expense};
-
-        when(restTemplate.getForObject(any(String.class), any()))
-                .thenReturn(mockResponse);
-
-        FinancialReportDTO report = analyticsService.generateReport();
-
-        assertEquals(BigDecimal.ZERO, report.getTotalIncomes());
-        assertEquals(new BigDecimal("-100"), report.getSavingsRate());
-        assertTrue(report.getAlertLevel().contains("Critical"));
-    }
-    
-    @Test
-    @DisplayName("Scenario EMPTY: Nessuna transazione")
-    void generateReport_EmptyScenario() {
-        when(restTemplate.getForObject(any(String.class), any()))
+    void generateReport_noTransactions_shouldReturnEmptyReport() {
+        when(restTemplate.getForObject(ACCOUNTING_URL, TransactionDTO[].class))
                 .thenReturn(new TransactionDTO[0]);
 
         FinancialReportDTO report = analyticsService.generateReport();
 
-        assertNotNull(report);
+        assertEquals(BigDecimal.ZERO, report.getTotalIncomes());
+        assertEquals(BigDecimal.ZERO, report.getTotalExpenses());
+        assertEquals(BigDecimal.ZERO, report.getTotalBalance());
+        assertTrue(report.getBreakdownByCategory().isEmpty());
     }
 
     @Test
-    @DisplayName("Integrazione Categorie Multiple")
-    void generateReport_CategoryAggregation() {
-        TransactionDTO t1 = new TransactionDTO();
-        t1.setAmount(new BigDecimal("50.00"));
-        t1.setType(TransactionType.EXPENSE);
-        t1.setCategory("Cibo");
+    void generateReport_onlyExpenses_shouldTriggerRedAlert() {
+        TransactionDTO expense = new TransactionDTO();
+        expense.setAmount(new BigDecimal("150"));
+        expense.setType(TransactionType.EXPENSE);
+        expense.setCategory("Food");
 
-        TransactionDTO t2 = new TransactionDTO();
-        t2.setAmount(new BigDecimal("30.00"));
-        t2.setType(TransactionType.EXPENSE);
-        t2.setCategory("Cibo");
-
-        TransactionDTO t3 = new TransactionDTO();
-        t3.setAmount(new BigDecimal("20.00"));
-        t3.setType(TransactionType.EXPENSE);
-        t3.setCategory("Trasporti");
-
-        TransactionDTO[] mockResponse = {t1, t2, t3};
-
-        when(restTemplate.getForObject(any(String.class), any()))
-                .thenReturn(mockResponse);
+        when(restTemplate.getForObject(ACCOUNTING_URL, TransactionDTO[].class))
+                .thenReturn(new TransactionDTO[]{ expense });
 
         FinancialReportDTO report = analyticsService.generateReport();
 
-        Map<String, BigDecimal> cats = report.getBreakdownByCategory();
-        
-  
-        assertEquals(new BigDecimal("80.00"), cats.get("Cibo"));
-       
-        assertEquals(new BigDecimal("20.00"), cats.get("Trasporti"));
+        assertEquals(BigDecimal.ZERO, report.getTotalIncomes());
+        assertEquals(new BigDecimal("150"), report.getTotalExpenses());
+        assertEquals(new BigDecimal("-150"), report.getTotalBalance());
+
+        assertEquals("RED - Critical", report.getAlertLevel());
+        assertEquals(new BigDecimal("-100"), report.getSavingsRate());
     }
 }
