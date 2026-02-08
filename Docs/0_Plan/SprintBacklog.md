@@ -131,7 +131,7 @@ Con il rientro operativo di **Alessandro Biscaro** e **Alessandro Rocco**, l’o
 | Analisi Dinamica | Analisi architetturale con Stan4J | Alessandro Rocco |
 | Revisione GUI | Miglioramento UX/UI Dashboard | Alessandro Biscaro |
 | Aggiornamento Diagrammi | Correzione UML (Class, Sequence, Deployment) | Alessandro Biscaro |
-| Calcolo Computazionale | Calcolo degli algoritmi Analytics e Parser NLU| Alessandro Biscaro & Alessandro Rocco |
+| Calcolo Computazionale | Calcolo degli algoritmi Analytics e Parser NLU| Davide Bonsembiante |
 | Documentazione LaTeX | Stesura documentazione tecnica | Tutti (coord. Davide) |
 
 &nbsp;
