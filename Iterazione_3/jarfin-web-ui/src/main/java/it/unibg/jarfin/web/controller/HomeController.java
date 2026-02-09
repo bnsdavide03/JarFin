@@ -30,7 +30,9 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model) {
+        // CORREZIONE: Carichiamo sia il report che la lista delle transazioni
         loadFinancialReport(model);
+        loadTransactionsList(model); 
         return "index";
     }
 
@@ -81,6 +83,7 @@ public class HomeController {
             
             List<ParsedTransaction> list = response.getBody() != null ? response.getBody() : new ArrayList<>();
 
+            // Ordiniamo per ID decrescente (più recenti prima)
             list.sort((t1, t2) -> {
                 if (t1.getId() == null || t2.getId() == null) return 0;
                 return t2.getId().compareTo(t1.getId());

@@ -80,23 +80,23 @@ public class AnalyticsService {
             report.setSavingsRate(rate);
 
             if (rate.compareTo(new BigDecimal("20")) > 0) {
-                report.setAlertLevel("GREEN - Ottimo risparmio");
+                report.setAlertLevel("GREEN");
                 report.setFinancialAdvice("Ottimo lavoro! Continua a risparmiare così.");
             } else if (rate.compareTo(BigDecimal.ZERO) > 0) {
-                report.setAlertLevel("YELLOW - Attenzione alle spese");
+                report.setAlertLevel("YELLOW");
                 report.setFinancialAdvice("Cerca di ridurre le spese non essenziali.");
             } else {
-                report.setAlertLevel("RED - Bilancio in negativo!");
+                report.setAlertLevel("RED");
                 report.setFinancialAdvice("Attenzione: le uscite superano le entrate.");
             }
         } else {
             if (expenses.compareTo(BigDecimal.ZERO) > 0) {
                 report.setSavingsRate(new BigDecimal("-100")); 
-                report.setAlertLevel("RED - Critical");
+                report.setAlertLevel("RED");
                 report.setFinancialAdvice("⚠️ Attenzione! Stai spendendo senza alcuna entrata registrata.");
             } else {
                 report.setSavingsRate(BigDecimal.ZERO);
-                report.setAlertLevel("GRAY - Nessun dato");
+                report.setAlertLevel("GREY");
                 report.setFinancialAdvice("Registra delle transazioni per iniziare l'analisi.");
             }
         }
