@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -31,6 +32,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import it.unibg.jarfin.web.dto.FinancialReport;
 import it.unibg.jarfin.web.dto.ParsedTransaction;
 
@@ -50,15 +54,16 @@ class HomeControllerTest {
     @BeforeEach
     void setUp() {
         t1 = new ParsedTransaction();
-        t1.setId(10L);
-        t1.setDescription("Vecchia");
+        ReflectionTestUtils.setField(t1, "id", 10L); 
+        ReflectionTestUtils.setField(t1, "description", "Vecchia");
 
         t2 = new ParsedTransaction();
-        t2.setId(20L);
-        t2.setDescription("Nuova");
+        ReflectionTestUtils.setField(t2, "id", 20L);
+        ReflectionTestUtils.setField(t2, "description", "Nuova");
 
         report = new FinancialReport();
-        report.setTotalBalance(new BigDecimal("1000.00"));
+
+        ReflectionTestUtils.setField(report, "balance", new BigDecimal("1000.00"));
     }
 
     @Test
@@ -101,15 +106,18 @@ class HomeControllerTest {
                 any(ParameterizedTypeReference.class)))
             .thenReturn(ResponseEntity.ok(unsortedList));
 
-        mockMvc.perform(get("/transactions"))
+       MvcResult result = mockMvc.perform(get("/transactions"))
             .andExpect(status().isOk())
             .andExpect(view().name("transactions"))
-            .andExpect(model().attribute("transactions", hasSize(2)))
-            .andExpect(model().attribute("transactions", list -> {
-                List<ParsedTransaction> transactions = (List<ParsedTransaction>) list;
-                assertEquals(20L, transactions.get(0).getId());
-                assertEquals(10L, transactions.get(1).getId());
-            }));
+            .andExpect(model().attributeExists("transactions"))
+            .andReturn();
+        
+        @SuppressWarnings("unchecked")
+        List<ParsedTransaction> transactions = (List<ParsedTransaction>) result.getModelAndView().getModel().get("transactions");
+        
+        assertEquals(2, transactions.size());
+        assertEquals(20L, transactions.get(0).getId()); 
+        assertEquals(10L, transactions.get(1).getId());
     }
 
     @Test
