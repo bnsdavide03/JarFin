@@ -30,6 +30,9 @@
 \usepackage{lmodern}
 \usepackage[italian]{babel}
 
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
+
 \lstdefinelanguage{yaml}{
   keywords={true,false,null,y,n},
   keywordstyle=\color{blue}\bfseries,

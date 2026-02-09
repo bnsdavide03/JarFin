@@ -4,7 +4,14 @@
 
 Lo sviluppo del sistema \textit{JarFin} è stato condotto adottando una metodologia Agile, con l’obiettivo di favorire un processo di progettazione incrementale, flessibile e orientato al cambiamento. In particolare, il progetto ha seguito i principi di \textbf{SCRUM}, integrati con l’approccio \textbf{Agile Model Driven Development (AMDD)}, al fine di bilanciare la necessità di una progettazione architetturale solida con i vantaggi dell’iterazione continua e del feedback costante.
 
-SCRUM è stato utilizzato come framework di riferimento per l’organizzazione del lavoro, la pianificazione delle attività e la gestione delle iterazioni di sviluppo. Il ciclo di vita del progetto è stato articolato in sprint di durata indicativa pari a due settimane, ciascuno caratterizzato da obiettivi ben definiti e dalla produzione di un incremento funzionale del sistema. Questa impostazione ha consentito di monitorare costantemente l’avanzamento del progetto e di adattare le scelte progettuali in base alle esigenze emerse durante lo sviluppo \cite{scrum}.
+SCRUM è stato utilizzato come framework di riferimento per l’organizzazione del lavoro, la pianificazione delle attività e la gestione delle iterazioni di sviluppo. Il ciclo di vita del progetto è stato articolato in sprint di durata indicativa pari a due settimane, ciascuno caratterizzato da obiettivi ben definiti e dalla produzione di un incremento funzionale del sistema. Questa impostazione ha consentito di monitorare costantemente l’avanzamento del progetto e di adattare le scelte progettuali in base alle esigenze emerse durante lo sviluppo \cite{scrumOrg}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{2.0_scrum_framework.png}
+    \caption{Il framework SCRUM e il ciclo degli Sprint.}
+    \label{fig:scrum_framework}
+\end{figure}
 
 L’approccio AMDD ha guidato le attività di modellazione e progettazione. Invece di definire in modo esaustivo l’intera architettura nelle fasi iniziali, la modellazione è stata condotta in maniera incrementale, producendo modelli essenziali e sufficienti a supportare le decisioni architetturali di ciascuna iterazione. In particolare, sono stati realizzati diagrammi UML per i casi d’uso più rilevanti, successivamente raffinati nel corso dello sviluppo \cite{amdd}. Questo approccio ha permesso di evitare un’eccessiva rigidità progettuale, mantenendo una visione globale del sistema.
 
@@ -44,7 +51,14 @@ Il framework supporta nativamente la creazione di API REST, l’integrazione con
 La persistenza dei dati è affidata a un database relazionale \textbf{PostgreSQL}, scelto per la sua affidabilità, conformità agli standard SQL e supporto a funzionalità avanzate di gestione dei dati. PostgreSQL garantisce l’integrità delle transazioni finanziarie (proprietà ACID) e supporta operazioni di interrogazione efficienti, fondamentali per le funzionalità di analisi offerte dal sistema.
 
 Per semplificare la gestione dell'ambiente di sviluppo e garantire l'isolamento dei dati, l'istanza del database è stata containerizzata tramite \textbf{Docker}.
-Questa scelta architetturale consente di avviare il servizio di persistenza in modo rapido e indipendente dalla configurazione del sistema operativo ospite, evitando installazioni locali invasive e garantendo un ambiente sempre pulito e riproducibile.
+Questa scelta architetturale consente di avviare il servizio di persistenza in modo rapido e indipendente dalla configurazione del sistema operativo ospite, evitando installazioni locali invasive e garantendo un ambiente sempre pulito e riproducibile (Figura~\ref{fig:docker_vm}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{2.1_docker_vs_VM.png}
+    \caption{Confronto architetturale tra Macchine Virtuali e Container Docker \cite{geeksforgeeksDocker}.}
+    \label{fig:docker_vm}
+\end{figure}
 
 \subsection{Modulo di Natural Language Understanding}
 
@@ -140,7 +154,14 @@ Per la gestione del ciclo di vita del software sono stati utilizzati due ambient
 
 La build automation e la gestione delle dipendenze del progetto Java sono state affidate ad \textbf{Apache Maven}, garantendo la riproducibilità del processo di compilazione e una gestione centralizzata delle librerie su diverse macchine di sviluppo.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{2.2_toolchain.png}
+    \caption{Il flusso di lavoro e la toolchain integrata del progetto JarFin.}
+    \label{fig:toolchain}
+\end{figure}
+
 \subsection{Considerazioni sulla toolchain}
 
 L’integrazione degli strumenti descritti ha permesso di coprire l’intero ciclo di vita del software, dalla modellazione iniziale alla verifica della qualità del codice.
-La toolchain adottata rappresenta una soluzione completa e coerente con gli obiettivi del progetto, fornendo un supporto efficace sia allo sviluppo incrementale sia alla validazione tecnica del sistema.
+La toolchain adottata rappresenta una soluzione completa e coerente con gli obiettivi del progetto, fornendo un supporto efficace sia allo sviluppo incrementale sia alla validazione tecnica del sistema (Figura~\ref{fig:toolchain}).

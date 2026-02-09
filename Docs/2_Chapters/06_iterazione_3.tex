@@ -103,6 +103,13 @@ Anche qui, l'integrazione è gestita lato server:
 
 Una funzionalità distintiva della UI è l'integrazione con le \textbf{Web Speech API} native del browser per l'input vocale.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{6.0_edge_AI.png}
+    \caption{Architettura ibrida "Edge AI"}
+    \label{}
+\end{figure}
+
 \subsection{Strategia "Edge AI" (Client-Side Processing)}
 Invece di inviare flussi audio pesanti al server (che richiederebbero larghezza di banda e costose GPU per la trascrizione), si è optato per l'utilizzo delle \textbf{Web Speech API} native del browser.
 La trascrizione avviene localmente sul dispositivo dell'utente (Edge), e solo il testo risultante viene inviato al backend.
