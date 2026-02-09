@@ -54,7 +54,7 @@ class AnalyticsServiceTest {
 
         TransactionDTO[] mockResponse = {income, expense};
 
-        when(restTemplate.getForObject(fakeUrl, eq(TransactionDTO[].class)))
+        when(restTemplate.getForObject(eq(fakeUrl), eq(TransactionDTO[].class)))
                 .thenReturn(mockResponse);
 
         FinancialReportDTO report = analyticsService.generateReport();
