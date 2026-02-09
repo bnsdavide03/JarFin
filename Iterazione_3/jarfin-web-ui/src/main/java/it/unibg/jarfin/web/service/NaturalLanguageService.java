@@ -112,12 +112,17 @@ public class NaturalLanguageService {
     public ParsedTransaction parse(String text) {
         if (text == null || text.trim().length() < 2) return null;
         
+        String lowerCaseText = text.trim().toLowerCase();
+        
         String[] stopWords = {"stop", "nulla", "niente", "annulla", "chiudi", "jar", "giar"};
-        for (String w : stopWords) if (text.toLowerCase().equals(w)) return null;
+        for (String w : stopWords) {
+        	if (lowerCaseText.equals(w) || lowerCaseText.startsWith(w + " ")){
+        		return null;
+        	}
+        }
 
         ParsedTransaction result = new ParsedTransaction();
-        String lowerCaseText = text.toLowerCase();
-
+        
         if (DELETE_CMD.matcher(text).find()) {
             result.setCommandType(CommandType.DELETE);
             result.setTargetId(extractId(text)); 

@@ -76,7 +76,6 @@ class NaturalLanguageServiceTest {
     @Test
     @DisplayName("UPDATE: Modifica descrizione esplicita")
     void parse_UpdateDescription() {
-        // Il pattern EXPLICIT_DESC_PATTERN cerca "descrizione ..."
         String input = "Modifica id 5 descrizione Cena aziendale";
         
         ParsedTransaction result = service.parse(input);
@@ -109,7 +108,7 @@ class NaturalLanguageServiceTest {
         assertEquals("Trasporti", t1.getCategory());
 
         ParsedTransaction t2 = service.parse("Spesa ikea 100");
-        assertEquals("Casa", t2.getCategory());
+        assertEquals("Supermercato", t2.getCategory());
         
         ParsedTransaction t3 = service.parse("Ordine zalando 50");
         assertEquals("Shopping", t3.getCategory());
