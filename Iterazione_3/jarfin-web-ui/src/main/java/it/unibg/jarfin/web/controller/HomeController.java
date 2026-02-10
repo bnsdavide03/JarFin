@@ -31,6 +31,7 @@ public class HomeController {
     @GetMapping("/")
     public String home(Model model) {
         loadFinancialReport(model);
+        loadTransactionsList(model); 
         return "index";
     }
 
