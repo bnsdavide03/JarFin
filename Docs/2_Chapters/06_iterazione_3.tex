@@ -233,10 +233,10 @@ Analizziamo il costo temporale $T(n)$ dell'algoritmo, dove $n$ è la lunghezza d
 \begin{enumerate}
     \item \textbf{Regex Matching}: L'applicazione di pattern regex semplici (senza backtracking annidato o ricorsivo) su una stringa di lunghezza $n$ ha complessità lineare $O(n)$.
     \item \textbf{Keyword Matching}: L'algoritmo itera su una mappa di $K$ parole chiave. Per ogni parola chiave, l'operazione `contains` ha un costo proporzionale alla lunghezza della stringa.
-    \[ T_{match} \approx K \cdot O(n) \]
-    Poiché $K$ è una costante di configurazione (circa 50 entry) e non dipende dall'input utente, asintoticamente questo termine si riduce a $O(n)$.
+          \[ T_{match} \approx K \cdot O(n) \]
+          Poiché $K$ è una costante di configurazione (circa 50 entry) e non dipende dall'input utente, asintoticamente questo termine si riduce a $O(n)$.
     \item \textbf{Clean Text}: La rimozione delle stop-word avviene tramite una serie di \texttt{replaceAll}, ciascuno dei quali scorre la stringa una volta.
-    \[ T_{clean} = \sum_{regex} O(n) \approx C \cdot O(n) \]
+          \[ T_{clean} = \sum_{regex} O(n) \approx C \cdot O(n) \]
 \end{enumerate}
 
 \textbf{Complessità Totale}:
@@ -279,10 +279,107 @@ public ResponseEntity<?> processVoiceCommand(@RequestBody Map<String, String> pa
 \end{lstlisting}
 
 \section{Strategia di Validazione e Testing}
+\label{sec:validazione_iterazione3}
 
-\bigskip
-\textbf{DA FARE}
-\bigskip
+La validazione dell'Iterazione 3 ha seguito un approccio \textit{End-to-End} (E2E), verificando il comportamento del sistema dal punto di ingresso (Gateway/UI) fino alla persistenza dei dati. I test sono stati condotti sia a livello architetturale (API Routing) che funzionale (User Experience).
+
+\subsection{Validazione Architetturale: API Gateway Routing}
+Il primo livello di test ha verificato la corretta configurazione delle rotte di Spring Cloud Gateway. Utilizzando il client HTTP \textit{Postman}, sono state simulate richieste dirette alla porta pubblica \texttt{8080}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.72\textwidth]{../Iterazione_3/images/Routing_Accounting.png}
+    \caption{Richiesta GET verso Accounting Service tramite Gateway (Porta 8080)}
+    \label{fig:routing_accounting}
+\end{figure}
+
+Come mostrato in Figura \ref{fig:routing_accounting}, una richiesta GET \texttt{/api/transactions} inviata al Gateway viene inoltrata al microservizio di Accounting, che restituisce il JSON delle transazioni. Il client resta agnostico rispetto alla locazione reale del servizio, confermando l’efficacia del pattern Reverse Proxy.
+
+La validazione è estesa alla Business Intelligence tramite l’endpoint \texttt{/api/analytics/report} Figura \ref{fig:routing_analytics}, che restituisce il payload JSON del servizio Analytics, confermando il ruolo del Gateway come Facade dell’ecosistema.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.72\textwidth]{../Iterazione_3/images/Routing_Analytics.png}
+    \caption{Validazione del routing verso il servizio di Analytics (Porta 8080)}
+    \label{fig:routing_analytics}
+\end{figure}
+
+\subsection{Validazione Funzionale: Flusso Utente (UX)}
+Il secondo livello di test ha coinvolto l'interfaccia utente (Web UI), verificando la reattività del sistema e la gestione degli errori.
+
+\subsubsection{Inserimento Vocale e Feedback}
+Il test di inserimento vocale ha confermato l'efficacia del motore NLU. Pronunciando comandi naturali come \textit{"Ho speso 550 come abbonamento in palestra"}, il sistema ha riconosciuto l'intento, estratto l'importo e categorizzato automaticamente la spesa sotto "Salute/Sport", fornendo un feedback visivo immediato tramite modale.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{../Iterazione_3/images/Inserimento_Vocale.png}
+    \caption{Dashboard aggiornata in tempo reale dopo l'inserimento vocale}
+    \label{fig:inserimento_vocale}
+\end{figure}
+
+\newpage
+
+\subsubsection{Gestione Robusta degli Errori}
+Un aspetto critico dei sistemi distribuiti è la gestione dei fallimenti parziali. È stato simulato uno scenario di indisponibilità del Gateway spegnendo il servizio.
+La Web UI ha intercettato l'eccezione di rete e mostrato un avviso chiaro all'utente (Figura \ref{fig:errore_gestito}), evitando il blocco dell'applicazione.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{../Iterazione_3/images/Errore_Gestito.png}
+    \caption{Gestione dell'errore di connessione: Feedback visivo all'utente}
+    \label{fig:errore_gestito}
+\end{figure}
+
+Inoltre, è stata verificata la compatibilità cross-browser. \\
+Poiché le Web Speech API non sono standardizzate su tutti i browser, il sistema implementa un controllo preventivo (Feature Detection), avvisando l'utente se il browser (es. Firefox) non supporta il riconoscimento vocale nativo.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{../Iterazione_3/images/Firefox_error.png}
+    \caption{Feature Detection: Avviso di incompatibilità su browser non supportati}
+    \label{fig:firefox_error}
+\end{figure}
+
+\subsubsection{Operazioni CRUD e Filtraggio}
+Infine, sono state validate le operazioni di modifica e cancellazione. L'interfaccia permette di aggiornare i dettagli di una transazione tramite un form modale precompilato (Figura \ref{fig:modifica_transazione}) e di eliminare record con una richiesta di conferma esplicita (Figura \ref{fig:cancellazione_transazione}), prevenendo azioni accidentali.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{../Iterazione_3/images/Modifica_Transazione.png}
+        \caption{Modifica Transazione}
+        \label{fig:modifica_transazione}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{../Iterazione_3/images/Cancellazione_Transazione.png}
+        \caption{Cancellazione Transazione}
+        \label{fig:cancellazione_transazione}
+    \end{minipage}
+\end{figure}
+
+Il sistema di filtraggio (Figure \ref{fig:filtro_entrate} e \ref{fig:filtro_uscite}) permette di isolare rapidamente entrate e uscite, completando la suite di funzionalità necessarie per una gestione finanziaria efficace.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{../Iterazione_3/images/Filtro_Entrate.png}
+        \caption{Filtro Entrate}
+        \label{fig:filtro_entrate}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{../Iterazione_3/images/Filtro_Uscite.png}
+        \caption{Filtro Uscite}
+        \label{fig:filtro_uscite}
+    \end{minipage}
+\end{figure}
+
+\newpage
 
 \section{Conclusione Iterazione 3}
 
