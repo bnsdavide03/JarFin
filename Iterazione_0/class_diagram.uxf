@@ -5,7 +5,7 @@ Transaction
 -amount: BigDecimal
 -date: LocalDate
 -description: String
--category: Category
+-category: String
 -type: String
 
 --
