@@ -298,7 +298,6 @@ public void testGenerateReport_Success() {
     TransactionDTO t2 = new TransactionDTO();
     t2.setAmount(new BigDecimal("200.00"));
     t2.setType(TransactionType.EXPENSE);
-
     // Istruiamo il Mock a restituire questi dati quando chiamato
     when(restTemplate.getForObject(anyString(), eq(TransactionDTO[].class)))
             .thenReturn(new TransactionDTO[]{t1, t2});
