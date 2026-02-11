@@ -5,6 +5,8 @@ Transaction
 -amount: BigDecimal
 -date: LocalDate
 -description: String
+-category: Category
+-type: String
 
 --
 </panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>128</x><y>504</y><w>168</w><h>48</h></coordinates><panel_attributes>Category
