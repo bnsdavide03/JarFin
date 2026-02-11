@@ -65,6 +65,7 @@ m2=1</panel_attributes><additional_attributes>160;10;10;10</additional_attribute
 + authUser(request: Request): boolean
 + route(request: Request): Response</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>40</x><y>384</y><w>840</w><h>648</h></coordinates><panel_attributes>lt=..</panel_attributes><additional_attributes>10;10;10;790;1030;790</additional_attributes></element><element><id>Relation</id><coordinates><x>576</x><y>736</y><w>304</w><h>264</h></coordinates><panel_attributes>lt=..</panel_attributes><additional_attributes>10;10;360;310</additional_attributes></element><element><id>Relation</id><coordinates><x>576</x><y>632</y><w>680</w><h>120</h></coordinates><panel_attributes>lt=..</panel_attributes><additional_attributes>10;130;830;10</additional_attributes></element><element><id>Relation</id><coordinates><x>576</x><y>344</y><w>328</w><h>400</h></coordinates><panel_attributes>lt=..</panel_attributes><additional_attributes>10;480;390;10</additional_attributes></element><element><id>UMLInterface</id><coordinates><x>1152</x><y>152</y><w>128</w><h>80</h></coordinates><panel_attributes>Interface
 SpeechToTextService
+«future» abstraction, currently via Web Speech API in index.html (no Java implementation yet)
 --
 +transcribe(audio): String</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>888</x><y>288</y><w>184</w><h>80</h></coordinates><panel_attributes>NaturalLanguageService
 --
