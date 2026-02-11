@@ -36,7 +36,7 @@ Transaction
 +findByPeriod(): Transaction</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>928</x><y>1016</y><w>24</w><h>80</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;80;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>984</x><y>1096</y><w>96</w><h>24</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>100;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1240</x><y>624</y><w>296</w><h>48</h></coordinates><panel_attributes>AnalyticsController
 --
 --
-+getReport(startDate: LocalDate, endDate: LocalDate): Report</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1232</x><y>720</y><w>168</w><h>48</h></coordinates><panel_attributes>AnalyticsService
++getReport(): FinancialReportDTO</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1232</x><y>720</y><w>168</w><h>48</h></coordinates><panel_attributes>AnalyticsService
 --
 --
 +generateReport(): Report</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1248</x><y>816</y><w>168</w><h>72</h></coordinates><panel_attributes>FinancialReportDTO
