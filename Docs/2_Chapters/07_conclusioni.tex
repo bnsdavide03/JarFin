@@ -70,7 +70,11 @@ Il Gateway verificherebbe i token JWT (JSON Web Token) prima di inoltrare le ric
 \subsection{Evoluzione del Motore NLU}
 Per supportare frasi più complesse e meno strutturate, il motore regex potrebbe essere sostituito o affiancato da una libreria di NLP (Natural Language Processing) locale come \textbf{Stanford CoreNLP} o \textbf{Apache OpenNLP}, permettendo il riconoscimento delle entità (NER) tramite modelli probabilistici.
 
-\newpage
+\subsection{Digitalizzazione Scontrini tramite OCR}
+Un'importante funzionalità, attualmente già in fase di sviluppo, riguarda l'integrazione di un sistema di \textbf{Optical Character Recognition (OCR)} per la digitalizzazione automatica degli scontrini cartacei.
+L'obiettivo è permettere all'utente di caricare l'immagine di uno scontrino direttamente dalla Web UI; il sistema, mediante librerie di elaborazione immagini (es. Tesseract), estrarrà automaticamente i metadati essenziali (Data, Importo Totale ed Esercente) per popolare una nuova transazione.
+Questo modulo ridurrà drasticamente il \textit{data entry} manuale, rendendo l'inserimento delle spese fisiche immediato e meno soggetto a errori di trascrizione.
+
 \subsection{Container Orchestration (Kubernetes)}
 L'attuale configurazione \textit{Docker Compose} è ideale per lo sviluppo. In produzione, il passaggio a \textbf{Kubernetes} permetterebbe di scalare orizzontalmente i singoli servizi (es. avere 3 istanze dell'Analytics Service durante i picchi di carico di fine mese) e gestire la resilienza automatica (Self-healing).
 
