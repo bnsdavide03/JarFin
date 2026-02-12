@@ -117,7 +117,7 @@ class AnalyticsServiceTest {
 
         assertEquals(BigDecimal.ZERO, report.getTotalIncomes());
         assertEquals(new BigDecimal("-100"), report.getSavingsRate());
-        assertTrue(report.getAlertLevel().contains("Critical"));
+        assertTrue(report.getAlertLevel().contains("RED"));
     }
     
     @Test

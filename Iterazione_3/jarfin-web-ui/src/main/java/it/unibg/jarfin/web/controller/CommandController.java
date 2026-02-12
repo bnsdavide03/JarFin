@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/voice")
@@ -26,7 +28,7 @@ public class CommandController {
     private final NaturalLanguageService nluService;
     private final RestTemplate restTemplate;
     
-    private String mex = "message";
+    private static final String RESPONSE_KEY_MESSAGE = "message";
 
     @Value("${api.gateway.url:http://localhost:8080}")
     private String gatewayUrl;
@@ -45,7 +47,7 @@ public class CommandController {
             ParsedTransaction parsed = nluService.parse(text);
             
             if (parsed == null || (parsed.getAmount() == null && parsed.getCommandType() == CommandType.CREATE)) {
-                 return ResponseEntity.ok(Map.of("status", "ignored", mex, "Ignorato"));
+                 return ResponseEntity.ok(Map.of("status", "ignored", RESPONSE_KEY_MESSAGE, "Ignorato"));
             }
 
             String baseUrl = gatewayUrl + "/api/transactions";
@@ -62,47 +64,64 @@ public class CommandController {
                     HttpEntity<ParsedTransaction> request = new HttpEntity<>(parsed, headers);
                     restTemplate.postForEntity(baseUrl, request, Object.class);
                     
-                    return ResponseEntity.ok(Map.of(mex, "Salvato", "amount", parsed.getAmount(), "category", parsed.getCategory()));
+                    return ResponseEntity.ok(Map.of(
+                        RESPONSE_KEY_MESSAGE, "Salvato", 
+                        "amount", parsed.getAmount(), 
+                        "category", parsed.getCategory()
+                    ));
 
                 case UPDATE:
                     if (parsed.getTargetId() == null) return ResponseEntity.badRequest().body("Specifica l'ID");
                     
                     String resourceUrl = baseUrl + "/" + parsed.getTargetId();
-                    ParsedTransaction existing;
+                    ParsedTransaction existing = null;
+                    
                     try {
                         existing = restTemplate.getForObject(resourceUrl, ParsedTransaction.class);
                     } catch (Exception e) {
-                        return ResponseEntity.badRequest().body("ID non trovato.");
+                        return ResponseEntity.badRequest().body("ID non trovato o errore backend.");
                     }
+                    
                     if (existing == null) return ResponseEntity.badRequest().body("ID non trovato.");
 
                     if (parsed.getAmount() != null) existing.setAmount(parsed.getAmount());
                     if (parsed.getDescription() != null && !parsed.getDescription().isEmpty()) existing.setDescription(parsed.getDescription());
                     if (parsed.getCategory() != null) existing.setCategory(parsed.getCategory());
                     if (parsed.getType() != null) existing.setType(parsed.getType());
+                    
                     existing.setId(parsed.getTargetId());
 
                     HttpEntity<ParsedTransaction> requestUp = new HttpEntity<>(existing, headers);
                     restTemplate.put(resourceUrl, requestUp);
                     
-                    return ResponseEntity.ok(Map.of(mex, "Aggiornato ID " + parsed.getTargetId(), "amount", existing.getAmount(), "category", "Modifica salvata"));
+                    return ResponseEntity.ok(Map.of(
+                        RESPONSE_KEY_MESSAGE, "Aggiornato ID " + parsed.getTargetId(), 
+                        "amount", existing.getAmount(), 
+                        "category", "Modifica salvata"
+                    ));
 
                 case DELETE:
                     Long idToDelete = parsed.getTargetId();
+                    
                     if (idToDelete == null && parsed.getDescription() != null) {
                         idToDelete = findIdByDescription(parsed.getDescription());
                     }
-                    if (idToDelete == null) return ResponseEntity.badRequest().body("Cosa elimino?");
+                    
+                    if (idToDelete == null) return ResponseEntity.badRequest().body("Non ho capito cosa eliminare (ID mancante).");
 
-                    restTemplate.delete(baseUrl + "/" + idToDelete);
-                    return ResponseEntity.ok(Map.of(mex, "Eliminato ID " + idToDelete));
+                    try {
+                        restTemplate.delete(baseUrl + "/" + idToDelete);
+                        return ResponseEntity.ok(Map.of(RESPONSE_KEY_MESSAGE, "Eliminato ID " + idToDelete));
+                    } catch (Exception e) {
+                        return ResponseEntity.badRequest().body("Errore durante l'eliminazione dell'ID " + idToDelete);
+                    }
 
                 default:
                     return ResponseEntity.status(400).body("Comando sconosciuto");
             }
 
         } catch (Exception e) {
-            log.error("Errore: {}", e.getMessage());
+            log.error("Errore processamento voce: {}", e.getMessage());
             return ResponseEntity.internalServerError().body("Errore: " + e.getMessage());
         }
     }
@@ -115,13 +134,20 @@ public class CommandController {
                 null,
                 new ParameterizedTypeReference<List<ParsedTransaction>>() {}
             );
+            
             List<ParsedTransaction> list = response.getBody();
-            if (list == null) return null;
-            return list.stream()
+            if (list == null || list.isEmpty()) return null;
+
+            Optional<ParsedTransaction> match = list.stream()
                 .filter(t -> t.getDescription() != null && t.getDescription().toLowerCase().contains(keyword.toLowerCase()))
-                .sorted((t1, t2) -> t2.getDate().compareTo(t1.getDate()))
-                .map(ParsedTransaction::getId)
-                .findFirst().orElse(null);
-        } catch (Exception e) { return null; }
+                .sorted(Comparator.comparing(ParsedTransaction::getDate, Comparator.nullsLast(Comparator.reverseOrder()))) 
+                .findFirst();
+
+            return match.map(ParsedTransaction::getId).orElse(null);
+            
+        } catch (Exception e) { 
+            log.warn("Errore durante findIdByDescription: {}", e.getMessage());
+            return null; 
+        }
     }
 }
