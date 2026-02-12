@@ -33,22 +33,22 @@ I requisiti funzionali definiscono le capacità operative che il sistema deve es
     \begin{longtable}{|c|p{4cm}|p{6cm}|c|}
 
         \hline
-        \textbf{ID} & \textbf{Requisito}              & \textbf{Descrizione}                                                                                                                                                                      & \textbf{Priorità} \\ \hline
+        \textbf{ID} & \textbf{Requisito}              & \textbf{Descrizione}                                                                                                                                                                            & \textbf{Priorità} \\ \hline
         \endfirsthead
 
-        \multicolumn{4}{c}{{}}                                                                                                                                                                                                                                        \\
+        \multicolumn{4}{c}{{}}                                                                                                                                                                                                                                              \\
         \hline
-        \textbf{ID} & \textbf{Requisito}              & \textbf{Descrizione}                                                                                                                                                                      & \textbf{Priorità} \\ \hline
+        \textbf{ID} & \textbf{Requisito}              & \textbf{Descrizione}                                                                                                                                                                            & \textbf{Priorità} \\ \hline
         \endhead
 
         \hline
         \endfoot
 
-        RF-01       & Gestione transazioni (CRUD)     & Il sistema deve consentire la creazione, lettura, aggiornamento e cancellazione delle transazioni tramite API REST esposte dal servizio Accounting.                                       & Alta              \\ \hline
+        RF-01       & Gestione transazioni (CRUD)     & Il sistema deve consentire la creazione, lettura, aggiornamento e cancellazione delle transazioni tramite API REST esposte dal servizio Accounting.                                             & Alta              \\ \hline
         RF-02       & Parsing del linguaggio naturale & Il servizio NLU deve interpretare input testuali ed estrarre le entità rilevanti (importo, categoria, tipo) utilizzando la classe \texttt{NaturalLanguageService} e il metodo \texttt{parse()}. & Alta              \\ \hline
-        RF-03       & Aggregazione e reporting        & Il servizio Analytics deve aggregare i dati finanziari e generare statistiche temporali tramite la classe \texttt{DataAggregator}.                                                        & Media             \\ \hline
-        RF-04       & Orchestrazione API Gateway      & Il sistema deve fornire un punto di accesso unico tramite \texttt{APIGateway}, responsabile del routing verso i microservizi.                                                             & Alta              \\ \hline
-        RF-05       & Output strutturato              & Il sistema deve restituire risposte in formato JSON standardizzato per garantire interoperabilità con i client.                                                                           & Media             \\ \hline
+        RF-03       & Aggregazione e reporting        & Il servizio Analytics deve aggregare i dati finanziari e generare statistiche temporali tramite la classe \texttt{DataAggregator}.                                                              & Media             \\ \hline
+        RF-04       & Orchestrazione API Gateway      & Il sistema deve fornire un punto di accesso unico tramite \texttt{APIGateway}, responsabile del routing verso i microservizi.                                                                   & Alta              \\ \hline
+        RF-05       & Output strutturato              & Il sistema deve restituire risposte in formato JSON standardizzato per garantire interoperabilità con i client.                                                                                 & Media             \\ \hline
     \end{longtable}
 \end{small}
 
@@ -74,8 +74,8 @@ I requisiti non funzionali definiscono gli attributi di qualità del sistema.
         RNF-01      & Modularità         & Il sistema deve essere implementato con architettura a microservizi (Spring Boot), garantendo disaccoppiamento.                  & Alta              \\ \hline
         RNF-02      & Manutenibilità     & Il codice deve rispettare il pattern \textit{Controller–Service–Repository} e i principi Clean Code.                             & Alta              \\ \hline
         RNF-03      & Scalabilità        & L'architettura deve supportare l'aggiunta di nuovi moduli (es. Speech-to-Text) senza rifattorizzazione.                          & Media             \\ \hline
-        RNF-04      & Usabilità          & Il sistema deve garantire tempi di risposta adeguati per operazioni sincrone standard e supportare query in linguaggio naturale. & Alta              \\ \hline        
-        RNF-05      & Integrità dei dati & La persistenza deve essere affidata a un DBMS relazionale (PostgreSQL) conforme alle proprietà ACID.            & Alta              \\ \hline
+        RNF-04      & Usabilità          & Il sistema deve garantire tempi di risposta adeguati per operazioni sincrone standard e supportare query in linguaggio naturale. & Alta              \\ \hline
+        RNF-05      & Integrità dei dati & La persistenza deve essere affidata a un DBMS relazionale (PostgreSQL) conforme alle proprietà ACID.                             & Alta              \\ \hline
     \end{longtable}
 \end{small}
 
@@ -159,16 +159,13 @@ La vista logica (Figura \ref{fig:classdiagram}) illustra la struttura statica de
 \end{figure}
 
 \subsection{Shared Kernel e Modello di Dominio}
-La parte sinistra del diagramma definisce le entità core, condivise concettualmente tra i moduli:
+La parte sinistra del diagramma definisce le entità core del sistema, che costituiscono il linguaggio comune tra i vari microservizi:
 \begin{itemize}
-    \subsection{Shared Kernel e Modello di Dominio}
-    La parte sinistra del diagramma definisce le entità core del sistema, che costituiscono il linguaggio comune tra i vari microservizi:
-    \begin{itemize}
-        \item \textbf{\texttt{Transaction}}: Definita come una \textit{Abstract Class}, rappresenta l'entità fondamentale. Include i campi \texttt{id} (Long), \texttt{amount} (BigDecimal), \texttt{date} (LocalDate), \texttt{description}, \texttt{category} e \texttt{type}.
-        \item \textbf{\texttt{Category}}: Entità dedicata alla classificazione delle operazioni (es. "Cibo", "Casa"). È legata a \texttt{Transaction} da una relazione di associazione "belongs to" con cardinalità $1$ a $0..n$.
-        \item \textbf{\texttt{Budget}}: Classe utilizzata per monitorare le soglie di spesa. Presenta gli attributi \texttt{limitAmount}, \texttt{spentAmount} e un riferimento a un \texttt{Period}. È collegata alla classe \texttt{Category} con una relazione $1:1$.
-        \item \textbf{\texttt{Period}}: Una classe di supporto che modella un intervallo temporale tramite \texttt{startDate} e \texttt{endDate} (Date). Questa entità è condivisa sia da \texttt{Budget} che dalla logica di \texttt{Report} per definire l'ambito temporale delle analisi.
-    \end{itemize}
+    \item \textbf{\texttt{Transaction}}: Definita come una \textit{Abstract Class}, rappresenta l'entità fondamentale. Include i campi \texttt{id} (Long), \texttt{amount} (BigDecimal), \texttt{date} (LocalDate), \texttt{description}, \texttt{category} e \texttt{type}.
+    \item \textbf{\texttt{Category}}: Entità dedicata alla classificazione delle operazioni (es. "Cibo", "Casa"). È legata a \texttt{Transaction} da una relazione di associazione "belongs to" con cardinalità $1$ a $0..n$.
+    \item \textbf{\texttt{Budget}}: Classe utilizzata per monitorare le soglie di spesa. Presenta gli attributi \texttt{limitAmount}, \texttt{spentAmount} e un riferimento a un \texttt{Period}. È collegata alla classe \texttt{Category} con una relazione $1:1$.
+    \item \textbf{\texttt{Period}}: Una classe di supporto che modella un intervallo temporale tramite \texttt{startDate} e \texttt{endDate} (Date). Questa entità è condivisa sia da \texttt{Budget} che dalla logica di \texttt{Report} per definire l'ambito temporale delle analisi.
+\end{itemize}
 
 \subsection{Microservizio Accounting}
 Situato nella parte inferiore, implementa il classico pattern a tre livelli per la gestione dei dati finanziari:
