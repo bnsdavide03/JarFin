@@ -45,7 +45,7 @@ I requisiti funzionali definiscono le capacità operative che il sistema deve es
         \endfoot
 
         RF-01       & Gestione transazioni (CRUD)     & Il sistema deve consentire la creazione, lettura, aggiornamento e cancellazione delle transazioni tramite API REST esposte dal servizio Accounting.                                       & Alta              \\ \hline
-        RF-02       & Parsing del linguaggio naturale & Il servizio NLU deve interpretare input testuali ed estrarre le entità rilevanti (importo, categoria, tipo) utilizzando la classe \texttt{ParserNLU} e il metodo \texttt{parseCommand()}. & Alta              \\ \hline
+        RF-02       & Parsing del linguaggio naturale & Il servizio NLU deve interpretare input testuali ed estrarre le entità rilevanti (importo, categoria, tipo) utilizzando la classe \texttt{NaturalLanguageService} e il metodo \texttt{parse()}. & Alta              \\ \hline
         RF-03       & Aggregazione e reporting        & Il servizio Analytics deve aggregare i dati finanziari e generare statistiche temporali tramite la classe \texttt{DataAggregator}.                                                        & Media             \\ \hline
         RF-04       & Orchestrazione API Gateway      & Il sistema deve fornire un punto di accesso unico tramite \texttt{APIGateway}, responsabile del routing verso i microservizi.                                                             & Alta              \\ \hline
         RF-05       & Output strutturato              & Il sistema deve restituire risposte in formato JSON standardizzato per garantire interoperabilità con i client.                                                                           & Media             \\ \hline
@@ -217,7 +217,7 @@ Il livello superiore rappresenta il frontend dell'applicazione.
 \subsection{Application Layer (Business Logic)}
 Il nucleo del sistema è accessibile tramite la porta di ingresso \textbf{\texttt{APPORT [1]}} e comprende tre microservizi:
 \begin{itemize}
-    \item \textbf{NLU Service}: Espone l'interfaccia \texttt{NLUInterface} con il metodo \texttt{parseCommand()}. Al suo interno incapsula l'artefatto \texttt{ParserNLU.java} per l'analisi semantica.
+    \item \textbf{NLU Service}: Espone l'interfaccia \texttt{NLUInterface} con il metodo \texttt{parse()}. Al suo interno incapsula l'artefatto \texttt{NaturalLanguageService.java} per l'analisi semantica.
     \item \textbf{Accounting Service}: Gestisce la contabilità tramite \texttt{AccountingInterface}, offrendo i metodi \texttt{addTransaction()} e \texttt{getBalance()}.
     \item \textbf{Analytics Service}: Espone \texttt{AnalyticsInterface} e utilizza l'artefatto \texttt{DataAggregator.java} per calcolare le statistiche (\texttt{getStatistics()}).
 \end{itemize}
@@ -302,7 +302,7 @@ Il sistema è distribuito su quattro entità computazionali distinte, configurat
 
     \item \textbf{Cloud Server (Application Host)}: Il nodo server che ospita la logica di business. È configurato come un ambiente di orchestrazione container (Docker Host), suddiviso in tre ambienti di esecuzione isolati per massimizzare l'indipendenza dei servizi:
           \begin{itemize}
-              \item \textbf{Container NLU}: esegue l'artefatto \texttt{ParserNLU.jar}.
+              \item \textbf{Container NLU}: esegue l'artefatto \texttt{NaturalLanguageService.jar}.
               \item \textbf{Container Accounting}: esegue l'artefatto \texttt{AccountingService.jar}.
               \item \textbf{Container Analytics}: esegue l'artefatto \texttt{AnalyticsService.jar}.
           \end{itemize}
