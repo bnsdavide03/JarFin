@@ -141,109 +141,420 @@ recognition.onresult = (event) => {
 
 Questa architettura ibrida garantisce \textbf{latenza zero} nell'attivazione e maggiore \textbf{privacy}, poiché l'audio raw non lascia mai il dispositivo dell'utente.
 
-\section{Natural Language Understanding (NLU) Engine}
+\section{Natural Language Understanding Engine}
 
-Il cuore intelligente del sistema è il servizio \texttt{NaturalLanguageService}. A differenza degli approcci basati su LLM (Large Language Models), che sono probabilisticamente corretti ma lenti e costosi, JarFin adotta un motore \textbf{deterministico basato su regole}.
+Il cuore intelligente del sistema è il servizio \texttt{NaturalLanguageService}. A differenza degli approcci basati su Large Language Models (LLM), che producono output probabilistici e richiedono risorse computazionali elevate, JarFin adotta un motore \textbf{deterministico multi-stadio basato su regole, normalizzazione linguistica e parsing semantico strutturato}.
 
-Questa scelta garantisce:
+Questa architettura garantisce simultaneamente:
+
 \begin{itemize}
-    \item \textbf{Velocità}: Elaborazione in $O(N)$.
-    \item \textbf{Affidabilità}: A parità di input, l'output è sempre identico.
-    \item \textbf{Interpretabilità}: Ogni estrazione è giustificata da una regola regex/keyword.
+    \item \textbf{Velocità}: complessità lineare $O(n)$ rispetto alla lunghezza dell'input.
+    \item \textbf{Determinismo}: assenza di variabilità stocastica nell'output.
+    \item \textbf{Interpretabilità}: ogni estrazione è tracciabile a una regola esplicita.
+    \item \textbf{Robustezza linguistica}: capacità di interpretare varianti naturali della lingua italiana.
+    \item \textbf{Efficienza}: nessuna dipendenza da GPU o servizi cloud esterni.
+    \item \textbf{Privacy}: nessun invio di dati sensibili a servizi terzi.
 \end{itemize}
 
-\subsection{Implementazione: Regex e Keyword Mapping}
-Il servizio utilizza espressioni regolari pre-compilate per l'estrazione di importi e ID, e una mappa hash per la classificazione semantica.
+Il servizio implementa una pipeline di elaborazione composta da più fasi sequenziali, ciascuna responsabile di un aspetto specifico dell'interpretazione semantica.
+
+\subsection{Architettura della Pipeline di Parsing}
+
+Il processo di interpretazione segue una pipeline deterministica multi-stadio:
+
+\begin{enumerate}
+    \item Normalizzazione linguistica
+    \item Classificazione dell'intento
+    \item Estrazione dell'importo
+    \item Classificazione della categoria
+    \item Determinazione del tipo finanziario
+    \item Generazione intelligente della descrizione
+    \item Costruzione dell'oggetto strutturato
+\end{enumerate}
+
+Ogni fase opera sul risultato della precedente, implementando un modello di trasformazione incrementale.
+
+\subsection{Normalizzazione Morfologica e Semantica}
+
+Il primo stadio consiste nella normalizzazione linguistica mediante una trasformazione morfologica deterministica che converte verbi in sostantivi semanticamente equivalenti.
+
+\medskip
+
+\begin{lstlisting}[language=Java]
+VERB_TO_NOUN.put("pagato", "pagamento");
+VERB_TO_NOUN.put("speso", "spesa");
+VERB_TO_NOUN.put("ricevuto", "entrata");
+VERB_TO_NOUN.put("accreditato", "accredito");
+VERB_TO_NOUN.put("comprato", "acquisto");
+\end{lstlisting}
+
+Questo processo equivale a una forma semplificata di lemmatizzazione e consente di ridurre la dimensionalità semantica dello spazio linguistico.
+
+Ad esempio:
+
+\begin{itemize}
+    \item "ho pagato 50 euro" → "ho pagamento 50 euro"
+    \item "ho ricevuto lo stipendio" → "ho entrata stipendio"
+\end{itemize}
+
+Ciò migliora significativamente la precisione del matching semantico nelle fasi successive.
+
+\subsection{Classificazione dell'Intento}
+
+Il sistema identifica l'intento dell'utente utilizzando espressioni regolari pre-compilate:
 
 \bigskip
 
-\begin{lstlisting}[language=Java, label={lst:nlu_constants}]
-private static final Pattern NUMBER_PATTERN = 
-    Pattern.compile("(\\d+([.,]\\d{1,2})?)"); // Supporta 10.50 e 10,50
-    
-private static final Pattern DELETE_CMD = 
-    Pattern.compile("(elimina|cancella|rimuovi|togli)", Pattern.CASE_INSENSITIVE);
+\begin{lstlisting}[language=Java]
+private static final Pattern DELETE_CMD =
+Pattern.compile("(elimina|cancella|rimuovi|togli)");
 
-private static final Map<String, String> CATEGORY_MAP = new HashMap<>();
-static {
-    CATEGORY_MAP.put("mcdonald", "Ristorante");
-    CATEGORY_MAP.put("benzina", "Trasporti");
-    // ... mappatura estesa di oltre 50 keyword
+private static final Pattern UPDATE_CMD =
+Pattern.compile("(modifica|cambia|aggiorna|correggi)");
+\end{lstlisting}
+
+Gli intenti supportati sono:
+
+\begin{itemize}
+    \item CREATE
+    \item UPDATE
+    \item DELETE
+\end{itemize}
+
+In caso di UPDATE o DELETE, il sistema estrae l'identificatore della transazione:
+
+\bigskip
+\begin{lstlisting}[language=Java]
+private static final Pattern ID_PATTERN =
+Pattern.compile("(id|numero|codice|transazione)\\s+(\\d+)");
+\end{lstlisting}
+
+\bigskip
+
+Esempio:
+
+\begin{itemize}
+    \item "elimina transazione 42" → comando DELETE con targetId = 42
+\end{itemize}
+
+\subsection{Parsing Numerico Avanzato}
+
+Una delle principali evoluzioni del NaturalLanguageService consiste nell'implementazione di un parser numerico completo per la lingua italiana.
+
+Il sistema supporta simultaneamente:
+
+\begin{itemize}
+    \item numeri interi
+    \item numeri decimali
+    \item separatori europei (1.234,56)
+    \item separatori internazionali (1234.56)
+    \item numeri scritti in lettere
+    \item numeri composti complessi
+    \item centesimi espressi verbalmente
+    \item magnitudini fino ai miliardi
+\end{itemize}
+
+Esempi validi:
+
+\begin{itemize}
+    \item "ho speso 12.50"
+    \item "ho speso 12,50"
+    \item "ho speso dodici euro"
+    \item "ho speso centoventi"
+    \item "ho ricevuto duemilacinquecento"
+    \item "ho ricevuto un milione"
+    \item "venti euro e cinquanta centesimi"
+\end{itemize}
+
+Il parsing avviene tramite il metodo:
+
+\bigskip
+
+\begin{lstlisting}[language=Java]
+private BigDecimal parseItalianNumberWords(String text)
+\end{lstlisting}
+
+Il metodo implementa un parser deterministico basato su accumulatore incrementale, in cui il valore numerico viene costruito progressivamente durante la scansione sequenziale dei token, senza ricorrere a backtracking o analisi grammaticale completa. Inoltre il metodo in questione implementa un parser gerarchico in grado di riconoscere:
+
+\begin{itemize}
+    \item unità (uno, due, tre)
+    \item decine (venti, trenta)
+    \item centinaia
+    \item migliaia
+    \item milioni
+    \item miliardi
+\end{itemize}
+
+La struttura logica si basa su una decomposizione in gruppi numerici ordinati per magnitudine.
+
+\subsubsection{Meccanismo ad accumulatore incrementale}
+
+L'algoritmo utilizza un approccio deterministico basato su due variabili principali:
+
+\begin{itemize}
+    \item \texttt{currentValue}: accumula il valore del gruppo numerico corrente
+    \item \texttt{totalValue}: accumula il valore complessivo dei gruppi già completati
+\end{itemize}
+
+Il testo viene analizzato sequenzialmente da sinistra a destra. Ogni token numerico modifica uno degli accumulatori secondo regole precise.
+
+Durante la scansione:
+
+\begin{enumerate}
+
+    \item Se il token rappresenta un'unità o una decina, il valore viene sommato a \texttt{currentValue}.
+
+        Esempio:
+
+        \medskip
+
+            \begin{lstlisting}
+                currentValue = 20
+                currentValue = currentValue + 3   // 23
+            \end{lstlisting}
+
+    \newpage
+    \item Se il token rappresenta una centinaia, il valore corrente viene moltiplicato.
+
+        Esempio:
+
+          \medskip
+
+            \begin{lstlisting}
+                currentValue = 2
+                currentValue = currentValue * 100   // 200
+            \end{lstlisting}
+
+    \item Se il token rappresenta un moltiplicatore maggiore (mille, milione, miliardo), il valore corrente viene moltiplicato e trasferito nel totale.
+
+        Esempio:
+         
+        \medskip
+            \begin{lstlisting}
+                currentValue = 2
+                currentValue = currentValue * 1000   // 2000
+
+                totalValue = totalValue + currentValue
+                currentValue = 0
+
+                currentValue = 300
+            \end{lstlisting}
+
+        Valore finale:
+        \medskip
+
+            \begin{lstlisting}
+                value = totalValue + currentValue   // 2300
+            \end{lstlisting}
+
+    \item Se viene rilevata una componente frazionaria espressa in centesimi, essa viene convertita e sommata come valore decimale.
+    \item Il sistema riconosce esplicitamente espressioni naturali come "cinquanta centesimi", convertendole in rappresentazione decimale (0.50) e integrandole nel valore finale. Questa funzionalità è particolarmente rilevante per applicazioni vocali, dove l'utente tende a esprimere naturalmente la parte frazionaria in forma linguistica anziché numerica.
+
+        Esempio:
+        \medskip
+
+            \begin{lstlisting}
+            value = 20 + 0.50   // 20.50
+            \end{lstlisting}
+
+\end{enumerate}
+
+\newpage
+Il valore finale è quindi calcolato come:
+\[
+    value = totalValue + currentValue
+\]
+
+Il risultato viene rappresentato tramite il tipo \texttt{BigDecimal}, che garantisce precisione esatta nelle operazioni monetarie ed evita errori di arrotondamento tipici dei tipi floating-point, risultando particolarmente adatto per applicazioni finanziarie.
+
+\subsubsection{Strategia di fallback}
+
+Il sistema adotta un approccio multi-livello:
+
+\begin{enumerate}
+    \item Tentativo di parsing tramite analisi semantica dei numeri espressi in lettere
+    \item In caso di fallimento, utilizzo di espressioni regolari per identificare numeri in formato numerico
+\end{enumerate}
+
+Questo garantisce robustezza anche in presenza di input misti o parzialmente strutturati.
+
+\subsubsection{Complessità computazionale}
+
+L'algoritmo presenta complessità temporale lineare:
+\[
+    O(n)
+\]
+
+dove $n$ rappresenta il numero di token nel comando.
+
+La complessità spaziale è anch'essa lineare, limitata alla memorizzazione temporanea dei token e degli accumulatori.
+
+L'assenza di backtracking o branching non deterministico rende il parser adatto all'esecuzione in tempo reale anche su dispositivi a risorse limitate.
+
+\newpage
+\subsection{Classificazione Semantica della Categoria}
+
+Il sistema utilizza una mappa semantica contenente oltre 100 keyword:
+
+\medskip
+
+\begin{lstlisting}[language=Java]
+CATEGORY_MAP.put("mcdonald", "Ristorante");
+CATEGORY_MAP.put("esselunga", "Supermercato");
+CATEGORY_MAP.put("benzina", "Trasporti");
+CATEGORY_MAP.put("netflix", "Svago");
+CATEGORY_MAP.put("stipendio", "Stipendio");
+\end{lstlisting}
+
+L'algoritmo utilizza una strategia di \textbf{Longest Match Selection}:
+
+\begin{itemize}
+    \item tra tutte le keyword trovate
+    \item viene selezionata quella più specifica (stringa più lunga)
+\end{itemize}
+
+Questo evita classificazioni errate causate da keyword generiche.
+
+\subsection{Determinazione del Tipo Finanziario}
+
+Il sistema distingue automaticamente tra entrate e uscite:
+
+\medskip
+
+\begin{lstlisting}[language=Java]
+if (containsAny(text,
+"ricevuto","stipendio","accreditato"))
+type = INCOME;
+if (containsAny(text,
+"speso","pagato","costo"))
+type = EXPENSE;
+\end{lstlisting}
+
+Questa classificazione avviene indipendentemente dalla categoria.
+
+\subsection{Generazione Intelligente della Descrizione}
+
+Il sistema implementa un algoritmo di estrazione semantica della descrizione basato su priorità:
+
+\begin{enumerate}
+    \item estrazione di nomi specifici
+    \item estrazione di sostantivi rilevanti
+    \item fallback su descrizione predefinita per categoria
+\end{enumerate}
+
+Esempio:
+
+\begin{itemize}
+    \item "ho speso 12 euro al McDonald"
+          → descrizione: McDonald
+
+    \item "ho pagato la palestra"
+          → descrizione: Palestra
+\end{itemize}
+
+\subsection{Costruzione dell'Oggetto ParsedTransaction}
+
+Il risultato finale è un oggetto strutturato:
+
+\bigskip
+
+\begin{lstlisting}[language=Java]
+ParsedTransaction {
+ commandType
+ amount
+ category
+ description
+ type
+ date
+ targetId
 }
 \end{lstlisting}
 
-\section{Design in Piccolo: Analisi dell'Algoritmo NLU}
+Questo oggetto è direttamente utilizzabile dal servizio Accounting.
 
-L'algoritmo di parsing (\texttt{parse}) trasforma una stringa naturale non strutturata in un oggetto \texttt{ParsedTransaction} pronto per il database.
-
-\subsection{Pseudocodice Formale}
-L'algoritmo segue una pipeline sequenziale di estrazione e pulizia.
-
-\bigskip
+\subsection{Pseudocodice dell'Algoritmo}
 
 \begin{lstlisting}[mathescape=true, basicstyle=\small\ttfamily]
 Algoritmo ParseNaturalLanguage(text):
-    Input: Stringa $S$ (comando utente)
-    Output: Oggetto $T$ (Transazione strutturata) o NULL
+Input: Stringa S (comando utente)
+Output: Oggetto T (Transazione strutturata) o NULL
 
-    // 1. Pre-validazione
-    IF $S$ is NULL OR length($S$) < 2 OR contains(STOP_WORDS, $S$) THEN
-        RETURN NULL
-    END IF
-    $S_{lower} \leftarrow$ ToLowerCase($S$)
+// 1. Pre-validazione e Stop-words
+IF $S$ is NULL OR length($S$) < 2 THEN RETURN NULL
+$S_{lower} \leftarrow$ ToLowerCase(Trim($S$))
+IF contains(STOP_WORDS, $S_{lower}$) THEN RETURN NULL
 
-    // 2. Identificazione Intento (Command Classification)
-    IF Match($P_{delete}$, $S$) THEN 
-        $T.command \leftarrow$ DELETE
-        $T.targetId \leftarrow$ ExtractId($S$)
-    ELSE IF Match($P_{update}$, $S$) THEN
-        $T.command \leftarrow$ UPDATE
-        $T.targetId \leftarrow$ ExtractId($S$)
-    ELSE
-        $T.command \leftarrow$ CREATE
-        $T.date \leftarrow$ CurrentDate()
-    END IF
+// 2. Normalizzazione e Identificazione Intento
+$S_{norm} \leftarrow$ ConvertVerbsToNouns($S_{lower}$)
+$T \leftarrow$ New ParsedTransaction()
 
-    // 3. Estrazione Importo (Regex)
-    Match $M_{num} \leftarrow$ Find($P_{number}$, $S$ without IDs)
-    IF $M_{num}$ found THEN
-        $T.amount \leftarrow$ ParseDecimal($M_{num}.value$)
-    END IF
+IF Match($P_{delete}$, $S_{norm}$) THEN 
+    $T.command \leftarrow$ DELETE
+    $T.targetId \leftarrow$ ExtractId($S_{norm}$)
+ELSE IF Match($P_{update}$, $S_{norm}$) THEN
+    $T.command \leftarrow$ UPDATE
+    $T.targetId \leftarrow$ ExtractId($S_{norm}$)
+ELSE
+    $T.command \leftarrow$ CREATE
+    $T.date \leftarrow$ CurrentDate()
+END IF
 
-    // 4. Classificazione Categoria (Keyword Matching)
-    FOR each ($Key$, $Cat$) in $Map_{categories}$ DO:
-        IF $S_{lower}$ contains $Key$ THEN
-            $T.category \leftarrow Cat$
-            BREAK // Match trovato (Priority First)
+// 3. Estrazione Importo (Accumulatore Ibrido)
+$Tokens \leftarrow$ Tokenize($S_{norm}$ without IDs)
+$GrandTotal \leftarrow 0$, $Buffer \leftarrow 0$
+
+FOR each $Token$ in $Tokens$ DO:
+    IF IsNumeric($Token$) OR IsNumberWord($Token$) THEN
+        $Val \leftarrow$ ParseMagnitude($Token$)
+        // Gestione Centesimi
+        IF FollowedBy($Token$, "centesimi") THEN
+            $GrandTotal \leftarrow GrandTotal + (Val \times 0.01)$
+        // Gestione Grandezze (Migliaia/Milioni)
+        ELSE IF $Val \geq 1000$ THEN
+            $GrandTotal \leftarrow GrandTotal + Val$
+        ELSE
+            $Buffer \leftarrow$ Accumulate($Buffer, Val$)
         END IF
-    END FOR
-
-    // 5. Pulizia Descrizione (Stop-word Removal)
-    $T.description \leftarrow$ CleanText($S_{lower}$) 
-    IF $T.description$ is empty THEN
-        $T.description \leftarrow T.category$ OR "Generale"
     END IF
+END FOR
+$T.amount \leftarrow GrandTotal + Buffer$
 
-    RETURN $T$
+// 4. Classificazione Categoria e Tipo
+$T.category \leftarrow$ LongestMatch($S_{lower}, Map_{categories}$)
+$T.type \leftarrow$ DetectFinancialType($S_{lower}$)
+
+// 5. Pulizia Descrizione
+$T.description \leftarrow$ CleanText($S_{norm}$, $T.category$)
+
+RETURN $T$
+
 \end{lstlisting}
 
 \subsection{Analisi della Complessità Computazionale}
-Analizziamo il costo temporale $T(n)$ dell'algoritmo, dove $n$ è la lunghezza della stringa di input.
 
-\begin{enumerate}
-    \item \textbf{Regex Matching}: L'applicazione di pattern regex semplici (senza backtracking annidato o ricorsivo) su una stringa di lunghezza $n$ ha complessità lineare $O(n)$.
-    \item \textbf{Keyword Matching}: L'algoritmo itera su una mappa di $K$ parole chiave. Per ogni parola chiave, l'operazione `contains` ha un costo proporzionale alla lunghezza della stringa.
-          \[ T_{match} \approx K \cdot O(n) \]
-          Poiché $K$ è una costante di configurazione (circa 50 entry) e non dipende dall'input utente, asintoticamente questo termine si riduce a $O(n)$.
-    \item \textbf{Clean Text}: La rimozione delle stop-word avviene tramite una serie di \texttt{replaceAll}, ciascuno dei quali scorre la stringa una volta.
-          \[ T_{clean} = \sum_{regex} O(n) \approx C \cdot O(n) \]
-\end{enumerate}
+Il costo computazionale totale è:
+\[
+    T(n) =
+    O(n)
+\]
 
-\textbf{Complessità Totale}:
-\[ T(n) = O(n) + K \cdot O(n) + C \cdot O(n) \]
-\[ T(n) = O(n) \]
+dove ogni fase esegue una scansione lineare della stringa.
 
-L'algoritmo è \textbf{Lineare}. Questo garantisce che il tempo di elaborazione sia trascurabile (< 1ms) per frasi di lunghezza standard (es. 10-100 caratteri), rendendo l'esperienza utente percepita come "istantanea".
+Questo garantisce tempi di risposta inferiori al millisecondo.
+
+\subsection{Robustezza Linguistica}
+
+Il sistema è robusto rispetto a:
+
+\begin{itemize}
+    \item variazioni grammaticali
+    \item ordine libero delle parole
+    \item numeri espressi in forme diverse
+    \item comandi incompleti
+    \item input rumorosi provenienti da STT
+\end{itemize}
+
+Questo rende il sistema adatto all'uso reale in contesti vocali.
 
 \section{Orchestrazione: CommandController}
 
