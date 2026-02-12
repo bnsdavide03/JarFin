@@ -117,11 +117,7 @@ Il diagramma identifica due tipologie di attori:
 
 Le funzionalità sono state raggruppate in tre macro-aree logiche per facilitarne la lettura e l'implementazione.
 
-\subsubsection{Gestione Accesso}
-Include le operazioni di sicurezza e identificazione, necessarie per garantire che i dati finanziari siano accessibili solo al proprietario.
-\begin{itemize}
-    \item \textbf{Registrazione, Login e Logout}: casi d'uso distinti che gestiscono il ciclo di vita della sessione utente.
-\end{itemize}
+
 
 \subsubsection{Gestione Transazioni}
 Rappresenta il nucleo operativo dell'applicazione (\textit{Core Domain}).
@@ -175,30 +171,41 @@ Situato nella parte inferiore, implementa il classico pattern a tre livelli per 
     \item \textbf{\texttt{TransactionRepository}}: interfaccia che estende \textit{Spring Data JPA}, gestendo l'accesso diretto al database.
 \end{itemize}
 
-\subsection{Microservizio NLU (Natural Language Understanding)}
-Il modulo in alto a destra gestisce l'interpretazione dei comandi. La sua struttura evidenzia la separazione tra ricezione del comando ed elaborazione:
+\subsection{NLU Service (Natural Language Understanding)}
+Il modulo gestisce l'interpretazione dei comandi vocali e testuali, evidenziando una struttura orientata al pattern matching e al processamento asincrono:
 \begin{itemize}
-    \item \textbf{\texttt{NLUController}}: riceve l'input (testuale o vocale) dall'API Gateway.
-    \item \textbf{\texttt{NLUService}}: coordina il processo di analisi.
-    \item \textbf{\texttt{ParserNLU}}: il componente core che esegue il pattern matching per estrarre intenti e parametri dalla stringa di testo.
-    \item \textbf{\texttt{SpeechToTextService}}: interfaccia che astrae la comunicazione con il servizio cloud esterno per la trascrizione vocale, garantendo che il resto del sistema rimanga agnostico rispetto alla tecnologia STT scelta.
+    \item \textbf{\texttt{CommandController}}: Riceve i payload dalla WEB UI (endpoint \texttt{POST /process}) e coordina l'interazione tra il servizio NLU e il resto del sistema tramite \texttt{RestTemplate}.
+    \item \textbf{\texttt{NaturalLanguageService}}: Il componente core che esegue il parsing del testo utilizzando pattern predefiniti (\texttt{NUMBER\_PATTERN}, \texttt{DELETE\_CMD}) e una \texttt{CATEGORY\_MAP} per estrarre i dati.
+    \item \textbf{\texttt{ParsedTransaction}}: Un oggetto contenitore (DTO) che racchiude l'intento estratto, includendo il \texttt{CommandType} (CREATE, DELETE, UPDATE), l'importo, la categoria e la descrizione.
+    \item \textbf{\texttt{SpeechToTextService}}: Definita come \textit{Interface}, rappresenta un'astrazione «future». Attualmente, la trascrizione avviene lato client tramite Web Speech API in \texttt{index.html}.
 \end{itemize}
 
-\subsection{Microservizio Analytics}
-Visibile in basso a destra, è dedicato all'elaborazione statistica:
+\subsection{Analytics Service}
+Localizzato nel package dedicato, si occupa della generazione della reportistica finanziaria:
 \begin{itemize}
-    \item \textbf{\texttt{AnalyticsController}}: espone gli endpoint per la richiesta di report.
-    \item \textbf{\texttt{DataAggregator}}: classe specializzata che elabora collezioni di transazioni per calcolare totali, medie e proiezioni, restituendo oggetti di tipo \textbf{\texttt{Report}}.
+    \item \textbf{\texttt{AnalyticsController}}: Espone l'endpoint \texttt{getReport()} che restituisce un oggetto di tipo \texttt{FinancialReportDTO}.
+    \item \textbf{\texttt{AnalyticsService}}: Contiene la logica di business per aggregare i dati e invocare la creazione del \texttt{Report} tramite il metodo \texttt{generateReport()}.
+    \item \textbf{\texttt{FinancialReportDTO}}: Struttura dati ottimizzata per il frontend che include i totali (\texttt{totExp}, \texttt{totInc}) e il dettaglio dei totali per categoria (\texttt{totByCategory}).
 \end{itemize}
 
-\subsection{Orchestrazione}
-Al centro del diagramma, la classe \textbf{\texttt{APIGateway}} agisce come facciata (\textit{Facade Pattern}) verso il client. Le linee tratteggiate indicano che il Gateway non possiede le logiche di business, ma dipende dai Controller dei singoli microservizi per inoltrare le richieste e aggregare le risposte.
+\subsection{Accounting Service}
+Modulo preposto alla gestione della persistenza e della logica transazionale:
+\begin{itemize}
+    \item \textbf{\texttt{TransactionController}}: Punto di ingresso per la gestione delle transazioni (\texttt{createTransaction}, \texttt{getTransactions}).
+    \item \textbf{\texttt{TransactionService}}: Implementa i metodi operativi come \texttt{addExp()} (aggiunta spesa) e \texttt{addInc()} (aggiunta entrata).
+    \item \textbf{\texttt{TransactionRepository}}: Interfaccia per l'accesso ai dati, con metodi specifici come \texttt{saveTransaction()} e \texttt{findByPeriod()}.
+\end{itemize}
 
+\subsection{Orchestrazione e API Gateway}
+L'architettura utilizza un \textbf{\texttt{APIGateway}} all'interno del package \texttt{API}:
+\begin{itemize}
+    \item \textbf{Routing}: Il Gateway funge da unico punto di accesso, esponendo metodi per l'autenticazione (\texttt{authUser}) e il routing delle richieste (\texttt{route}) verso i controller dei microservizi.
+    \item \textbf{Dipendenze}: Le linee tratteggiate indicano una dipendenza d'uso verso \texttt{TransactionController}, \texttt{AnalyticsController} e \texttt{NaturalLanguageService}, confermando il suo ruolo di orchestratore del traffico.
+\end{itemize}
 
 \section{Vista di sviluppo – Component Diagram}
 
-Il Diagramma dei Componenti (Figura \ref{fig:components}) illustra l'organizzazione del sistema in moduli software distinti e le dipendenze che intercorrono tra di essi.
-Questa vista evidenzia la struttura a livelli (\textit{Layered Architecture}), separando nettamente la presentazione, la logica di business e la persistenza dei dati.
+Il Diagramma dei Componenti (Figura \ref{fig:components}) illustra l'organizzazione del sistema JarFin [cite: 4] in moduli software distinti e le dipendenze che intercorrono tra di essi. Questa vista evidenzia una struttura a tre livelli (\textit{Layered Architecture}):
 
 \begin{figure}[H]
     \centering
@@ -207,39 +214,40 @@ Questa vista evidenzia la struttura a livelli (\textit{Layered Architecture}), s
     \label{fig:components}
 \end{figure}
 
-\subsection{Client Layer (Presentation)}
-Il livello superiore rappresenta il frontend dell'applicazione.
+\subsection{Client Layer}
+Il livello superiore rappresenta il frontend e i servizi di interazione immediata con l'utente:
 \begin{itemize}
-    \item \textbf{Componente GUI}: Gestisce il rendering dell'interfaccia grafica.
-    \item \textbf{Interfacce}: Il componente implementa l'interfaccia \texttt{UserInterface}, che espone i metodi \texttt{inputCommand()} e \texttt{displayReport()}.
-    \item \textbf{Porte}: La comunicazione verso l'esterno avviene tramite la porta \textbf{\texttt{GUIPORT [1]}}, che funge da connettore verso l'\textit{API Gateway}.
+    \item \textbf{GUI}: Componente che gestisce la logica di visualizzazione, implementando l'interfaccia \texttt{UserInterface} con i metodi \texttt{inputCommand()} e \texttt{displayReport()}.
+    \item \textbf{Web Speech API (Browser)}: Componente che fornisce le capacità di riconoscimento vocale integrate nel browser.
+    \item \textbf{Porte}: La comunicazione verso i livelli sottostanti è veicolata tramite la \texttt{GUIPORT [1]}.
 \end{itemize}
 
-\subsection{Application Layer (Business Logic)}
-Il nucleo del sistema è accessibile tramite la porta di ingresso \textbf{\texttt{APPORT [1]}} e comprende tre microservizi:
+\subsection{Application Layer}
+Il nucleo del sistema incapsula la logica di business ed è suddiviso in tre moduli principali che operano all'interno del componente \texttt{Web UI} e dei servizi backend:
 \begin{itemize}
-    \item \textbf{NLU Service}: Espone l'interfaccia \texttt{NLUInterface} con il metodo \texttt{parse()}. Al suo interno incapsula l'artefatto \texttt{NaturalLanguageService.java} per l'analisi semantica.
-    \item \textbf{Accounting Service}: Gestisce la contabilità tramite \texttt{AccountingInterface}, offrendo i metodi \texttt{addTransaction()} e \texttt{getBalance()}.
-    \item \textbf{Analytics Service}: Espone \texttt{AnalyticsInterface} e utilizza l'artefatto \texttt{DataAggregator.java} per calcolare le statistiche (\texttt{getStatistics()}).
-\end{itemize}
-Il layer comunica con il livello dati sottostante attraverso la porta di uscita \textbf{\texttt{APPORTDB [1]}}.
-
-\subsection{Data Layer (Persistence)}
-Il livello inferiore riceve le richieste sulla porta \textbf{\texttt{DBPORT [1]}}.
-\begin{itemize}
-    \item \textbf{Componente Database}: Gestisce l'archiviazione fisica (PostgreSQL).
-    \item \textbf{\texttt{DBInterface}}: Astrae le operazioni di basso livello quali \texttt{save()} e \texttt{query()}, garantendo il disaccoppiamento tra logica applicativa e storage.
+    \item \textbf{NLU Service}: Incapsula l'artefatto \texttt{NaturalLanguageService.java} e fornisce l'interfaccia \texttt{NLUInterface} per l'operazione di \texttt{parse()}.
+    \item \textbf{Accounting Service}: Gestisce i flussi finanziari tramite l'interfaccia \texttt{AccountingInterface}, esponendo i metodi \texttt{addTransaction()} e \texttt{getBalance()}.
+    \item \textbf{Analytics Service}: Utilizza l'artefatto \texttt{DataAggregator.java} per elaborare i dati tramite l'interfaccia \texttt{AnalyticsInterface} e il metodo \texttt{getStatistics()}[cite: 5, 3].
 \end{itemize}
 
-\subsection{Dipendenze Esterne}
+\subsection{Data Layer}
+Il livello di persistenza è isolato dal resto dell'applicazione per garantire l'indipendenza dallo storage:
 \begin{itemize}
-    \item \textbf{STT Service}: Componente esterno collegato tramite una relazione di dipendenza \texttt{«use»}. È invocato dal servizio NLU per la trascrizione dei comandi vocali.
+    \item \textbf{Database}: Componente responsabile dell'archiviazione dei dati.
+    \item \textbf{DBInterface}: L'interfaccia di accesso ai dati che astrae le operazioni CRUD fondamentali: \texttt{save()}, \texttt{findAll()}, \texttt{findById()} e \texttt{deleteById()}.
+    \item \textbf{Porte}: Riceve le richieste dal livello applicativo sulla porta \texttt{DBPORT [1]} attraverso una connessione verso la \texttt{DatabasePort}.
 \end{itemize}
+
+\subsection{Dipendenze e Relazioni}
+\begin{itemize}
+    \item \textbf{Relazione di Uso}: Il componente \texttt{Web UI} all'interno dell'Application Layer presenta una dipendenza \texttt{«use»} verso la \texttt{Web Speech API} del Client Layer per le funzionalità STT.
+    \item \textbf{Integrazione}: I componenti \texttt{Accounting Service} e \texttt{Analytics Service} appaiono interconnessi per permettere l'aggregazione dei dati transazionali ai fini statistici.
+\end{itemize}
+
 
 \section{Vista di processo – Sequence Diagram}
 
-La vista di processo (Figura \ref{fig:sequence}) descrive la dinamica temporale delle interazioni tra i componenti del sistema.
-Il diagramma è strutturato in due macro-fasi logiche: la gestione dell'identità utente (parte superiore) e l'esecuzione dei comandi operativi (parte inferiore).
+La vista di processo descrive la dinamica temporale delle interazioni tra gli attori e i componenti del sistema JarFin durante l'esecuzione di un comando. Il diagramma (Figura \ref{fig:sequence}) illustra il flusso completo, dalla ricezione dell'input alla persistenza dei dati e alla generazione del feedback.
 
 \begin{figure}[H]
     \centering
@@ -248,45 +256,41 @@ Il diagramma è strutturato in due macro-fasi logiche: la gestione dell'identit�
     \label{fig:sequence}
 \end{figure}
 
-\subsection{Fase 1: Gestione Accesso e Autenticazione}
-La parte iniziale del diagramma modella il ciclo di vita della sessione utente:
+\newpage
+\subsection{Fase 1: Input e Pre-elaborazione}
+Il flusso ha inizio con l'interazione dell'utente verso l'applicazione client:
 \begin{enumerate}
-    \item \textbf{Registrazione}: L'utente non registrato invia una richiesta \texttt{POST /auth/register}. L'API Gateway inoltra la richiesta al servizio di autenticazione, che gestisce la persistenza dei dati utente.
-    \item \textbf{Login}: L'utente registrato invia le credenziali tramite \texttt{POST /auth/login}. Il sistema recupera l'hash della password (\texttt{SELECT Password Hash}) e, in caso di validazione positiva, restituisce un \textbf{Token di Sessione} necessario per le chiamate successive.
+    \item \textbf{Invio Comando}: L'utente invia un comando (es. "Saldo") alla \texttt{Client Application} [cite: 15].
+    \item \textbf{Inoltro Richiesta}: La \texttt{Client Application} effettua una chiamata \texttt{POST /process(testo)} verso l'\texttt{Api Gateway}.
+    \item \textbf{Analisi Semantica}: L'Gateway invoca il metodo \texttt{parse(Testo)} del \texttt{NaturalLanguageService}. Il servizio restituisce un oggetto \texttt{JSON \{intento, dati\}} che identifica l'azione richiesta.
 \end{enumerate}
 
-\subsection{Fase 2: Elaborazione dei Comandi}
-Una volta autenticato, l'utente invia comandi (Request + TOKEN). Il flusso segue questi passaggi:
+\subsection{Fase 2: Elaborazione Condizionale (Frammento \texttt{alt})}
+In base all'intento estratto dal servizio NLU, il sistema segue due percorsi logici distinti:
 
-\begin{enumerate}
-    \item \textbf{Gestione Input Vocale (Frammento \texttt{opt})}:
-          Se la condizione \texttt{[Input è vocale]} è vera, il Gateway invia il flusso audio al servizio esterno \textit{Cloud STT} e attende la trascrizione testuale.
-
-    \item \textbf{Analisi Semantica}:
-          Il testo (originario o trascritto) viene inviato al \textbf{NLU Service} (\texttt{POST /parse}). Il servizio restituisce un JSON contenente l'intento identificato e i dati estratti.
-
-    \item \textbf{Routing e Logica di Business (Frammento \texttt{alt})}:
-          Sulla base dell'intento ricevuto, il Gateway instrada la richiesta verso il microservizio competente:
-
+\begin{itemize}
+    \item \textbf{Intento SCRITTURA (Spese, Fondi)}: 
+          L'Gateway inoltra una richiesta \texttt{POST/PUT} all'\textbf{Accounting Service}. All'interno di questo ramo, un ulteriore frammento \texttt{alt} distingue l'operazione sul \texttt{Database}:
           \begin{itemize}
-              \item \textbf{Ramo Scrittura (Accounting)}: Se l'intento riguarda modifiche (es. "Spese", "Budget"), viene invocato l'\textbf{Accounting Service}.
-                    Un ulteriore frammento condizionale distingue tra:
-                    \begin{itemize}
-                        \item \textit{Nuova Entità}: Esegue una \texttt{INSERT into table} sul Database.
-                        \item \textit{Modifica}: Esegue una \texttt{UPDATE table} sul Database.
-                    \end{itemize}
-
-              \item \textbf{Ramo Lettura (Analytics)}: Se l'intento è di analisi (es. "Report"), viene invocato l'\textbf{Analytics Service} (\texttt{GET /stats}), che interroga il Database (\texttt{SELECT Aggregazione}) per ottenere i dati grezzi ed elaborarli.
+              \item \textit{Nuova Entità}: Viene eseguita una \texttt{INSERT into table} (es. per una nuova Spesa)[cite: 14, 16].
+              \item \textit{Modifica}: Viene eseguita una \texttt{UPDATE Table}.
           \end{itemize}
+          Il Database restituisce una \texttt{Conferma ID} all'Accounting Service, che a sua volta comunica l'\texttt{Esito Operazione} all'Gateway.
 
-    \item \textbf{Risposta}:
-          L'esito dell'operazione (conferma o report JSON) viene restituito a ritroso fino alla \textit{Client Application}, che fornisce il feedback finale all'utente.
+    \item \textbf{Intento LETTURA (Report, Analisi)}: 
+          L'Gateway invoca l'\textbf{Analytics Service} tramite \texttt{GET /api/analytics/report(Filtri)}. Il servizio esegue una query di \texttt{SELECT / Aggregazione} sul \texttt{Database}, riceve i \texttt{Dati Grezzi} e li trasforma in un \texttt{JSON Report} per l'Gateway.
+\end{itemize}
+
+\subsection{Fase 3: Feedback Finale}
+Una volta completata l'elaborazione nei microservizi, il ciclo si conclude con la notifica all'utente:
+\begin{enumerate}
+    \item L'\texttt{Api Gateway} invia la \texttt{Risposta Utente} alla \texttt{Client Application}.
+    \item L'applicazione mostra il \texttt{Feedback} finale (sotto forma di testo o voce) all'utente.
 \end{enumerate}
 
 \section{Vista fisica – Deployment Diagram}
 
-Il Diagramma di Deployment (Figura \ref{fig:deployment}) mappa i componenti software (artefatti) sull'infrastruttura hardware (nodi), illustrando la distribuzione fisica del sistema.
-L'architettura adotta un approccio a microservizi containerizzati, garantendo scalabilità orizzontale, isolamento dei processi e facilità di rilascio.
+Il Diagramma di Deployment (Figura \ref{fig:deployment}) illustra la distribuzione fisica del sistema JarFin, mappando gli artefatti software sui nodi hardware e descrivendo i protocolli di comunicazione utilizzati.
 
 \begin{figure}[H]
     \centering
@@ -296,34 +300,33 @@ L'architettura adotta un approccio a microservizi containerizzati, garantendo sc
 \end{figure}
 
 \subsection{Architettura dei Nodi e Ambienti}
-Il sistema è distribuito su quattro entità computazionali distinte, configurate come segue:
+Il sistema è distribuito su infrastrutture distinte che separano il frontend, la logica applicativa e la persistenza:
 
 \begin{itemize}
-    \item \textbf{User Device (Client)}: Rappresenta il dispositivo dell'utente (PC, smartphone). Ospita l'ambiente di esecuzione \textit{Web Browser}, all'interno del quale viene caricato l'artefatto \textbf{\texttt{JarFin Web UI}}. L'approccio \textit{Zero-Install} delega il rendering interamente al browser.
+    \item \textbf{User Device}: Rappresenta il dispositivo terminale dell'utente. Ospita l'ambiente di esecuzione \textbf{Web Browser} [cite: 31], all'interno del quale viene eseguito l'artefatto \textbf{\texttt{jarfin-web-ui.jar}}. In questo nodo è presente anche il supporto alle \textbf{Web Speech API} per il riconoscimento vocale direttamente lato client.
 
-    \item \textbf{Cloud Server (Application Host)}: Il nodo server che ospita la logica di business. È configurato come un ambiente di orchestrazione container (Docker Host), suddiviso in tre ambienti di esecuzione isolati per massimizzare l'indipendenza dei servizi:
+    \item \textbf{Cloud Server}: Il nodo centrale che ospita i microservizi. È suddiviso in ambienti di esecuzione containerizzati per garantire l'isolamento:
           \begin{itemize}
-              \item \textbf{Container NLU}: esegue l'artefatto \texttt{NaturalLanguageService.jar}.
-              \item \textbf{Container Accounting}: esegue l'artefatto \texttt{AccountingService.jar}.
-              \item \textbf{Container Analytics}: esegue l'artefatto \texttt{AnalyticsService.jar}.
+              \item \textbf{Container Accounting}: Esegue l'artefatto \texttt{AccountingService.jar}[cite: 28, 30].
+              \item \textbf{Analytics Service Container}: Esegue l'artefatto \texttt{AnalyticsService.jar}[cite: 28, 30].
+              \item \textbf{Esecuzione NLU}: All'interno del server viene eseguito l'artefatto \texttt{ParserNLU.jar} per l'elaborazione del linguaggio naturale.
           \end{itemize}
 
-    \item \textbf{Database Server}: Nodo dedicato alla persistenza che ospita il DBMS \textbf{PostgreSQL}. La sua separazione fisica dal server applicativo è una scelta architetturale critica per garantire sicurezza dei dati e performance di I/O dedicate.
-
-    \item \textbf{External STT Service}: Nodo esterno al perimetro del sistema (Third-Party Service), che fornisce le funzionalità di Speech-to-Text on-demand.
+    \item \textbf{Database Server}: Un nodo dedicato che ospita il DBMS \textbf{PostgreSQL}, garantendo che la persistenza dei dati sia fisicamente separata dalla logica di business per ottimizzare sicurezza e performance.
 \end{itemize}
 
 \subsection{Protocolli di Comunicazione}
-Le connessioni tra i nodi avvengono tramite canali sicuri e standardizzati:
+Le interconnessioni tra i vari nodi utilizzano protocolli standard per lo scambio di dati:
 
 \begin{itemize}
-    \item \textbf{User Device $\xrightarrow{HTTPS}$ Cloud Server}: La comunicazione Client-Server è cifrata tramite protocollo \textbf{HTTPS}. Le richieste vengono intercettate e instradate dall'\textit{API Gateway} verso i container specifici, nascondendo la complessità interna al client.
+    \item \textbf{User Device $\xrightarrow{HTTPS/JSON}$ Cloud Server}: La comunicazione tra il browser dell'utente e il server applicativo avviene tramite il protocollo \textbf{HTTPS}. I dati vengono scambiati in formato \textbf{JSON}, permettendo al client di inviare comandi e ricevere report o conferme.
 
-    \item \textbf{Cloud Server $\xrightarrow{JDBC}$ Database Server}: I microservizi accedono ai dati persistenti utilizzando il protocollo standard \textbf{JDBC} (Java Database Connectivity) su TCP/IP, demandando al DBMS PostgreSQL la garanzia delle proprietà ACID.
+    \item \textbf{Cloud Server $\xrightarrow{JDBC}$ Database Server}: L'accesso ai dati da parte dei microservizi (in particolare il servizio Accounting) avviene tramite una connessione \textbf{JDBC} verso l'istanza di PostgreSQL.
 
-    \item \textbf{Cloud Server $\xrightarrow{HTTPS/JSON}$ External STT}: Il servizio NLU invia i flussi audio al servizio esterno tramite chiamate REST su \textbf{HTTPS}, ricevendo in risposta la trascrizione in formato \textbf{JSON}.
+    \item \textbf{Integrazione Locale}: A differenza di implementazioni puramente cloud, il diagramma evidenzia che la componente di trascrizione vocale (\textbf{Web Speech API}) risiede nello \textit{User Device}, riducendo la necessità di inviare flussi audio grezzi verso nodi esterni per il solo STT.
 \end{itemize}
 
+\newpage
 \section{Conclusioni dell'Iterazione 0}
 
 L'attività di analisi e progettazione ha prodotto un'architettura solida, modulare e documentata. L'adozione del modello 4+1 ha permesso di affrontare la complessità del sistema distribuito, definendo chiaramente le responsabilità di ogni componente prima dell'inizio della fase di codifica (Iterazione 1).
