@@ -230,7 +230,7 @@ public static final String RISTORANTE = "Ristorante";
             } else {
                 result.setDescription(null);
             }
-        } else {1
+        } else {
             String description = extractSmartDescription(lowerCaseText, foundCategory, matchedKeyword);
             result.setDescription(description);
         }
