@@ -161,10 +161,14 @@ La vista logica (Figura \ref{fig:classdiagram}) illustra la struttura statica de
 \subsection{Shared Kernel e Modello di Dominio}
 La parte sinistra del diagramma definisce le entità core, condivise concettualmente tra i moduli:
 \begin{itemize}
-    \item \textbf{\texttt{User}}: rappresenta l'utente del sistema. È la radice dell'aggregato e possiede una relazione uno-a-uno con \texttt{Account}.
-    \item \textbf{\texttt{Account}}: rappresenta il portafoglio digitale. Mantiene la lista delle transazioni associate.
-    \item \textbf{\texttt{Transaction}}: l'entità centrale, caratterizzata da attributi come importo, data e descrizione. È associata a una \textbf{\texttt{Category}} (es. "Cibo", "Casa") per permettere analisi tematiche.
-\end{itemize}
+    \subsection{Shared Kernel e Modello di Dominio}
+    La parte sinistra del diagramma definisce le entità core del sistema, che costituiscono il linguaggio comune tra i vari microservizi:
+    \begin{itemize}
+        \item \textbf{\texttt{Transaction}}: Definita come una \textit{Abstract Class}, rappresenta l'entità fondamentale. Include i campi \texttt{id} (Long), \texttt{amount} (BigDecimal), \texttt{date} (LocalDate), \texttt{description}, \texttt{category} e \texttt{type}.
+        \item \textbf{\texttt{Category}}: Entità dedicata alla classificazione delle operazioni (es. "Cibo", "Casa"). È legata a \texttt{Transaction} da una relazione di associazione "belongs to" con cardinalità $1$ a $0..n$.
+        \item \textbf{\texttt{Budget}}: Classe utilizzata per monitorare le soglie di spesa. Presenta gli attributi \texttt{limitAmount}, \texttt{spentAmount} e un riferimento a un \texttt{Period}. È collegata alla classe \texttt{Category} con una relazione $1:1$.
+        \item \textbf{\texttt{Period}}: Una classe di supporto che modella un intervallo temporale tramite \texttt{startDate} e \texttt{endDate} (Date). Questa entità è condivisa sia da \texttt{Budget} che dalla logica di \texttt{Report} per definire l'ambito temporale delle analisi.
+    \end{itemize}
 
 \subsection{Microservizio Accounting}
 Situato nella parte inferiore, implementa il classico pattern a tre livelli per la gestione dei dati finanziari:
