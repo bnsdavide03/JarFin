@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +26,7 @@ import it.unibg.jarfin.accounting_service.model.Transaction;
 import it.unibg.jarfin.accounting_service.repository.TransactionRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class TransactionServiceTest {
+class TransactionServiceTest {
 
     @Mock
     private TransactionRepository repository;
@@ -34,7 +35,7 @@ public class TransactionServiceTest {
     private TransactionService service;
 
     @Test
-    public void testSaveTransaction() {
+    void testSaveTransaction() {
         Transaction inputTransaction = new Transaction();
         inputTransaction.setAmount(new BigDecimal("100.00"));
         inputTransaction.setDescription("Spesa Test");
@@ -56,7 +57,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    public void testDeleteTransaction() {
+    void testDeleteTransaction() {
         Long idToDelete = 1L;
         when(repository.existsById(idToDelete)).thenReturn(true);
 
@@ -66,7 +67,7 @@ public class TransactionServiceTest {
     }
     
     @Test
-    public void testGetAllTransactions() {
+    void testGetAllTransactions() {
         Transaction t1 = new Transaction();
         t1.setId(1L);
         t1.setAmount(new BigDecimal("50.00"));
@@ -93,7 +94,7 @@ public class TransactionServiceTest {
     }
     
     @Test
-    public void testDeleteTransaction_NotFound() {
+    void testDeleteTransaction_NotFound() {
         Long idNonEsistente = 99L;
         when(repository.existsById(idNonEsistente)).thenReturn(false);
 
@@ -102,5 +103,82 @@ public class TransactionServiceTest {
         });
 
         verify(repository, never()).deleteById(any());
+    }
+    
+    @Test
+    void testGetTransactionById_Success() {
+        Long id = 1L;
+        Transaction foundTransaction = new Transaction();
+        foundTransaction.setId(id);
+        foundTransaction.setDescription("Trovata");
+
+        when(repository.findById(id)).thenReturn(Optional.of(foundTransaction));
+
+        Transaction result = service.getTransactionById(id);
+
+        assertNotNull(result);
+        assertEquals(id, result.getId());
+        assertEquals("Trovata", result.getDescription());
+        
+        verify(repository, times(1)).findById(id);
+    }
+
+    @Test
+    void testGetTransactionById_NotFound() {
+        Long idNonEsistente = 999L;
+        
+        when(repository.findById(idNonEsistente)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            service.getTransactionById(idNonEsistente);
+        });
+
+        verify(repository, times(1)).findById(idNonEsistente);
+    }
+
+    @Test
+    void testUpdateTransaction_Success() {
+        Long id = 1L;
+
+        Transaction existingTransaction = new Transaction();
+        existingTransaction.setId(id);
+        existingTransaction.setAmount(new BigDecimal("50.00"));
+        existingTransaction.setDescription("Vecchio");
+        existingTransaction.setCategory("VecchioCat");
+
+        Transaction updateDetails = new Transaction();
+        updateDetails.setAmount(new BigDecimal("75.00"));
+        updateDetails.setDescription("Nuovo");
+        updateDetails.setCategory("NuovoCat");
+        updateDetails.setDate(LocalDate.now());
+
+        when(repository.findById(id)).thenReturn(Optional.of(existingTransaction));
+        
+        when(repository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Transaction result = service.updateTransaction(id, updateDetails);
+
+        assertNotNull(result);
+        assertEquals(new BigDecimal("75.00"), result.getAmount());
+        assertEquals("Nuovo", result.getDescription());
+        assertEquals("NuovoCat", result.getCategory());
+        
+        verify(repository, times(1)).findById(id);
+        verify(repository, times(1)).save(existingTransaction);
+    }
+
+    @Test
+    void testUpdateTransaction_NotFound() {
+        Long idNonEsistente = 999L;
+        Transaction updateDetails = new Transaction();
+
+        when(repository.findById(idNonEsistente)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            service.updateTransaction(idNonEsistente, updateDetails);
+        });
+
+        verify(repository, times(1)).findById(idNonEsistente);
+        verify(repository, never()).save(any());
     }
 }

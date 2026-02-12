@@ -1,5 +1,21 @@
 package it.unibg.jarfin.accounting_service.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import java.net.URI;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import it.unibg.jarfin.accounting_service.dto.TransactionRequest;
 import it.unibg.jarfin.accounting_service.dto.TransactionResponse;
 import it.unibg.jarfin.accounting_service.mapper.TransactionMapper;
@@ -7,12 +23,6 @@ import it.unibg.jarfin.accounting_service.model.Transaction;
 import it.unibg.jarfin.accounting_service.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -28,8 +38,13 @@ public class TransactionController {
         
         Transaction saved = service.saveTransaction(entity);
         
-        return ResponseEntity.status(HttpStatus.CREATED)
-                             .body(mapper.toResponse(saved));
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
+        
+        return ResponseEntity.created(location)
+        		.body(mapper.toResponse(saved));
     }
 
     @GetMapping
