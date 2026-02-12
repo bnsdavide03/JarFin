@@ -15,6 +15,22 @@ import it.unibg.jarfin.web.dto.CommandType;
 
 @Service
 public class NaturalLanguageService {
+	
+public static final String RISTORANTE = "Ristorante";
+    public static final String BAR_COLAZIONE = "Bar/Colazione";
+    public static final String SUPERMERCATO = "Supermercato";
+    public static final String TRASPORTI = "Trasporti";
+    public static final String BOLLETTE = "Bollette";
+    public static final String CASA = "Casa";
+    public static final String SVAGO = "Svago";
+    public static final String SHOPPING = "Shopping";
+    public static final String SALUTE = "Salute";
+    public static final String SALUTE_SPORT = "Salute/Sport";
+    public static final String CURA_PERSONALE = "Cura Personale";
+    public static final String STIPENDIO = "Stipendio";
+    public static final String BONIFICO = "Bonifico";
+    public static final String ENTRATA = "Entrata";
+	
 
     public static final String RISTORANTE = "Ristorante";
     public static final String BAR_COLAZIONE = "Bar/Colazione";
@@ -42,6 +58,7 @@ public class NaturalLanguageService {
     private static final Map<String, String> VERB_TO_NOUN = new HashMap<>();
 
     static {
+
         VERB_TO_NOUN.put("stipendiato", "stipendio");
         VERB_TO_NOUN.put("regalato", "regalo");
         VERB_TO_NOUN.put("comprato", "acquisto");
@@ -64,6 +81,7 @@ public class NaturalLanguageService {
         CATEGORY_MAP.put("colazione", BAR_COLAZIONE);
         CATEGORY_MAP.put("aperitivo", BAR_COLAZIONE);
         CATEGORY_MAP.put("caffè", BAR_COLAZIONE);
+
         CATEGORY_MAP.put("esselunga", SUPERMERCATO);
         CATEGORY_MAP.put("coop", SUPERMERCATO);
         CATEGORY_MAP.put("lidl", SUPERMERCATO);
@@ -74,6 +92,7 @@ public class NaturalLanguageService {
         CATEGORY_MAP.put("supermercato", SUPERMERCATO);
         CATEGORY_MAP.put("alimentari", SUPERMERCATO);
         CATEGORY_MAP.put("ortofrutta", SUPERMERCATO);
+
         CATEGORY_MAP.put("benzina", TRASPORTI);
         CATEGORY_MAP.put("diesel", TRASPORTI);
         CATEGORY_MAP.put("treno", TRASPORTI);
@@ -87,6 +106,7 @@ public class NaturalLanguageService {
         CATEGORY_MAP.put("taxi", TRASPORTI);
         CATEGORY_MAP.put("aereo", TRASPORTI);
         CATEGORY_MAP.put("ryanair", TRASPORTI);
+
         CATEGORY_MAP.put("luce", BOLLETTE);
         CATEGORY_MAP.put("gas", BOLLETTE);
         CATEGORY_MAP.put("enel", BOLLETTE);
@@ -99,6 +119,7 @@ public class NaturalLanguageService {
         CATEGORY_MAP.put("mutuo", CASA);
         CATEGORY_MAP.put("ikea", CASA);
         CATEGORY_MAP.put("leroy", CASA);
+
         CATEGORY_MAP.put("netflix", SVAGO);
         CATEGORY_MAP.put("spotify", SVAGO);
         CATEGORY_MAP.put("cinema", SVAGO);
@@ -108,12 +129,14 @@ public class NaturalLanguageService {
         CATEGORY_MAP.put("shein", SHOPPING);
         CATEGORY_MAP.put("zara", SHOPPING);
         CATEGORY_MAP.put("h&m", SHOPPING);
+
         CATEGORY_MAP.put("palestra", SALUTE_SPORT);
         CATEGORY_MAP.put("padel", SALUTE_SPORT);
         CATEGORY_MAP.put("farmacia", SALUTE);
         CATEGORY_MAP.put("medico", SALUTE);
         CATEGORY_MAP.put("dentista", SALUTE);
         CATEGORY_MAP.put("visita", SALUTE);
+
         CATEGORY_MAP.put("parrucchiere", CURA_PERSONALE);
         CATEGORY_MAP.put("barbiere", CURA_PERSONALE);
         CATEGORY_MAP.put("estetista", CURA_PERSONALE);
@@ -127,6 +150,7 @@ public class NaturalLanguageService {
         CATEGORY_MAP.put("salone", CURA_PERSONALE);
         CATEGORY_MAP.put("profumeria", CURA_PERSONALE);
         CATEGORY_MAP.put("cosmetica", CURA_PERSONALE);
+
         CATEGORY_MAP.put("stipendio", STIPENDIO);
         CATEGORY_MAP.put("bonifico", BONIFICO);
         CATEGORY_MAP.put("rimborso", ENTRATA);
@@ -149,7 +173,7 @@ public class NaturalLanguageService {
         CATEGORY_DEFAULT_DESC.put(ENTRATA, "Entrata");
     }
 
-    public ParsedTransaction parse(String text) {
+public ParsedTransaction parse(String text) {
         if (text == null || text.trim().length() < 2) return null;
 
         String lowerCaseText = text.trim().toLowerCase();
