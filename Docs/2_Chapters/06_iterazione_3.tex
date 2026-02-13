@@ -372,8 +372,8 @@ Il risultato viene rappresentato tramite il tipo \texttt{BigDecimal}, che garant
 Il sistema adotta un approccio multi-livello:
 
 \begin{enumerate}
-    \item Tentativo di parsing tramite analisi semantica dei numeri espressi in lettere
-    \item In caso di fallimento, utilizzo di espressioni regolari per identificare numeri in formato numerico
+    \item Tentativo di parsing tramite analisi semantica dei numeri espressi in lettere.
+    \item In caso di fallimento, utilizzo di un \textbf{parser euristico posizionale} per identificare cifre numeriche, in grado di disambiguare intelligentemente tra separatori delle migliaia (es. 1.000) e separatori decimali (es. 10.50) basandosi sul conteggio e la posizione dei punti.
 \end{enumerate}
 
 Questo garantisce robustezza anche in presenza di input misti o parzialmente strutturati.
@@ -437,9 +437,9 @@ Questa classificazione avviene indipendentemente dalla categoria.
 Il sistema implementa un algoritmo di estrazione semantica della descrizione basato su priorità:
 
 \begin{enumerate}
-    \item estrazione di nomi specifici
-    \item estrazione di sostantivi rilevanti
-    \item fallback su descrizione predefinita per categoria
+    \item estrazione prioritaria di nomi specifici (Brand detection);
+    \item \textbf{filtraggio contestuale}: rimozione di verbi normalizzati e keyword generiche (es. "pagamento", "spesa", "ristorante") per evitare ridondanze;
+    \item estrazione dei sostantivi residui o fallback su descrizione predefinita per categoria.
 \end{enumerate}
 
 Esempio:
@@ -504,12 +504,20 @@ $Tokens \leftarrow$ Tokenize($S_{norm}$ without IDs)
 $GrandTotal \leftarrow 0$, $Buffer \leftarrow 0$
 
 FOR each $Token$ in $Tokens$ DO:
-    IF IsNumeric($Token$) OR IsNumberWord($Token$) THEN
+    $Val \leftarrow 0$
+    // Caso 1: Token numerico (es. "10.50" o "1.000")
+    IF IsDigit($Token$) THEN
+        $Val \leftarrow$ ParseSmartDecimal($Token$)
+    
+    // Caso 2: Parola numerica (es. "mille", "venti")
+    ELSE IF IsNumberWord($Token$) THEN
         $Val \leftarrow$ ParseMagnitude($Token$)
-        // Gestione Centesimi
+    END IF
+
+    // Logica di accumulo comune
+    IF $Val > 0$ THEN
         IF FollowedBy($Token$, "centesimi") THEN
             $GrandTotal \leftarrow GrandTotal + (Val \times 0.01)$
-        // Gestione Grandezze (Migliaia/Milioni)
         ELSE IF $Val \geq 1000$ THEN
             $GrandTotal \leftarrow GrandTotal + Val$
         ELSE
@@ -556,6 +564,8 @@ Il sistema è robusto rispetto a:
 
 Questo rende il sistema adatto all'uso reale in contesti vocali.
 
+\newpage
+
 \section{Orchestrazione: CommandController}
 
 Il \texttt{CommandController} funge da orchestratore backend. Riceve il testo dal frontend, invoca il servizio NLU e instrada il comando strutturato verso l'API Gateway.
@@ -590,69 +600,137 @@ public ResponseEntity<?> processVoiceCommand(@RequestBody Map<String, String> pa
 \end{lstlisting}
 
 \section{Strategia di Validazione e Testing}
-\label{sec:validazione_iterazione3}
 
-La validazione dell'Iterazione 3 ha seguito un approccio \textit{End-to-End} (E2E), verificando il comportamento del sistema dal punto di ingresso (Gateway/UI) fino alla persistenza dei dati. I test sono stati condotti sia a livello architetturale (API Routing) che funzionale (User Experience).
+La validazione dell'Iterazione 3 ha presentato sfide uniche, dovendo coprire sia la complessità algoritmica del motore NLU sia l'integrazione di un'architettura a microservizi distribuita. La strategia adottata ha combinato analisi statica, testing di integrazione (con focus sulla resilienza) e validazione End-to-End.
 
-\subsection{Validazione Architetturale: API Gateway Routing}
-Il primo livello di test ha verificato la corretta configurazione delle rotte di Spring Cloud Gateway. Utilizzando il client HTTP \textit{Postman}, sono state simulate richieste dirette alla porta pubblica \texttt{8080}.
+\subsection{Analisi della Complessità (NLU Engine)}
+
+L'analisi statica con \textbf{SonarLint} ha evidenziato una criticità nel cuore del motore semantico: il metodo di parsing utilizza regex complesse per il matching delle keyword, risultando in una \textbf{Complessità Cognitiva di 85} (ben oltre la soglia raccomandata di 15).
+
+È stato condotto un tentativo di refactoring sperimentale per ridurre tale complessità, basato sulla costruzione dinamica dei pattern:
+
+\bigskip
+
+\begin{lstlisting}[language=Java]
+private static final List<String> STOP_WORDS = List.of("ho", "hai", ...);
+String pattern = "\\b(" + String.join("|", STOP_WORDS) + ")\\b";
+\end{lstlisting}
+
+Tuttavia, l'approccio dinamico ha introdotto instabilità in fase di compilazione e una perdita di leggibilità della struttura finale della Regex. Di conseguenza, la segnalazione è stata marcata come \textbf{Won't Fix}, riconoscendo la complessità come intrinseca alla natura del problema (parsing linguistico deterministico) e preferendo l'affidabilità alla pura conformità metrica.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.72\textwidth]{../Iterazione_3/images/Routing_Accounting.png}
-    \caption{Richiesta GET verso Accounting Service tramite Gateway (Porta 8080)}
+    \includegraphics[width=0.75\textwidth]{../Iterazione_3/images/regex.png}
+    \caption{segnalazione complessità regex}
+    \label{fig:sonar_regex}
+\end{figure}
+
+\subsection{Testing di Integrazione e Resilienza}
+
+Il \texttt{CommandController} funge da gateway applicativo per le richieste vocali. I test di integrazione hanno coperto scenari complessi e verificato la capacità del sistema di gestire i fallimenti dei microservizi a valle (\textit{Fault Tolerance}).
+
+\subsubsection{Scenari Avanzati (NLU)}
+Il seguente test verifica la corretta interpretazione di comandi basati sulla descrizione (es. "Cancella l'ultima pizza"), assicurando che il controller orchestratore invochi correttamente il servizio NLU e filtri i risultati.
+
+\bigskip
+
+\begin{lstlisting}[language=Java]
+@Test
+void process_Delete_ByDescription() throws Exception {
+    // Scenario: Input vocale "Elimina pizza" -> Il sistema deve trovare l'ID corretto
+    parsedTx.setDescription("pizza");
+    when(nluService.parse(anyString())).thenReturn(parsedTx);
+    
+    // Il mock restituisce una lista, il controller filtra e ordina per data
+    when(restTemplate.exchange(...)).thenReturn(ResponseEntity.ok(mockList));
+
+    mockMvc.perform(post("/api/voice/process")...)
+            .andExpect(jsonPath("$.message").value("Eliminato ID 20"));
+}
+\end{lstlisting}
+
+\newpage
+
+\subsubsection{Resilienza e Graceful Degradation}
+In un'architettura a microservizi, il fallimento di un nodo backend è un evento atteso. È stata quindi implementata una strategia di \textit{Graceful Degradation}: se un servizio (es. Analytics) è irraggiungibile, l'interfaccia deve rimanere navigabile.
+
+Il test seguente simula un rifiuto della connessione (\texttt{Connection refused}) e verifica che la Dashboard venga comunque servita con un messaggio di errore gestito, evitando il crash dell'applicazione (White Screen of Death).
+
+\begin{lstlisting}[language=Java]
+@Test
+@DisplayName("HOME: Gestione errore Backend Down - Graceful Degradation")
+void home_ShouldHandleBackendError() throws Exception {
+    // 1. Simuliamo il fallimento del microservizio esterno
+    when(restTemplate.getForObject(anyString(), eq(FinancialReport.class)))
+        .thenThrow(new RestClientException("Connection refused"));
+
+    // 2. Verifichiamo che la pagina venga comunque servita (HTTP 200)
+    mockMvc.perform(get("/"))
+        .andExpect(status().isOk())
+        .andExpect(view().name("index"))
+        .andExpect(model().attributeExists("error")); // Verifica presenza messaggio errore
+}
+\end{lstlisting}
+
+\newpage
+
+\subsection{Validazione Architetturale: API Gateway}
+
+Per verificare il corretto instradamento delle richieste attraverso l'\texttt{api-gateway}, sono stati eseguiti test manuali con Postman puntando esclusivamente alla porta pubblica \texttt{8080}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../Iterazione_3/images/Routing_Accounting.png}
+    \caption{Routing corretto verso Accounting Service via Gateway (Porta 8080)}
     \label{fig:routing_accounting}
 \end{figure}
 
-Come mostrato in Figura \ref{fig:routing_accounting}, una richiesta GET \texttt{/api/transactions} inviata al Gateway viene inoltrata al microservizio di Accounting, che restituisce il JSON delle transazioni. Il client resta agnostico rispetto alla locazione reale del servizio, confermando l’efficacia del pattern Reverse Proxy.
-
-La validazione è estesa alla Business Intelligence tramite l’endpoint \texttt{/api/analytics/report} Figura \ref{fig:routing_analytics}, che restituisce il payload JSON del servizio Analytics, confermando il ruolo del Gateway come Facade dell’ecosistema.
+Le Figure \ref{fig:routing_accounting} e \ref{fig:routing_analytics} confermano che il Gateway agisce correttamente da \textit{Reverse Proxy}, mascherando la topologia interna dei microservizi (Accounting su 8081, Analytics su 8082) e offrendo un unico punto di accesso.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.72\textwidth]{../Iterazione_3/images/Routing_Analytics.png}
-    \caption{Validazione del routing verso il servizio di Analytics (Porta 8080)}
+    \includegraphics[width=0.85\textwidth]{../Iterazione_3/images/Routing_Analytics.png}
+    \caption{Routing corretto verso Analytics Service via Gateway}
     \label{fig:routing_analytics}
 \end{figure}
 
 \subsection{Validazione Funzionale: Flusso Utente (UX)}
-Il secondo livello di test ha coinvolto l'interfaccia utente (Web UI), verificando la reattività del sistema e la gestione degli errori.
 
-\subsubsection{Inserimento Vocale e Feedback}
-Il test di inserimento vocale ha confermato l'efficacia del motore NLU. Pronunciando comandi naturali come \textit{"Ho speso 550 come abbonamento in palestra"}, il sistema ha riconosciuto l'intento, estratto l'importo e categorizzato automaticamente la spesa sotto "Salute/Sport", fornendo un feedback visivo immediato tramite modale.
+La validazione finale ha coinvolto l'interfaccia utente (Web UI), verificando l'esperienza d'uso complessiva.
+
+\subsubsection{Inserimento Vocale}
+Il test "sul campo" ha confermato l'efficacia del flusso \textit{Voice-to-Action}. Pronunciando \textit{"Ho speso 550 come abbonamento in palestra"}, il sistema ha trascritto l'audio localmente, interpretato l'intento tramite NLU e categorizzato la spesa, aggiornando la UI in tempo reale.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\textwidth]{../Iterazione_3/images/Inserimento_Vocale.png}
-    \caption{Dashboard aggiornata in tempo reale dopo l'inserimento vocale}
+    \includegraphics[width=1\textwidth]{../Iterazione_3/images/Inserimento_Vocale.png}
+    \caption{Feedback visivo immediato dopo un comando vocale}
     \label{fig:inserimento_vocale}
 \end{figure}
 
 \newpage
 
-\subsubsection{Gestione Robusta degli Errori}
-Un aspetto critico dei sistemi distribuiti è la gestione dei fallimenti parziali. È stato simulato uno scenario di indisponibilità del Gateway spegnendo il servizio.
-La Web UI ha intercettato l'eccezione di rete e mostrato un avviso chiaro all'utente (Figura \ref{fig:errore_gestito}), evitando il blocco dell'applicazione.
+\subsubsection{Gestione Errori UI}
+In linea con i test di resilienza backend, è stato verificato il comportamento visivo in caso di guasto. Spegnendo il Gateway, la Web UI ha mostrato un alert chiaro all'utente (Figura \ref{fig:errore_gestito}), confermando il successo della strategia di \textit{Graceful Degradation}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{../Iterazione_3/images/Errore_Gestito.png}
-    \caption{Gestione dell'errore di connessione: Feedback visivo all'utente}
+    \caption{UI Error Handling: Feedback visivo in caso di disservizio}
     \label{fig:errore_gestito}
 \end{figure}
 
-Inoltre, è stata verificata la compatibilità cross-browser. \\
-Poiché le Web Speech API non sono standardizzate su tutti i browser, il sistema implementa un controllo preventivo (Feature Detection), avvisando l'utente se il browser (es. Firefox) non supporta il riconoscimento vocale nativo.
+Inoltre, il sistema implementa un controllo di compatibilità browser (Feature Detection), avvisando l'utente se le Web Speech API non sono supportate (es. su Firefox).
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{../Iterazione_3/images/Firefox_error.png}
-    \caption{Feature Detection: Avviso di incompatibilità su browser non supportati}
+    \caption{Feature Detection: Avviso di incompatibilità browser}
     \label{fig:firefox_error}
 \end{figure}
 
-\subsubsection{Operazioni CRUD e Filtraggio}
-Infine, sono state validate le operazioni di modifica e cancellazione. L'interfaccia permette di aggiornare i dettagli di una transazione tramite un form modale precompilato (Figura \ref{fig:modifica_transazione}) e di eliminare record con una richiesta di conferma esplicita (Figura \ref{fig:cancellazione_transazione}), prevenendo azioni accidentali.
+\subsubsection{Operazioni CRUD}
+Infine, sono state validate le operazioni standard di modifica e cancellazione (Figure \ref{fig:modifica_transazione} e \ref{fig:cancellazione_transazione}) e il sistema di filtraggio, essenziali per la gestione quotidiana dei dati.
 
 \begin{figure}[H]
     \centering
@@ -671,8 +749,6 @@ Infine, sono state validate le operazioni di modifica e cancellazione. L'interfa
     \end{minipage}
 \end{figure}
 
-Il sistema di filtraggio (Figure \ref{fig:filtro_entrate} e \ref{fig:filtro_uscite}) permette di isolare rapidamente entrate e uscite, completando la suite di funzionalità necessarie per una gestione finanziaria efficace.
-
 \begin{figure}[H]
     \centering
     \begin{minipage}{0.49\textwidth}
@@ -690,17 +766,50 @@ Il sistema di filtraggio (Figure \ref{fig:filtro_entrate} e \ref{fig:filtro_usci
     \end{minipage}
 \end{figure}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{../Iterazione_3/images/NaturalLanguageServiceTest.png}
+    \caption{Routing corretto verso Analytics Service via Gateway}
+    \label{fig:NaturalLanguageServiceTest}
+\end{figure}
+
 \newpage
+
+\subsection{Metriche di Qualità Finali}
+
+A conclusione dell'iterazione, le metriche di copertura confermano la robustezza del modulo Web UI, con una copertura quasi totale del Service Layer (NLU):
+
+\begin{itemize}
+    \item \textbf{Service Layer Coverage:} 98.5\%
+    \item \textbf{Controller Layer Coverage:} 84.7\%
+    \item \textbf{Web UI Package Coverage:} 95.8\%
+\end{itemize}
+
+L'analisi strutturale con \textbf{CodeMR} (Figure \ref{fig:codemr_web_quality} e \ref{fig:codemr_web_deps}) mostra un'architettura bilanciata, con una chiara separazione delle responsabilità tra i componenti di presentazione e logica.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../Iterazione_3/images/quality-attributes.png}
+    \caption{Metriche di qualità architetturale per il modulo web-ui}
+    \label{fig:codemr_web_quality}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../Iterazione_3/images/dependencies.png}
+    \caption{Grafo delle dipendenze del modulo web-ui}
+    \label{fig:codemr_web_deps}
+\end{figure}
 
 \section{Conclusione Iterazione 3}
 
 L'Iterazione 3 ha rappresentato il punto di svolta per il progetto \textit{JarFin}, trasformando un insieme di microservizi backend in una \textbf{piattaforma applicativa completa}.
 
-I risultati raggiunti coprono l'intero stack architetturale:
+I risultati raggiunti coprono l'intero stack:
 \begin{itemize}
-    \item \textbf{Infrastruttura}: L'API Gateway ha unificato i punti di accesso, garantendo sicurezza e disaccoppiamento tra client e microservizi.
-    \item \textbf{Frontend}: La Web UI ha reso tangibile il valore dei dati elaborati, offrendo una dashboard interattiva e un'esperienza utente moderna ("Voice First") grazie all'integrazione delle Web Speech API.
-    \item \textbf{Intelligenza}: Il motore NLU deterministico ha dimostrato che è possibile interpretare il linguaggio naturale con complessità $O(n)$, offrendo un'alternativa robusta, privata e priva di latenza rispetto ai modelli generativi cloud-based.
+    \item \textbf{Infrastruttura}: L'API Gateway ha unificato i punti di accesso, garantendo sicurezza e disaccoppiamento.
+    \item \textbf{Frontend}: La Web UI ha offerto una dashboard interattiva e un'esperienza moderna ("Voice First").
+    \item \textbf{Intelligenza}: Il motore NLU deterministico ha dimostrato che è possibile interpretare il linguaggio naturale con complessità $O(n)$, offrendo un'alternativa robusta e privata ai modelli Cloud.
 \end{itemize}
 
 Il sistema è ora pienamente operativo in tutte le sue componenti: interfaccia, logica di business e persistenza.

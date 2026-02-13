@@ -119,32 +119,41 @@ Lo strumento ha permesso di:
 
 L’uso di Postman ha facilitato l’individuazione precoce di errori di comunicazione tra i servizi e ha supportato la fase di debugging dell’API Gateway.
 
-\subsection{Unit Testing}
+\subsection{Unit Testing e Mocking}
 
-Il testing automatico della logica applicativa è stato realizzato tramite \textbf{JUnit 5}, framework di riferimento per il testing in ambiente Java.
-JUnit è stato utilizzato per definire test unitari mirati a verificare il corretto funzionamento dei metodi di business logic, in particolare nei servizi di accounting, analytics e NLU.
+Il testing automatico della logica applicativa è stato realizzato tramite \textbf{JUnit 5}, framework di riferimento per il testing in ambiente Java, affiancato da \textbf{Mockito}, un framework di mocking essenziale per isolare le unità di codice.
+Mentre JUnit è stato utilizzato per definire il ciclo di vita dei test e le asserzioni, Mockito ha permesso di simulare il comportamento delle dipendenze esterne (mock), garantendo che i test unitari si focalizzassero esclusivamente sulla logica interna dei servizi, in particolare nei moduli di accounting, analytics e NLU.
 
-L’adozione del testing unitario ha contribuito a migliorare l’affidabilità del sistema e a ridurre il rischio di regressioni durante l’evoluzione del codice.
+L’adozione combinata di questi strumenti ha contribuito a migliorare l’affidabilità del sistema e a ridurre il rischio di regressioni durante l’evoluzione del codice.
 
 \subsection{Analisi della copertura del codice}
 
-Per l’analisi della copertura dei test è stato utilizzato il plugin \textbf{EclEmma}, integrato nell’ambiente di sviluppo.
-EclEmma consente di misurare dinamicamente la percentuale di codice eseguito durante l’esecuzione dei test, fornendo indicatori utili per valutare l’efficacia della suite di test.
+Per l’analisi della copertura dei test è stato utilizzato il plugin \textbf{EclEmma} (basato sulla libreria \textbf{JaCoCo}), integrato direttamente nell’ambiente di sviluppo.
+Lo strumento consente di misurare dinamicamente la percentuale di codice eseguito durante l’esecuzione dei test (code coverage), fornendo indicatori visivi e quantitativi utili per valutare l’efficacia della suite di test.
 
-Le metriche di copertura hanno supportato l’identificazione delle porzioni di codice meno testate, guidando il miglioramento progressivo dei test unitari.
+Le metriche di copertura hanno supportato l’identificazione delle porzioni di codice critiche non ancora verificate, guidando il miglioramento progressivo dei test unitari.
 
-\subsection{Analisi statica del codice}
+\subsection{Analisi statica e architetturale}
 
-La qualità strutturale del codice è stata analizzata mediante \textbf{SonarLint}, strumento di analisi statica integrato nell'ambiente di sviluppo per applicazioni Java. SonarLint è stato utilizzato per:
+La qualità del software è stata monitorata su due livelli distinti mediante l'uso combinato di strumenti di analisi statica:
+
+\subsubsection{Qualità del Codice (SonarLint)}
+La qualità strutturale e la conformità agli standard sono state analizzate mediante \textbf{SonarLint}. Lo strumento è stato utilizzato per:
 \begin{itemize}
-    \item rilevare metriche di complessità cognitiva e ciclomatica;
+    \item rilevare metriche di complessità cognitiva e ciclomatica puntuale;
     \item individuare \textit{code smells}, bug potenziali e vulnerabilità di sicurezza;
-    \item supportare la verifica del rispetto dei principi di Clean Code e delle convenzioni di programmazione.
+    \item supportare la verifica del rispetto dei principi di Clean Code.
 \end{itemize}
 
-L’analisi statica ha contribuito a mantenere un’architettura pulita, riducendo il debito tecnico e garantendo la manutenibilità del sistema nel lungo periodo.
-
-\newpage
+\subsubsection{Qualità Architetturale (CodeMR)}
+Per un'analisi di più alto livello, è stato introdotto \textbf{CodeMR}, uno strumento di analisi statica avanzata focalizzato sulla struttura del software.
+A differenza dei linter classici, CodeMR ha permesso di visualizzare e mappare le dipendenze tra i package, calcolando metriche architetturali fondamentali quali:
+\begin{itemize}
+    \item \textbf{Accoppiamento (Coupling)}: per valutare l'indipendenza dei moduli;
+    \item \textbf{Complessità Ciclomatica}: aggregata a livello di classe e package;
+    \item \textbf{Coesione}: per verificare la responsabilità singola delle classi.
+\end{itemize}
+L'utilizzo di CodeMR è stato determinante per verificare l'assenza di dipendenze cicliche tra i microservizi e per identificare preventivamente potenziali ``God Classes'' (classi monolitiche con troppe responsabilità), facilitando il refactoring verso un'architettura più modulare.
 
 \subsection{Ambienti di Sviluppo (IDE) e Build Automation}
 

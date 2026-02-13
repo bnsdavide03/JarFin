@@ -29,9 +29,11 @@ Il microservizio è stato sviluppato adottando uno stack tecnologico moderno, sc
     \item \textbf{Maven}: Per la gestione del ciclo di vita del software e delle dipendenze, come definito nel file \texttt{pom.xml}.
 \end{itemize}
 
-\section{Orchestrazione dell'Ambiente (Docker Compose)}
+\section{Orchestrazione (Docker Compose)}
 
 Una delle prime decisioni architetturali è stata quella di disaccoppiare l'applicazione dall'installazione locale del database. Per garantire che l'ambiente di sviluppo fosse deterministico e identico per ogni sviluppatore, si è optato per la virtualizzazione tramite \textbf{Docker}.
+
+\newpage
 
 Il file \texttt{docker-compose.yml} definisce il servizio di database e le sue configurazioni:
 
@@ -179,29 +181,107 @@ public ResponseEntity<TransactionResponse> create(@Valid @RequestBody Transactio
 }
 \end{lstlisting}
 
-\section{Testing e Validazione}
+\section{Qualità del Codice e Strategia di Testing}
 
-La qualità del software sviluppato è stata verificata attraverso una strategia di testing su due livelli: automatizzato e manuale.
+La validazione dell'Iterazione 1 non si è limitata alla sola verifica funzionale, ma ha seguito un percorso strutturato partendo dall'analisi statica del codice, passando per i test unitari con monitoraggio della copertura, fino ai test di integrazione manuali.
 
-\subsection{Unit Testing (JUnit 5 \& Mockito)}
-Sono stati sviluppati test unitari isolati per il Service e il Controller. L'uso di Mockito ha permesso di simulare il comportamento del database (`mocking`), verificando la logica di business e la corretta generazione delle risposte HTTP senza dipendenze esterne.
-La Figura \ref{fig:junit} mostra l'esecuzione positiva della suite di test nell'ambiente di sviluppo.
+\subsection{Analisi Statica e Refactoring (SonarLint)}
+
+Prima di procedere con il testing dinamico, è stata eseguita un'analisi statica del codice utilizzando \textbf{SonarLint}. Questa fase ha permesso di rilevare violazioni delle convenzioni REST e disuniformità nella gestione delle eccezioni.
+
+\newpage
+
+In particolare:
+\begin{itemize}
+    \item \textbf{Problema rilevato:} Il \texttt{TransactionController} restituiva status code generici e mancava l'header \texttt{Location} nelle risposte POST, violando le best practices RESTful.
+    \item \textbf{Intervento correttivo:} È stato introdotto \texttt{UriComponentsBuilder} ed eseguito un refactoring dei metodi per restituire oggetti \texttt{ResponseEntity} tipizzati correttamente, migliorando la semantica delle API.
+\end{itemize}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{../Iterazione_1/images/JUnit.png}
-    \caption{Suite di test unitari completata con successo su TransactionService.java}
+    \includegraphics[width=0.9\textwidth]{../Iterazione_1/images/UriComponentsBuilder.png}
+    \caption{Refactoring del Controller per conformità REST}
+    \label{fig:sonar_refactoring}
+\end{figure}
+
+Inoltre, sono state applicate correzioni minori suggerite dal linter, come la rimozione del modificatore \texttt{public} nei metodi di test (Figura \ref{fig:sonar_public}), rendendo il codice più pulito e conforme alle convenzioni di JUnit 5.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{../Iterazione_1/images/public_modifier.png}
+    \caption{Esempio di code smell rilevato da SonarLint}
+    \label{fig:sonar_public}
+\end{figure}
+
+\subsection{\mbox{Unit Testing e Copertura (JUnit 5, Mockito \& EclEmma)}}
+
+Per la verifica della logica di business, sono stati sviluppati test unitari isolati per il Service e il Controller.
+L'uso di \textbf{Mockito} ha permesso di simulare il comportamento del database (pattern \textit{mocking}), verificando la corretta generazione delle risposte HTTP e l'elaborazione dei dati senza dipendenze esterne.
+
+\subsubsection*{Strategia di Copertura}
+Non è stato perseguito l’obiettivo formale del 100\% di copertura, ma si è adottato un approccio \textbf{mirato} (soglia minima 85\%), concentrandosi sui metodi critici che:
+\begin{itemize}
+    \item contengono logica di business non banale o calcoli finanziari;
+    \item garantiscono l'integrità dei dati (es. validazione importi negativi);
+    \item gestiscono la persistenza e le transazioni verso il database.
+\end{itemize}
+
+La Figura \ref{fig:junit} mostra l'esecuzione con successo della suite di test nell'ambiente di sviluppo.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{../Iterazione_1/images/TransactionControllerTest.png}
+    \caption{Suite di test unitari completata con successo su TransactionController}
     \label{fig:junit}
 \end{figure}
 
+\subsubsection{Metriche Raggiunte}
+L'analisi con \textbf{EclEmma} ha confermato l'efficacia della strategia, raggiungendo livelli di copertura eccellenti per il modulo di contabilità:
+
+\begin{itemize}
+    \item \textbf{Service Layer Coverage:} 100\%
+    \item \textbf{Controller Layer Coverage:} 100\%
+    \item \textbf{Accounting Service Package Coverage:} 96\%
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{../Iterazione_1/images/Ecl-accounting-service.png}
+    \caption{Report di copertura EclEmma per il microservizio accounting-service}
+    \label{fig:eclemma_coverage}
+\end{figure}
+
+\subsection{Analisi Architetturale (CodeMR)}
+
+Per valutare la qualità strutturale del microservizio, è stato utilizzato \textbf{CodeMR}. L'analisi ha confermato una costruzione ottima delle classi, evidenziando un basso accoppiamento e un'alta coesione.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../Iterazione_1/images/quality-attributes.png}
+    \caption{Metriche degli attributi di qualità rilevate}
+    \label{fig:codemr_quality}
+\end{figure}
+
+Il grafico delle dipendenze (Figura \ref{fig:codemr_deps}) offre una rappresentazione visiva delle relazioni tra componenti, confermando una corretta stratificazione tra Controller, Service e Repository.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{../Iterazione_1/images/dependencies.png}
+    \caption{Grafo delle dipendenze del package Accounting}
+    \label{fig:codemr_deps}
+\end{figure}
+
+\newpage
+
 \subsection{Integration Testing (Postman)}
-Per validare l'intero stack (Controller + Service + DB + Docker), sono stati eseguiti test manuali \textit{End-to-End} tramite Postman.
+
+A completamento della fase di test, è stata eseguita una validazione \textit{End-to-End} dell'intero stack (Controller + Service + DB + Docker) mediante chiamate REST manuali con \textbf{Postman}.
 
 \textbf{1. Creazione Risorsa (Happy Path)}
 Una richiesta \texttt{POST} valida (Figura \ref{fig:post_ok}) restituisce status \texttt{201 Created} e il JSON della transazione salvata, confermando il corretto funzionamento della catena di persistenza.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{../Iterazione_1/images/postman_post.png}
+    \includegraphics[width=0.85\textwidth]{../Iterazione_1/images/postman_post.png}
     \caption{Creazione di una transazione con successo (Status 201).}
     \label{fig:post_ok}
 \end{figure}
@@ -210,7 +290,7 @@ Una richiesta \texttt{POST} valida (Figura \ref{fig:post_ok}) restituisce status
 La richiesta \texttt{GET} (Figura \ref{fig:get_ok}) conferma che i dati sono stati persistiti correttamente sul database PostgreSQL containerizzato.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{../Iterazione_1/images/postman_get.png}
+    \includegraphics[width=0.85\textwidth]{../Iterazione_1/images/postman_get.png}
     \caption{Recupero della lista delle transazioni (Status 200).}
     \label{fig:get_ok}
 \end{figure}
@@ -219,11 +299,12 @@ La richiesta \texttt{GET} (Figura \ref{fig:get_ok}) conferma che i dati sono sta
 Inviando un payload con dati non validi (es. importo negativo), il sistema attiva il \texttt{GlobalExceptionHandler} (Figura \ref{fig:post_bad}), restituendo un \texttt{400 Bad Request} con i dettagli dell'errore.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{../Iterazione_1/images/postman_bad_request.png}
+    \includegraphics[width=0.85\textwidth]{../Iterazione_1/images/postman_bad_request.png}
     \caption{Test di validazione: risposta 400 Bad Request su importo negativo.}
     \label{fig:post_bad}
 \end{figure}
 
 \section{Conclusione Iterazione 1}
 
-L'Iterazione 1 ha consegnato un microservizio di Accounting pienamente operativo e testato. L'adozione di Docker ha semplificato il deployment del database, mentre l'uso di pattern avanzati (DTO, Mapper, Global Exception Handling) ha garantito una codebase manutenibile e robusta. Il sistema è ora pronto per la successiva integrazione con i moduli di Analytics e Natural Language Understanding.
+L'Iterazione 1 ha consegnato un microservizio di Accounting pienamente operativo, validato sia staticamente che dinamicamente.
+L'integrazione di strumenti come SonarLint e CodeMR ha garantito la qualità del codice fin dalle prime fasi, mentre l'alta copertura dei test unitari (96\%) assicura la robustezza della logica di business. Il sistema, containerizzato con Docker e validato via Postman, è ora una base solida pronta per l'integrazione con i moduli di Analytics e Natural Language Understanding.

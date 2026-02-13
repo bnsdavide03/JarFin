@@ -142,7 +142,6 @@ Riguarda le funzionalità di monitoraggio e organizzazione dei dati.
     \item \textbf{Visualizzare Report e Stime}: generazione di grafici e proiezioni future basate sullo storico delle transazioni.
 \end{itemize}
 
-\newpage
 \section{Vista logica – Class Diagram}
 
 La vista logica (Figura \ref{fig:classdiagram}) illustra la struttura statica del sistema, evidenziando la suddivisione in microservizi e le relazioni tra le classi. Il diagramma riflette l'architettura modulare adottata, dove ogni componente ha responsabilità ben definite.
@@ -200,16 +199,16 @@ Modulo preposto alla gestione della persistenza e della logica transazionale:
 L'architettura utilizza un \textbf{\texttt{APIGateway}} all'interno del package \texttt{API}:
 \begin{itemize}
     \item \textbf{Routing}: Il Gateway funge da unico punto di accesso, esponendo metodi per l'autenticazione (\texttt{authUser}) e il routing delle richieste (\texttt{route}) verso i controller dei microservizi.
-    \item \textbf{Dipendenze}: Le linee tratteggiate indicano una dipendenza d'uso verso \texttt{TransactionController}, \texttt{AnalyticsController} e \texttt{NaturalLanguageService}, confermando il suo ruolo di orchestratore del traffico.
+    \item \textbf{Dipendenze}: Le linee tratteggiate indicano una dipendenza d'uso verso \\ \texttt{TransactionController}, \texttt{AnalyticsController} e \texttt{NaturalLanguageService}, confermando il suo ruolo di orchestratore del traffico.
 \end{itemize}
 
 \section{Vista di sviluppo – Component Diagram}
 
-Il Diagramma dei Componenti (Figura \ref{fig:components}) illustra l'organizzazione del sistema JarFin [cite: 4] in moduli software distinti e le dipendenze che intercorrono tra di essi. Questa vista evidenzia una struttura a tre livelli (\textit{Layered Architecture}):
+Il Diagramma dei Componenti (Figura \ref{fig:components}) illustra l'organizzazione del sistema JarFin in moduli software distinti e le dipendenze che intercorrono tra di essi. Questa vista evidenzia una struttura a tre livelli (\textit{Layered Architecture}):
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.78\textwidth]{../Iterazione_0/images/component_diagram.png}
+    \includegraphics[width=0.65\textwidth]{../Iterazione_0/images/component_diagram.png}
     \caption{Diagramma dei componenti: architettura a livelli e interfacce esposte.}
     \label{fig:components}
 \end{figure}
@@ -226,8 +225,8 @@ Il livello superiore rappresenta il frontend e i servizi di interazione immediat
 Il nucleo del sistema incapsula la logica di business ed è suddiviso in tre moduli principali che operano all'interno del componente \texttt{Web UI} e dei servizi backend:
 \begin{itemize}
     \item \textbf{NLU Service}: Incapsula l'artefatto \texttt{NaturalLanguageService.java} e fornisce l'interfaccia \texttt{NLUInterface} per l'operazione di \texttt{parse()}.
-    \item \textbf{Accounting Service}: Gestisce i flussi finanziari tramite l'interfaccia \texttt{AccountingInterface}, esponendo i metodi \texttt{addTransaction()} e \texttt{getBalance()}.
-    \item \textbf{Analytics Service}: Utilizza l'artefatto \texttt{DataAggregator.java} per elaborare i dati tramite l'interfaccia \texttt{AnalyticsInterface} e il metodo \texttt{getStatistics()}[cite: 5, 3].
+    \item \textbf{Accounting Service}: Gestisce i flussi finanziari tramite l'interfaccia \\ \texttt{AccountingInterface}, esponendo i metodi \texttt{addTransaction()} e \texttt{getBalance()}.
+    \item \textbf{Analytics Service}: Utilizza l'artefatto \texttt{DataAggregator.java} per elaborare i dati tramite l'interfaccia \texttt{AnalyticsInterface} e il metodo \texttt{getStatistics()}.
 \end{itemize}
 
 \subsection{Data Layer}
@@ -256,13 +255,12 @@ La vista di processo descrive la dinamica temporale delle interazioni tra gli at
     \label{fig:sequence}
 \end{figure}
 
-\newpage
 \subsection{Fase 1: Input e Pre-elaborazione}
 Il flusso ha inizio con l'interazione dell'utente verso l'applicazione client:
 \begin{enumerate}
-    \item \textbf{Invio Comando}: L'utente invia un comando (es. "Saldo") alla \texttt{Client Application} [cite: 15].
+    \item \textbf{Invio Comando}: L'utente invia un comando (es. "Saldo") alla \texttt{Client Application}.
     \item \textbf{Inoltro Richiesta}: La \texttt{Client Application} effettua una chiamata \texttt{POST /process(testo)} verso l'\texttt{Api Gateway}.
-    \item \textbf{Analisi Semantica}: L'Gateway invoca il metodo \texttt{parse(Testo)} del \texttt{NaturalLanguageService}. Il servizio restituisce un oggetto \texttt{JSON \{intento, dati\}} che identifica l'azione richiesta.
+    \item \textbf{Analisi Semantica}: L'Gateway invoca il metodo \texttt{parse(Testo)} del \\ \texttt{NaturalLanguageService}. Il servizio restituisce un oggetto \texttt{JSON \{intento, dati\}} che identifica l'azione richiesta.
 \end{enumerate}
 
 \subsection{Fase 2: Elaborazione Condizionale (Frammento \texttt{alt})}
@@ -272,7 +270,7 @@ In base all'intento estratto dal servizio NLU, il sistema segue due percorsi log
     \item \textbf{Intento SCRITTURA (Spese, Fondi)}: 
           L'Gateway inoltra una richiesta \texttt{POST/PUT} all'\textbf{Accounting Service}. All'interno di questo ramo, un ulteriore frammento \texttt{alt} distingue l'operazione sul \texttt{Database}:
           \begin{itemize}
-              \item \textit{Nuova Entità}: Viene eseguita una \texttt{INSERT into table} (es. per una nuova Spesa)[cite: 14, 16].
+              \item \textit{Nuova Entità}: Viene eseguita una \texttt{INSERT into table} (es. per una nuova Spesa).
               \item \textit{Modifica}: Viene eseguita una \texttt{UPDATE Table}.
           \end{itemize}
           Il Database restituisce una \texttt{Conferma ID} all'Accounting Service, che a sua volta comunica l'\texttt{Esito Operazione} all'Gateway.
@@ -303,12 +301,13 @@ Il Diagramma di Deployment (Figura \ref{fig:deployment}) illustra la distribuzio
 Il sistema è distribuito su infrastrutture distinte che separano il frontend, la logica applicativa e la persistenza:
 
 \begin{itemize}
-    \item \textbf{User Device}: Rappresenta il dispositivo terminale dell'utente. Ospita l'ambiente di esecuzione \textbf{Web Browser} [cite: 31], all'interno del quale viene eseguito l'artefatto \textbf{\texttt{jarfin-web-ui.jar}}. In questo nodo è presente anche il supporto alle \textbf{Web Speech API} per il riconoscimento vocale direttamente lato client.
+    \item \textbf{User Device}: Rappresenta il dispositivo terminale dell'utente. Ospita l'ambiente di esecuzione \textbf{Web Browser}, all'interno del quale viene eseguito l'artefatto \textbf{\texttt{jarfin-web-ui.jar}}. In questo nodo è presente anche il supporto alle \textbf{Web Speech API} per il riconoscimento vocale direttamente lato client.
 
+    \newpage
     \item \textbf{Cloud Server}: Il nodo centrale che ospita i microservizi. È suddiviso in ambienti di esecuzione containerizzati per garantire l'isolamento:
           \begin{itemize}
-              \item \textbf{Container Accounting}: Esegue l'artefatto \texttt{AccountingService.jar}[cite: 28, 30].
-              \item \textbf{Analytics Service Container}: Esegue l'artefatto \texttt{AnalyticsService.jar}[cite: 28, 30].
+              \item \textbf{Container Accounting}: Esegue l'artefatto \texttt{AccountingService.jar}.
+              \item \textbf{Analytics Service Container}: Esegue l'artefatto \texttt{AnalyticsService.jar}.
               \item \textbf{Esecuzione NLU}: All'interno del server viene eseguito l'artefatto \texttt{ParserNLU.jar} per l'elaborazione del linguaggio naturale.
           \end{itemize}
 
@@ -326,7 +325,6 @@ Le interconnessioni tra i vari nodi utilizzano protocolli standard per lo scambi
     \item \textbf{Integrazione Locale}: A differenza di implementazioni puramente cloud, il diagramma evidenzia che la componente di trascrizione vocale (\textbf{Web Speech API}) risiede nello \textit{User Device}, riducendo la necessità di inviare flussi audio grezzi verso nodi esterni per il solo STT.
 \end{itemize}
 
-\newpage
 \section{Conclusioni dell'Iterazione 0}
 
 L'attività di analisi e progettazione ha prodotto un'architettura solida, modulare e documentata. L'adozione del modello 4+1 ha permesso di affrontare la complessità del sistema distribuito, definendo chiaramente le responsabilità di ogni componente prima dell'inizio della fase di codifica (Iterazione 1).

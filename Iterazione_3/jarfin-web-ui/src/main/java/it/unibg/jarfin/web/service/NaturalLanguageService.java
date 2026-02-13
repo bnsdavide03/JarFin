@@ -15,22 +15,6 @@ import it.unibg.jarfin.web.dto.CommandType;
 
 @Service
 public class NaturalLanguageService {
-	
-public static final String RISTORANTE = "Ristorante";
-    public static final String BAR_COLAZIONE = "Bar/Colazione";
-    public static final String SUPERMERCATO = "Supermercato";
-    public static final String TRASPORTI = "Trasporti";
-    public static final String BOLLETTE = "Bollette";
-    public static final String CASA = "Casa";
-    public static final String SVAGO = "Svago";
-    public static final String SHOPPING = "Shopping";
-    public static final String SALUTE = "Salute";
-    public static final String SALUTE_SPORT = "Salute/Sport";
-    public static final String CURA_PERSONALE = "Cura Personale";
-    public static final String STIPENDIO = "Stipendio";
-    public static final String BONIFICO = "Bonifico";
-    public static final String ENTRATA = "Entrata";
-	
 
     public static final String RISTORANTE = "Ristorante";
     public static final String BAR_COLAZIONE = "Bar/Colazione";
@@ -58,7 +42,6 @@ public static final String RISTORANTE = "Ristorante";
     private static final Map<String, String> VERB_TO_NOUN = new HashMap<>();
 
     static {
-
         VERB_TO_NOUN.put("stipendiato", "stipendio");
         VERB_TO_NOUN.put("regalato", "regalo");
         VERB_TO_NOUN.put("comprato", "acquisto");
@@ -81,7 +64,6 @@ public static final String RISTORANTE = "Ristorante";
         CATEGORY_MAP.put("colazione", BAR_COLAZIONE);
         CATEGORY_MAP.put("aperitivo", BAR_COLAZIONE);
         CATEGORY_MAP.put("caffè", BAR_COLAZIONE);
-
         CATEGORY_MAP.put("esselunga", SUPERMERCATO);
         CATEGORY_MAP.put("coop", SUPERMERCATO);
         CATEGORY_MAP.put("lidl", SUPERMERCATO);
@@ -92,7 +74,6 @@ public static final String RISTORANTE = "Ristorante";
         CATEGORY_MAP.put("supermercato", SUPERMERCATO);
         CATEGORY_MAP.put("alimentari", SUPERMERCATO);
         CATEGORY_MAP.put("ortofrutta", SUPERMERCATO);
-
         CATEGORY_MAP.put("benzina", TRASPORTI);
         CATEGORY_MAP.put("diesel", TRASPORTI);
         CATEGORY_MAP.put("treno", TRASPORTI);
@@ -106,7 +87,6 @@ public static final String RISTORANTE = "Ristorante";
         CATEGORY_MAP.put("taxi", TRASPORTI);
         CATEGORY_MAP.put("aereo", TRASPORTI);
         CATEGORY_MAP.put("ryanair", TRASPORTI);
-
         CATEGORY_MAP.put("luce", BOLLETTE);
         CATEGORY_MAP.put("gas", BOLLETTE);
         CATEGORY_MAP.put("enel", BOLLETTE);
@@ -119,7 +99,6 @@ public static final String RISTORANTE = "Ristorante";
         CATEGORY_MAP.put("mutuo", CASA);
         CATEGORY_MAP.put("ikea", CASA);
         CATEGORY_MAP.put("leroy", CASA);
-
         CATEGORY_MAP.put("netflix", SVAGO);
         CATEGORY_MAP.put("spotify", SVAGO);
         CATEGORY_MAP.put("cinema", SVAGO);
@@ -129,14 +108,12 @@ public static final String RISTORANTE = "Ristorante";
         CATEGORY_MAP.put("shein", SHOPPING);
         CATEGORY_MAP.put("zara", SHOPPING);
         CATEGORY_MAP.put("h&m", SHOPPING);
-
         CATEGORY_MAP.put("palestra", SALUTE_SPORT);
         CATEGORY_MAP.put("padel", SALUTE_SPORT);
         CATEGORY_MAP.put("farmacia", SALUTE);
         CATEGORY_MAP.put("medico", SALUTE);
         CATEGORY_MAP.put("dentista", SALUTE);
         CATEGORY_MAP.put("visita", SALUTE);
-
         CATEGORY_MAP.put("parrucchiere", CURA_PERSONALE);
         CATEGORY_MAP.put("barbiere", CURA_PERSONALE);
         CATEGORY_MAP.put("estetista", CURA_PERSONALE);
@@ -150,7 +127,6 @@ public static final String RISTORANTE = "Ristorante";
         CATEGORY_MAP.put("salone", CURA_PERSONALE);
         CATEGORY_MAP.put("profumeria", CURA_PERSONALE);
         CATEGORY_MAP.put("cosmetica", CURA_PERSONALE);
-
         CATEGORY_MAP.put("stipendio", STIPENDIO);
         CATEGORY_MAP.put("bonifico", BONIFICO);
         CATEGORY_MAP.put("rimborso", ENTRATA);
@@ -173,12 +149,12 @@ public static final String RISTORANTE = "Ristorante";
         CATEGORY_DEFAULT_DESC.put(ENTRATA, "Entrata");
     }
 
-public ParsedTransaction parse(String text) {
+    public ParsedTransaction parse(String text) {
         if (text == null || text.trim().length() < 2) return null;
 
         String lowerCaseText = text.trim().toLowerCase();
 
-        String[] stopWords = { "stop", "nulla", "niente", "annulla", "chiudi", "jar", "giar" };
+        String[] stopWords = { "stop", "nulla", "niente", "annulla", "chiudi", "jar", "giar", "jarfin", "johnny", "gionni" };
         for (String w : stopWords) {
             if (lowerCaseText.equals(w) || lowerCaseText.startsWith(w + " ")) {
                 return null;
@@ -186,7 +162,6 @@ public ParsedTransaction parse(String text) {
         }
 
         String normalizedText = convertVerbsToNouns(text);
-        
         ParsedTransaction result = new ParsedTransaction();
 
         if (DELETE_CMD.matcher(normalizedText).find()) {
@@ -210,34 +185,12 @@ public ParsedTransaction parse(String text) {
             textForAmount = normalizedText.replace(idMatcher.group(0), "");
         }
 
-        BigDecimal parsedAmount = null;
-
-        parsedAmount = parseItalianNumberWords(textForAmount.toLowerCase());
-
+        BigDecimal parsedAmount = parseItalianNumberWords(textForAmount.toLowerCase());
+        
         if (parsedAmount == null) {
             Matcher matcher = NUMBER_PATTERN.matcher(textForAmount);
             if (matcher.find()) {
-                String numStr = matcher.group(1);
-                String cleanNum = numStr;
-
-                try {
-                    boolean hasDot = cleanNum.contains(".");
-                    boolean hasComma = cleanNum.contains(",");
-
-                    if (hasDot && hasComma) {
-                        cleanNum = cleanNum.replace(".", "").replace(",", ".");
-                    } else if (hasComma) {
-                        cleanNum = cleanNum.replace(",", ".");
-                    } else if (hasDot) {
-                        int dotsCount = org.springframework.util.StringUtils.countOccurrencesOf(cleanNum, ".");
-                        if (dotsCount > 1 || cleanNum.matches(".*\\.\\d{3}$")) {
-                            cleanNum = cleanNum.replace(".", ""); 
-                        }
-                    }
-                    parsedAmount = new BigDecimal(cleanNum);
-                } catch (Exception e) {
-                    parsedAmount = null;
-                }
+                parsedAmount = parseSmartDecimal(matcher.group(1));
             }
         }
         result.setAmount(parsedAmount);
@@ -309,7 +262,13 @@ public ParsedTransaction parse(String text) {
             String t = tokens[i];
             if (t.isEmpty()) continue;
             
-            if (t.matches("euro|eur|e|di|da|con|in|per")) continue;
+            if (t.matches("euro|eur|e|di|da|con|in|per")) {
+                if (t.matches("euro|eur") && currentBuffer.length() > 0) {
+                     grandTotal = grandTotal.add(parseStringBuffer(currentBuffer.toString(), units, tens));
+                     currentBuffer.setLength(0);
+                }
+                continue;
+            }
             
             boolean isDigit = t.matches("\\d+(?:[.,]\\d+)*"); 
             boolean isKeyword = isValidNumberWord(t);
@@ -318,15 +277,15 @@ public ParsedTransaction parse(String text) {
 
             if (isDigit) {
                 foundSomething = true;
-                String numClean = t.replace(".", "").replace(",", ".");
-                BigDecimal val = BigDecimal.ZERO;
-                try { val = new BigDecimal(numClean); } catch(Exception e) { continue; }
+                BigDecimal val = parseSmartDecimal(t); 
 
                 if (nextIsCents) {
                     val = val.multiply(new BigDecimal("0.01"));
                 }
                 
-                if (val.compareTo(BigDecimal.valueOf(1000)) >= 0 || nextIsCents) {
+                boolean likelyDecimal = t.contains(",") || (t.contains(".") && !t.matches(".*\\.\\d{3}$"));
+
+                if (val.compareTo(BigDecimal.valueOf(1000)) >= 0 || nextIsCents || likelyDecimal) {
                     if (currentBuffer.length() > 0) {
                         grandTotal = grandTotal.add(parseStringBuffer(currentBuffer.toString(), units, tens));
                         currentBuffer.setLength(0);
@@ -360,6 +319,34 @@ public ParsedTransaction parse(String text) {
         }
 
         return foundSomething ? grandTotal : null;
+    }
+
+    private BigDecimal parseSmartDecimal(String numStr) {
+        if (numStr == null) return BigDecimal.ZERO;
+        String cleanNum = numStr;
+        try {
+            boolean hasDot = cleanNum.contains(".");
+            boolean hasComma = cleanNum.contains(",");
+
+            if (hasDot && hasComma) {
+                cleanNum = cleanNum.replace(".", "").replace(",", ".");
+            } else if (hasComma) {
+                cleanNum = cleanNum.replace(",", ".");
+            } else if (hasDot) {
+                int dotsCount = org.springframework.util.StringUtils.countOccurrencesOf(cleanNum, ".");
+                
+                if (cleanNum.matches(".*\\.\\d{2}$")) {
+                    return new BigDecimal(cleanNum);
+                }
+
+                if (dotsCount > 1 || cleanNum.matches(".*\\.\\d{3}$")) {
+                    cleanNum = cleanNum.replace(".", ""); 
+                }
+            }
+            return new BigDecimal(cleanNum);
+        } catch (Exception e) {
+            return BigDecimal.ZERO;
+        }
     }
 
     private BigDecimal parseStringBuffer(String raw, Map<String, Long> units, Map<String, Long> tens) {
@@ -527,14 +514,12 @@ public ParsedTransaction parse(String text) {
     private String extractSpecificNoun(String text) {
         String lowerText = text.toLowerCase();
         String[] specificNouns = {
-                "stipendio", "regalo", "bonifico", "pagamento", "acquisto",
                 "netflix", "spotify", "amazon", "prime", "disney",
-                "cinema", "teatro", "concerto", "museo",
-                "pizza", "sushi", "hamburger", "panino", "kebab", "pranzo", "cena", "colazione",
+                "pizza", "sushi", "hamburger", "kebab",
                 "mcdonald", "burger king", "kfc",
                 "esselunga", "coop", "lidl", "conad", "carrefour", "eurospin",
                 "benzina", "diesel", "carburante", "metano", "gpl",
-                "treno", "bus", "metro", "taxi", "uber", "aereo", "viaggio",
+                "treno", "bus", "metro", "taxi", "uber", "aereo",
                 "farmacia", "parafarmacia", "ospedale",
                 "palestra", "piscina", "padel", "tennis", "calcio",
                 "parrucchiere", "barbiere", "estetista", "manicure", "pedicure",
@@ -542,8 +527,8 @@ public ParsedTransaction parse(String text) {
                 "enel", "tim", "vodafone", "wind", "fastweb",
                 "affitto", "mutuo", "condominio",
                 "zalando", "zara", "h&m", "shein", "vinted",
-                "ikea", "leroy", "obi", "libro", "libri", 
-                "abbonamento", "biglietto", "fiori", "manutenzione", "macchinette", "slot"
+                "ikea", "leroy", "obi", 
+                "abbonamento", "biglietto", "manutenzione", "slot"
         };
         for (String noun : specificNouns) {
             if (lowerText.contains(noun)) return noun;
@@ -563,7 +548,7 @@ public ParsedTransaction parse(String text) {
             "aggiungi|inserisci|crea|nuova|nuovo|registra|segna|metti|tieni|traccia|" +
             "ho|hai|ha|abbiamo|avete|hanno|" +
             "sono|sei|è|siamo|siete|" +
-            "speso|pagato|comprato|preso|ricevuto|accreditato|uscito|entrato|" +
+            "speso|pagato|pagamento|comprato|acquisto|preso|ricevuto|accreditato|uscito|entrato|ristorante|" +
             "fatto|faccio|fai|fa|" +
             "il|lo|la|i|gli|le|un|una|uno|" +
             "per|di|a|in|con|su|da|fra|tra|come|tipo|" +

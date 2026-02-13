@@ -93,7 +93,7 @@ L'algoritmo itera sulla lista una sola volta. Per ogni transazione, verifica il 
 
 \bigskip
 
-\begin{lstlisting}[language=Java, caption={Core dell'algoritmo di aggregazione}, label={lst:algo_core}]
+\begin{lstlisting}[language=Java, label={lst:algo_core}]
 BigDecimal incomes = BigDecimal.ZERO;
 BigDecimal expenses = BigDecimal.ZERO;
 Map<String, BigDecimal> categories = new HashMap<>();
@@ -248,7 +248,7 @@ Il calcolo del livello di allerta implementa una logica a soglie. Il codice gest
 
 \bigskip
 
-\begin{lstlisting}[language=Java, caption={Logica di valutazione finanziaria}, label={lst:alert}]
+\begin{lstlisting}[language=Java, label={lst:alert}]
 if (incomes.compareTo(BigDecimal.ZERO) > 0) {
     // Calcolo percentuale risparmio
     BigDecimal rate = balance.divide(incomes, 4, RoundingMode.HALF_UP)
@@ -273,9 +273,30 @@ if (incomes.compareTo(BigDecimal.ZERO) > 0) {
 }
 \end{lstlisting}
 
+\section{Qualità del Codice e Strategia di Testing}
+
+Nell'Iterazione 2, il focus si è spostato sulla validazione di logiche di business complesse (aggregazioni, proiezioni) e sulla gestione delle dipendenze esterne. Essendo l'Analytics Service un consumatore di dati (tramite chiamate HTTP verso l'Accounting Service), la strategia di testing ha dovuto isolare queste dipendenze per garantire determinismo e affidabilità.
+
+\subsection{Analisi della Complessità e Refactoring}
+
+L'analisi statica iniziale ha evidenziato che il metodo principale \texttt{generateReport} presentava un'elevata \textbf{complessità cognitiva} a causa di logiche annidate per il calcolo delle proiezioni finanziarie.
+
+Per migliorare la manutenibilità, sono stati applicati i seguenti interventi di refactoring:
+\begin{itemize}
+    \item \textbf{Estrazione della Logica:} Il calcolo delle proiezioni è stato isolato in metodi privati dedicati (es. \texttt{calculateProjections()}), riducendo la complessità ciclomatica del metodo principale.
+    \item \textbf{Gestione delle Costanti:} Gli URL dei servizi e i parametri di soglia (es. "Magic Numbers" per gli alert) sono stati sostituiti con costanti \texttt{static final}, rendendo il sistema configurabile e meno soggetto a errori di battitura (Typos).
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{../Iterazione_2/images/calculateProjections.png}
+    \caption{Estrazione del metodo calculateProjections per ridurre la complessità}
+    \label{fig:refactoring_projections}
+\end{figure}
+
 \section{Testing Isolato con Mockito}
 
-Data la natura interconnessa del servizio, un semplice Unit Test non sarebbe sufficiente se richiedesse il servizio Accounting attivo. Per garantire che i test siano deterministici e veloci, è stato utilizzato Mockito.
+Data la natura interconnessa del servizio, un semplice Unit Test non sarebbe sufficiente né affidabile se richiedesse l'istanza reale dell'Accounting Service attiva. Per garantire che i test siano deterministici e veloci, è stato utilizzato il framework \textbf{Mockito}.
 
 La classe di test \texttt{AnalyticsServiceTest} utilizza le annotazioni:
 \begin{itemize}
@@ -283,78 +304,115 @@ La classe di test \texttt{AnalyticsServiceTest} utilizza le annotazioni:
     \item \texttt{@InjectMocks}: Inietta il mock dentro l'istanza reale di \texttt{AnalyticsService}.
 \end{itemize}
 
-Il test verifica la correttezza matematica dell'aggregatore fornendo dati fittizi ("Stubbing"):
+I test verificano la correttezza matematica dell'aggregatore e la logica degli alert (GREEN, RED, CRITICAL) fornendo dati fittizi tramite la tecnica dello "Stubbing".
 
-\bigskip
+Di seguito è riportato lo scenario "GREEN" (Risparmio positivo), dove si verifica che il calcolo del \textit{Savings Rate} e del \textit{Total Balance} sia corretto:
 
 \begin{lstlisting}[language=Java, label={lst:mocktest}]
 @Test
-public void testGenerateReport_Success() {
+@DisplayName("Scenario GREEN: Entrate > Uscite (Risparmio Alto)")
+void generateReport_GreenScenario() {
     // ARRANGE: Preparazione dati fittizi
-    TransactionDTO t1 = new TransactionDTO(); 
-    t1.setAmount(new BigDecimal("1000.00")); 
-    t1.setType(TransactionType.INCOME);
-    
-    TransactionDTO t2 = new TransactionDTO();
-    t2.setAmount(new BigDecimal("200.00"));
-    t2.setType(TransactionType.EXPENSE);
+    TransactionDTO income = new TransactionDTO();
+    income.setAmount(new BigDecimal("2000.00"));
+    income.setType(TransactionType.INCOME);
+
+    TransactionDTO expense = new TransactionDTO();
+    expense.setAmount(new BigDecimal("500.00"));
+    expense.setType(TransactionType.EXPENSE);
+    expense.setCategory("Svago");
+
+    TransactionDTO[] mockResponse = {income, expense};
+
     // Istruiamo il Mock a restituire questi dati quando chiamato
-    when(restTemplate.getForObject(anyString(), eq(TransactionDTO[].class)))
-            .thenReturn(new TransactionDTO[]{t1, t2});
+    when(restTemplate.getForObject(any(), eq(TransactionDTO[].class)))
+            .thenReturn(mockResponse);
 
     // ACT: Esecuzione reale del servizio
-    FinancialReportDTO report = service.generateReport();
+    FinancialReportDTO report = analyticsService.generateReport();
 
     // ASSERT: Verifica dei calcoli
-    assertEquals(new BigDecimal("1000.00"), report.getTotalIncomes());
-    assertEquals(new BigDecimal("800.00"), report.getTotalBalance());
+    assertNotNull(report);
+    assertEquals(new BigDecimal("1500.00"), report.getTotalBalance());
+    assertEquals(new BigDecimal("75.0000"), report.getSavingsRate());
+    
+    // Verifica logica di business (Alert Level)
+    assertTrue(report.getAlertLevel().contains("GREEN"));
 }
 \end{lstlisting}
 
-
-
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{../Iterazione_2/images/JUnit.png}
-    \caption{Esito positivo dei test unitari su AnalyticsService.}
+    \includegraphics[width=0.9\textwidth]{../Iterazione_2/images/AnalyticsServiceTest.png}
+    \caption{Esito positivo della suite di test.}
     \label{fig:junit_analytics}
 \end{figure}
 
-Questo approccio disaccoppia il test della logica di business dalla disponibilità della rete o del database, rispettando la piramide dei test.
+Questo approccio rispetta la piramide dei test, validando la logica di aggregazione e le regole di business senza dipendere dalla disponibilità della rete o del database.
 
-\section{Validazione Funzionale del Servizio}
+\subsection{Metriche di Copertura e Qualità}
 
-Una volta verificata la logica unitaria, è stato avviato il servizio per una verifica funzionale completa.
+Anche per questo modulo è stato mantenuto l'approccio mirato al testing delle componenti critiche. Le metriche rilevate da \textbf{EclEmma} confermano un'alta copertura del codice:
 
-\subsection{Avvio del Microservizio}
-Come mostrato nel log di avvio (Figura \ref{fig:run_analytics}), il servizio viene inizializzato correttamente sulla porta \texttt{8082}, come definito nel file \texttt{application.properties}.
-
-
+\begin{itemize}
+    \item \textbf{Service Layer Coverage:} 92\%
+    \item \textbf{DTO Layer Coverage:} 100\%
+    \item \textbf{Analytics Service Package Coverage:} 94.2\%
+\end{itemize}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{../Iterazione_2/images/run_analytics_service.png}
-    \caption{Console log: avvio di AnalyticsService sulla porta 8082.}
+    \includegraphics[width=0.8\textwidth]{../Iterazione_2/images/Ecl-analytics-service.png}
+    \caption{Report di copertura EclEmma per il microservizio analytics-service}
+    \label{fig:eclemma_analytics}
+\end{figure}
+
+L'analisi architetturale con \textbf{CodeMR} (Figura \ref{fig:codemr_analytics_quality}) evidenzia attributi di qualità positivi per il package, mentre il grafo delle dipendenze (Figura \ref{fig:codemr_analytics_deps}) mostra una struttura pulita con dipendenze minime verso l'esterno.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{../Iterazione_2/images/quality-attributes.png}
+    \caption{Metriche degli attributi di qualità per analytics-service}
+    \label{fig:codemr_analytics_quality}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{../Iterazione_2/images/dependencies.png}
+    \caption{Grafo delle dipendenze del package analytics-service}
+    \label{fig:codemr_analytics_deps}
+\end{figure}
+
+\subsection{Validazione Funzionale del Servizio}
+
+Una volta validata la logica unitaria, è stata eseguita una verifica funzionale avviando il microservizio.
+
+\subsubsection{Avvio e Inizializzazione}
+Come mostrato nel log di avvio (Figura \ref{fig:run_analytics}), il servizio viene inizializzato correttamente sulla porta \texttt{8082}, pronto per ricevere richieste e comunicare con l'Accounting Service.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{../Iterazione_2/images/run_analytics_service.png}
+    \caption{Console log: avvio di AnalyticsService sulla porta 8082}
     \label{fig:run_analytics}
 \end{figure}
 
-\subsection{Verifica Output JSON}
-Utilizzando Postman, è stata simulata una richiesta di report. \\
+\subsubsection{Verifica Output JSON (Postman)}
+Utilizzando Postman, è stata simulata una richiesta di report finanziario.
 La risposta (Figura \ref{fig:postman_report}) dimostra che:
 \begin{enumerate}
-    \item I dati vengono recuperati correttamente dall'Accounting Service.
-    \item L'algoritmo di aggregazione calcola i totali (es. \texttt{totalBalance}, \texttt{totalExpenses}).
-    \item Il sistema di alert funziona, restituendo un livello \texttt{GREEN} (poiché le entrate superano le spese superando il margine minimo impostato del 20\%).
+    \item I dati vengono recuperati correttamente dall'Accounting Service tramite la rete.
+    \item L'algoritmo di aggregazione calcola correttamente i totali derivati (es. \texttt{totalBalance}, \texttt{totalExpenses}).
+    \item Il sistema di alert funziona come previsto, restituendo un livello \texttt{GREEN} coerente con i dati di input (entrate superiori alle uscite oltre il margine di sicurezza).
 \end{enumerate}
-
-
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{../Iterazione_2/images/postman_get.png}
-    \caption{Risposta JSON completa del report finanziario.}
+    \caption{Risposta JSON completa del report finanziario generato}
     \label{fig:postman_report}
 \end{figure}
 
 \section{Conclusione Iterazione 2}
-L'Iterazione 2 ha prodotto un servizio di Analytics capace di elaborare dati complessi con efficienza lineare $O(n)$. L'uso di configurazioni externalizzate e pattern di test isolati garantisce che il servizio sia pronto per il deployment in ambiente containerizzato \textit{JarFin}.
+
+L'Iterazione 2 ha prodotto un servizio di Analytics capace di elaborare dati complessi con efficienza. L'uso combinato di refactoring per ridurre la complessità cognitiva, mocking per i test unitari e analisi di copertura ha garantito un codice di alta qualità (copertura > 94\%). Le configurazioni externalizzate e i test isolati assicurano che il servizio sia pronto per l'integrazione nell'ecosistema containerizzato \textit{JarFin}.
