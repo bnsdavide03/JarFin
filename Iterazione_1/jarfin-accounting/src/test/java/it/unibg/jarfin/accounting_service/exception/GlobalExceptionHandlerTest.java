@@ -21,6 +21,10 @@ class GlobalExceptionHandlerTest {
 
     private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
 
+    /**
+     * Test case for handleNotFound method.
+     * Verify that the response contains the correct HTTP status (404) and error message.
+     */
     @Test
     void testHandleNotFound() {
         String errorMessage = "Transazione ID 1 non trovata";
@@ -32,6 +36,10 @@ class GlobalExceptionHandlerTest {
         assertEquals(errorMessage, response.getBody());
     }
 
+    /**
+     * Test case for handleValidationErrors method.
+     * Verify that the response contains the correct HTTP status (400) and a JSON body containing the error message.
+     */
     @Test
     void testHandleValidationErrors() {
     	BindingResult bindingResult = mock(BindingResult.class);
@@ -51,9 +59,12 @@ class GlobalExceptionHandlerTest {
         assertEquals("must be positive", body.get("amount"));
     }
     
+    /**
+     * Test case for handleValidationErrors method when the BindingResult is empty.
+     * Verify that the response contains the correct HTTP status (400) and an empty JSON body.
+     */
     @Test
     void testHandleValidationErrors_Empty() {
-        // Test caso limite: eccezione senza errori (teoricamente raro, ma utile per coverage)
         BindingResult bindingResult = mock(BindingResult.class);
         when(bindingResult.getFieldErrors()).thenReturn(Collections.emptyList());
         

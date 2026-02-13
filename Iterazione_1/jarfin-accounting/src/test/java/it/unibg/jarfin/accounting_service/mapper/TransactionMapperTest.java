@@ -18,6 +18,15 @@ class TransactionMapperTest {
 
 	private final TransactionMapper mapper = new TransactionMapper();
 
+	/**
+	 * Test that the mapper correctly maps a TransactionRequest to a Transaction
+	 * entity.
+	 * 
+	 * Verifies that the mapped entity is not null and that all fields are correctly
+	 * mapped.
+	 * 
+	 * @see TransactionMapper#toEntity(TransactionRequest)
+	 */
 	@Test
 	void testToEntity_CorrectMapping() {
 		TransactionRequest request = new TransactionRequest();
@@ -25,7 +34,7 @@ class TransactionMapperTest {
 		request.setCategory("Spesa");
 		request.setDate(LocalDate.of(2026, 2, 7));
 		request.setDescription("Supermercato");
-		request.setType(TransactionType.EXPENSE); 
+		request.setType(TransactionType.EXPENSE);
 
 		Transaction entity = mapper.toEntity(request);
 
@@ -40,6 +49,15 @@ class TransactionMapperTest {
 		assertNull(entity.getId());
 	}
 
+	/**
+	 * Test that the mapper correctly maps a Transaction entity to a
+	 * TransactionResponse object.
+	 * 
+	 * Verifies that the mapped response is not null and that all fields are
+	 * correctly mapped.
+	 * 
+	 * @see TransactionMapper#toResponse(transaction)
+	 */
 	@Test
 	void testToResponse_CorrectMapping() {
 		Transaction entity = new Transaction();

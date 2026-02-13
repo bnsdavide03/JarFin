@@ -14,6 +14,13 @@ public class AnalyticsController {
 
     private final AnalyticsService service;
 
+    /**
+     * Returns a FinancialReportDTO object, containing the total balance, total
+     * incomes, total expenses, breakdown by category, projected monthly expenses,
+     * savings rate and financial advice.
+     * 
+     * @return a FinancialReportDTO object
+     */
     @GetMapping("/report")
     public FinancialReportDTO getReport() {
         return service.generateReport();
