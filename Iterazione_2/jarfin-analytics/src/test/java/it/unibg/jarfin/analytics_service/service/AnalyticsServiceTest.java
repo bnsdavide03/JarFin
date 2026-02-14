@@ -35,11 +35,24 @@ class AnalyticsServiceTest {
 
     private final String fakeUrl = "http://fake-accounting-service/api/transactions";
 
+    /**
+     * Sets up the test environment by setting the 'accountingUrl' field
+     * of the {@link AnalyticsService} to the fake URL.
+     */
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(analyticsService, "accountingUrl", fakeUrl);
     }
 
+    /**
+     * Tests the {@link AnalyticsService#generateReport()} method in the scenario
+     * where the total income is greater than the total expense (green scenario).
+     * The test verifies that the method returns a valid {@link FinancialReportDTO}
+     * object
+     * with the correct total income, total expense, total balance, savings rate,
+     * and
+     * breakdown by category.
+     */
     @Test
     @DisplayName("Scenario GREEN: Entrate > Uscite (Risparmio Alto)")
     void generateReport_GreenScenario() {
@@ -52,7 +65,7 @@ class AnalyticsServiceTest {
         expense.setType(TransactionType.EXPENSE);
         expense.setCategory("Svago");
 
-        TransactionDTO[] mockResponse = {income, expense};
+        TransactionDTO[] mockResponse = { income, expense };
 
         when(restTemplate.getForObject(eq(fakeUrl), eq(TransactionDTO[].class)))
                 .thenReturn(mockResponse);
@@ -62,17 +75,25 @@ class AnalyticsServiceTest {
         assertNotNull(report);
         assertEquals(new BigDecimal("2000.00"), report.getTotalIncomes());
         assertEquals(new BigDecimal("500.00"), report.getTotalExpenses());
-        
+
         assertEquals(new BigDecimal("1500.00"), report.getTotalBalance());
-        
+
         assertEquals(new BigDecimal("75.0000"), report.getSavingsRate());
-        
+
         assertTrue(report.getAlertLevel().contains("GREEN"));
-        
+
         Map<String, BigDecimal> categories = report.getBreakdownByCategory();
         assertEquals(new BigDecimal("500.00"), categories.get("Svago"));
     }
 
+    /**
+     * Tests the {@link AnalyticsService#generateReport()} method in the scenario
+     * where the total expense is greater than the total income (red scenario).
+     * The test verifies that the method returns a valid {@link FinancialReportDTO}
+     * object with the correct total income, total expense, total balance, savings
+     * rate,
+     * and alert level.
+     */
     @Test
     @DisplayName("Scenario RED: Uscite > Entrate")
     void generateReport_RedScenario() {
@@ -85,7 +106,7 @@ class AnalyticsServiceTest {
         expense.setType(TransactionType.EXPENSE);
         expense.setCategory("Affitto");
 
-        TransactionDTO[] mockResponse = {income, expense};
+        TransactionDTO[] mockResponse = { income, expense };
 
         when(restTemplate.getForObject(any(String.class), any()))
                 .thenReturn(mockResponse);
@@ -93,12 +114,19 @@ class AnalyticsServiceTest {
         FinancialReportDTO report = analyticsService.generateReport();
 
         assertEquals(new BigDecimal("-200.00"), report.getTotalBalance());
-        
+
         assertTrue(report.getSavingsRate().compareTo(BigDecimal.ZERO) < 0);
-        
+
         assertTrue(report.getAlertLevel().contains("RED"));
     }
 
+    /**
+     * Tests the {@link AnalyticsService#generateReport()} method in the scenario
+     * where there are expenses but no income (critical scenario).
+     * The test verifies that the method returns a valid {@link FinancialReportDTO}
+     * object with the correct total income, total expense, total balance, savings
+     * rate, and alert level.
+     */
     @Test
     @DisplayName("Scenario CRITICAL: Solo Spese, Zero Entrate")
     void generateReport_CriticalScenario() {
@@ -108,7 +136,7 @@ class AnalyticsServiceTest {
         expense.setType(TransactionType.EXPENSE);
         expense.setCategory("Cibo");
 
-        TransactionDTO[] mockResponse = {expense};
+        TransactionDTO[] mockResponse = { expense };
 
         when(restTemplate.getForObject(any(String.class), any()))
                 .thenReturn(mockResponse);
@@ -119,7 +147,11 @@ class AnalyticsServiceTest {
         assertEquals(new BigDecimal("-100"), report.getSavingsRate());
         assertTrue(report.getAlertLevel().contains("RED"));
     }
-    
+
+    /**
+     * Verifies that the method returns a valid FinancialReportDTO object
+     * even when there are no transactions (empty scenario).
+     */
     @Test
     @DisplayName("Scenario EMPTY: Nessuna transazione")
     void generateReport_EmptyScenario() {
@@ -131,6 +163,13 @@ class AnalyticsServiceTest {
         assertNotNull(report);
     }
 
+    /**
+     * Tests the {@link AnalyticsService#generateReport()} method with a
+     * scenario having multiple expense categories.
+     * The test verifies that the method returns a valid
+     * {@link FinancialReportDTO} object with the correct total income, total
+     * expense, total balance, savings rate, and breakdown by category.
+     */
     @Test
     @DisplayName("Integrazione Categorie Multiple")
     void generateReport_CategoryAggregation() {
@@ -149,7 +188,7 @@ class AnalyticsServiceTest {
         t3.setType(TransactionType.EXPENSE);
         t3.setCategory("Trasporti");
 
-        TransactionDTO[] mockResponse = {t1, t2, t3};
+        TransactionDTO[] mockResponse = { t1, t2, t3 };
 
         when(restTemplate.getForObject(any(String.class), any()))
                 .thenReturn(mockResponse);
@@ -157,10 +196,9 @@ class AnalyticsServiceTest {
         FinancialReportDTO report = analyticsService.generateReport();
 
         Map<String, BigDecimal> cats = report.getBreakdownByCategory();
-        
-  
+
         assertEquals(new BigDecimal("80.00"), cats.get("Cibo"));
-       
+
         assertEquals(new BigDecimal("20.00"), cats.get("Trasporti"));
     }
 }

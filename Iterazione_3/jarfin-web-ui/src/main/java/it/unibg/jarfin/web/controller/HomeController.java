@@ -24,10 +24,10 @@ import java.util.List;
 public class HomeController {
 
     private final RestTemplate restTemplate;
-    
+
     private static final String VIEW_TRANSACTIONS = "transactions";
     private static final String VIEW_INDEX = "index";
-    
+
     private static final String MODEL_ATTR_TRANSACTIONS = "transactions";
     private static final String MODEL_ATTR_REPORT = "report";
     private static final String MODEL_ATTR_ERROR = "error";
@@ -35,19 +35,41 @@ public class HomeController {
     @Value("${api.gateway.url:http://localhost:8080}")
     private String gatewayUrl;
 
+    /**
+     * Displays the main page containing the financial dashboard and transaction
+     * history.
+     *
+     * @param model The model for the HTML page.
+     * @return The HTML view to be displayed.
+     */
     @GetMapping("/")
     public String home(Model model) {
         loadFinancialReport(model);
-        loadTransactionsList(model); 
+        loadTransactionsList(model);
         return VIEW_INDEX;
     }
 
+    /**
+     * Returns the HTML view displaying the transaction history.
+     * * @param model The model for the HTML page.
+     * 
+     * @return The HTML view to be displayed.
+     */
     @GetMapping("/transactions")
     public String allTransactions(Model model) {
         loadTransactionsList(model);
         return VIEW_TRANSACTIONS;
     }
 
+    /**
+     * Deletes the transaction with the specified ID.
+     * Performs a GET request to the /api/transactions/{id} API to delete the
+     * transaction.
+     * If an error occurs, it logs the error and returns the transactions view.
+     *
+     * @param id The ID of the transaction to be deleted.
+     * @return The transactions view.
+     */
     @GetMapping("/delete/{id}")
     public String deleteTransaction(@PathVariable Long id) {
         try {
@@ -58,6 +80,14 @@ public class HomeController {
         return "redirect:/" + VIEW_TRANSACTIONS;
     }
 
+    /**
+     * Sends a PUT request to the /api/transactions/{id} API to update the
+     * transaction.
+     * If an error occurs, it logs the error and returns the transactions view.
+     *
+     * @param transaction The transaction to be updated.
+     * @return The transactions view.
+     */
     @PostMapping("/update")
     public String updateTransaction(@ModelAttribute ParsedTransaction transaction) {
         try {
@@ -68,9 +98,17 @@ public class HomeController {
         return "redirect:/" + VIEW_TRANSACTIONS;
     }
 
+    /**
+     * Loads the financial report and adds it to the model.
+     * If the API call fails, adds an empty report and an error message to the
+     * model.
+     * 
+     * @param model The model for the HTML page.
+     */
     private void loadFinancialReport(Model model) {
         try {
-            FinancialReport report = restTemplate.getForObject(gatewayUrl + "/api/analytics/report", FinancialReport.class);
+            FinancialReport report = restTemplate.getForObject(gatewayUrl + "/api/analytics/report",
+                    FinancialReport.class);
             model.addAttribute(MODEL_ATTR_REPORT, report != null ? report : new FinancialReport());
         } catch (RestClientException e) {
             model.addAttribute(MODEL_ATTR_REPORT, new FinancialReport());
@@ -78,19 +116,26 @@ public class HomeController {
         }
     }
 
+    /**
+     * Loads the list of transactions from the API and adds it to the model.
+     * If the API call fails, adds an empty list and an error message to the model.
+     * 
+     * @param model The model for the HTML page.
+     */
     private void loadTransactionsList(Model model) {
         try {
             ResponseEntity<List<ParsedTransaction>> response = restTemplate.exchange(
                     gatewayUrl + "/api/transactions",
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<List<ParsedTransaction>>() {}
-            );
-            
+                    new ParameterizedTypeReference<List<ParsedTransaction>>() {
+                    });
+
             List<ParsedTransaction> list = response.getBody() != null ? response.getBody() : new ArrayList<>();
 
             list.sort((t1, t2) -> {
-                if (t1.getId() == null || t2.getId() == null) return 0;
+                if (t1.getId() == null || t2.getId() == null)
+                    return 0;
                 return t2.getId().compareTo(t1.getId());
             });
 
