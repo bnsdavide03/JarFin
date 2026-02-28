@@ -1,4 +1,4 @@
-<diagram program="umletino" version="15.1"><zoom_level>11</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLClass</id><coordinates><x>1155</x><y>1573</y><w>264</w><h>187</h></coordinates><panel_attributes>Transaction
+<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLClass</id><coordinates><x>1430</x><y>1540</y><w>240</w><h>170</h></coordinates><panel_attributes>Transaction
 --
 -id: Long
 -amount: BigDecimal
@@ -10,7 +10,7 @@
 --
 +equals(Object o): boolean
 +hashCode(): int
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1232</x><y>407</y><w>154</w><h>143</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;110;120;110;120;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>814</x><y>1408</y><w>506</w><h>154</h></coordinates><panel_attributes>TransactionController
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1120</x><y>370</y><w>140</w><h>130</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;110;120;110;120;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>740</x><y>1280</y><w>460</w><h>140</h></coordinates><panel_attributes>TransactionController
 --
 -service: TransactionService
 -mapper:TransactionMapper
@@ -19,7 +19,7 @@
 +findAll(): ResponseEntity&lt;List&lt;TransactionResponse&gt; &gt;
 +getById(Long id): ResponseEntity&lt;TransactionResponse&gt;
 +update(Long id, TransactionRequest r): ResponseEntity&lt;TransactionResponse&gt;
-+delete(Long id): ResponseEntity&lt;Void&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>814</x><y>1826</y><w>363</w><h>143</h></coordinates><panel_attributes>TransactionService
++delete(Long id): ResponseEntity&lt;Void&gt;</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>740</x><y>1660</y><w>330</w><h>130</h></coordinates><panel_attributes>TransactionService
 --
 --
 +saveTransaction(Transaction t): Transaction
@@ -27,21 +27,21 @@
 +updateTransaction(Long id, Transaction t): Transaction
 +deleteTransaction(Long id): void
 +getTransactionById(Long id): Transaction
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1199</x><y>1826</y><w>198</w><h>77</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1400</x><y>1760</y><w>180</w><h>70</h></coordinates><panel_attributes>&lt;&lt;interface&gt;&gt;
 TransactionRepository
 
 
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>891</x><y>1551</y><w>55</w><h>297</h></coordinates><panel_attributes>lt=&lt;-
-uses</panel_attributes><additional_attributes>10;250;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1166</x><y>1848</y><w>55</w><h>33</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>30;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1331</x><y>924</y><w>407</w><h>77</h></coordinates><panel_attributes>AnalyticsController
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>810</x><y>1410</y><w>50</w><h>270</h></coordinates><panel_attributes>lt=&lt;-
+uses</panel_attributes><additional_attributes>10;250;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1060</x><y>1760</y><w>360</w><h>50</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>340;30;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1210</x><y>840</y><w>370</w><h>70</h></coordinates><panel_attributes>AnalyticsController
 --
 -service: AnalyticsService
 --
-+getReport(): FinancialReportDTO</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1320</x><y>1056</y><w>594</w><h>88</h></coordinates><panel_attributes>AnalyticsService
++getReport(): FinancialReportDTO</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1200</x><y>960</y><w>540</w><h>80</h></coordinates><panel_attributes>AnalyticsService
 --
 -restTemplate: RestTemplate
 --
 +generateReport(): FinancialReportDTO
-+calculateProjections(FinancialReportDTO r, BigDecimal incomes, BigDecimal expenses): void</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1342</x><y>1177</y><w>330</w><h>165</h></coordinates><panel_attributes>FinancialReportDTO
++calculateProjections(FinancialReportDTO r, BigDecimal incomes, BigDecimal expenses): void</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1220</x><y>1070</y><w>300</w><h>150</h></coordinates><panel_attributes>FinancialReportDTO
 --
 -totalBalance: BigDecimal
 -totalIncomes: BigDecimal
@@ -50,20 +50,20 @@ uses</panel_attributes><additional_attributes>10;250;10;10</additional_attribute
 -prejectedMonthlyExpenses: BigDecimal
 -savingsRate: BigDecimal
 -financialAdvice: String
--alertLevel: String</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1397</x><y>990</y><w>55</w><h>88</h></coordinates><panel_attributes>lt=&lt;-
-uses</panel_attributes><additional_attributes>10;60;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1408</x><y>1133</y><w>88</w><h>66</h></coordinates><panel_attributes>lt=&lt;..
-produces</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>781</x><y>0</y><w>1034</w><h>858</h></coordinates><panel_attributes>Web UI</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>1265</x><y>880</y><w>902</w><h>473</h></coordinates><panel_attributes>Analytics Service</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>803</x><y>1364</y><w>1089</w><h>671</h></coordinates><panel_attributes>Accounting Service</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>0</x><y>990</y><w>594</w><h>330</h></coordinates><panel_attributes>API</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>121</x><y>1089</y><w>308</w><h>77</h></coordinates><panel_attributes>&lt;&lt;SpringApplication&gt;&gt;
+-alertLevel: String</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1270</x><y>900</y><w>50</w><h>80</h></coordinates><panel_attributes>lt=&lt;-
+uses</panel_attributes><additional_attributes>10;60;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1280</x><y>1030</y><w>80</w><h>60</h></coordinates><panel_attributes>lt=&lt;..
+produces</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>710</x><y>0</y><w>940</w><h>780</h></coordinates><panel_attributes>Web UI</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>1150</x><y>800</y><w>820</w><h>430</h></coordinates><panel_attributes>Analytics Service</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>730</x><y>1240</y><w>990</w><h>610</h></coordinates><panel_attributes>Accounting Service</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLPackage</id><coordinates><x>0</x><y>900</y><w>540</w><h>300</h></coordinates><panel_attributes>API</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>110</x><y>990</y><w>280</w><h>70</h></coordinates><panel_attributes>&lt;&lt;SpringApplication&gt;&gt;
 JarfinAPIGatewayApplication
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1265</x><y>1749</y><w>88</w><h>99</h></coordinates><panel_attributes>lt=..
-manages</panel_attributes><additional_attributes>10;10;10;70</additional_attributes></element><element><id>Relation</id><coordinates><x>418</x><y>1111</y><w>418</w><h>451</h></coordinates><panel_attributes>lt=..&gt;
-    routes</panel_attributes><additional_attributes>10;10;360;390</additional_attributes></element><element><id>Relation</id><coordinates><x>418</x><y>935</y><w>935</w><h>198</h></coordinates><panel_attributes>lt=..&gt;
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1460</x><y>1700</y><w>100</w><h>80</h></coordinates><panel_attributes>lt=..
+manages</panel_attributes><additional_attributes>80;10;10;60</additional_attributes></element><element><id>Relation</id><coordinates><x>380</x><y>1010</y><w>380</w><h>410</h></coordinates><panel_attributes>lt=..&gt;
+    routes</panel_attributes><additional_attributes>10;10;360;390</additional_attributes></element><element><id>Relation</id><coordinates><x>380</x><y>850</y><w>850</w><h>180</h></coordinates><panel_attributes>lt=..&gt;
 
 
-routes</panel_attributes><additional_attributes>10;160;830;10</additional_attributes></element><element><id>Relation</id><coordinates><x>418</x><y>407</y><w>451</w><h>715</h></coordinates><panel_attributes>lt=..</panel_attributes><additional_attributes>10;630;390;10</additional_attributes></element><element><id>UMLInterface</id><coordinates><x>1254</x><y>297</y><w>220</w><h>132</h></coordinates><panel_attributes>Interface
+routes</panel_attributes><additional_attributes>10;160;830;10</additional_attributes></element><element><id>Relation</id><coordinates><x>380</x><y>370</y><w>410</w><h>650</h></coordinates><panel_attributes>lt=..</panel_attributes><additional_attributes>10;630;390;10</additional_attributes></element><element><id>UMLInterface</id><coordinates><x>1140</x><y>270</y><w>200</w><h>120</h></coordinates><panel_attributes>Interface
 SpeechToTextService
 via Web Speech API in index.html
 --
-+transcribe(audio): String</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>847</x><y>231</y><w>396</w><h>418</h></coordinates><panel_attributes>NaturalLanguageService
++transcribe(audio): String</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>770</x><y>210</y><w>360</w><h>380</h></coordinates><panel_attributes>NaturalLanguageService
 --
 -NUMBER_PATTERN: Pattern
 -DELETE_CMD: Pattern
@@ -88,12 +88,12 @@ via Web Speech API in index.html
 -extractSmartDescription(...): String
 -extractSpecificNoun(text: String): String
 -extractId(text: String): Long
--containsAny(String text, String keywords): boolean</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1199</x><y>737</y><w>176</w><h>99</h></coordinates><panel_attributes>enum: CommandType
+-containsAny(String text, String keywords): boolean</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1090</x><y>670</y><w>160</w><h>90</h></coordinates><panel_attributes>enum: CommandType
 --
 CREATE
 DELETE
 UPDATE
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>792</x><y>44</y><w>363</w><h>143</h></coordinates><panel_attributes>CommandController
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>720</x><y>40</y><w>330</w><h>130</h></coordinates><panel_attributes>CommandController
 --
 -nluService: NaturalLanguageService
 -restTemplate: RestTemplate
@@ -101,22 +101,22 @@ UPDATE
 -gatewayUrl: String
 --
 +processVoiceCommand(payload: Map): ResponseEntity
--findIdByDescription(String keyword): Long</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>605</x><y>55</y><w>220</w><h>1430</h></coordinates><panel_attributes>REST Call /api/transactions
+-findIdByDescription(String keyword): Long</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>550</x><y>50</y><w>200</w><h>1300</h></coordinates><panel_attributes>REST Call /api/transactions
 
 lt=&lt;&lt;-
-</panel_attributes><additional_attributes>180;1280;10;1280;10;60;170;10</additional_attributes></element><element><id>Relation</id><coordinates><x>946</x><y>176</y><w>968</w><h>528</h></coordinates><panel_attributes>lt=&lt;..
-   &lt;&lt;use&gt;&gt;</panel_attributes><additional_attributes>40;460;40;440;390;440;390;390;820;390;820;40;10;40;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>902</x><y>638</y><w>33</w><h>66</h></coordinates><panel_attributes>lt=&lt;..</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1452</x><y>1430</y><w>198</w><h>77</h></coordinates><panel_attributes>enum: TransactionType
+</panel_attributes><additional_attributes>180;1280;10;1280;10;60;170;10</additional_attributes></element><element><id>Relation</id><coordinates><x>860</x><y>160</y><w>880</w><h>480</h></coordinates><panel_attributes>lt=&lt;..
+   &lt;&lt;use&gt;&gt;</panel_attributes><additional_attributes>40;460;40;440;390;440;390;390;820;390;820;40;10;40;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>820</x><y>580</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;..</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1320</x><y>1300</y><w>180</w><h>70</h></coordinates><panel_attributes>enum: TransactionType
 --
 INCOME
 EXPENSE
 
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1430</x><y>1529</y><w>363</w><h>77</h></coordinates><panel_attributes>TransactionMapper
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1300</x><y>1390</y><w>330</w><h>70</h></coordinates><panel_attributes>TransactionMapper
 --
 +toEntity(TransactionRequest r): Transaction
 +toReponse(Transaction entity): TransactionResponse
 
 
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1430</x><y>1628</y><w>242</w><h>121</h></coordinates><panel_attributes>TransactionRequest
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>890</x><y>1510</y><w>220</w><h>110</h></coordinates><panel_attributes>TransactionRequest
 --
 -amount: BigDecimal
 -date: LocalDate
@@ -125,7 +125,7 @@ EXPENSE
 -type: TransactionType
 
 
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1430</x><y>1760</y><w>242</w><h>132</h></coordinates><panel_attributes>TransactionResponse
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1150</x><y>1550</y><w>220</w><h>120</h></coordinates><panel_attributes>TransactionResponse
 --
 -id: Long
 -amount: BigDecimal
@@ -135,24 +135,24 @@ EXPENSE
 -type: TransactionType
 
 
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1925</x><y>968</y><w>231</w><h>66</h></coordinates><panel_attributes>RestTemplateConfig
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1750</x><y>880</y><w>210</w><h>60</h></coordinates><panel_attributes>RestTemplateConfig
 
 --
-+restTemplate(): RestTemplate</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1782</x><y>1199</y><w>231</w><h>99</h></coordinates><panel_attributes>TransactionDTO
++restTemplate(): RestTemplate</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1620</x><y>1090</y><w>210</w><h>90</h></coordinates><panel_attributes>TransactionDTO
 --
 -amount: BigDecimal
 -category: String
 -date: LocalDate
--type:TransactionType</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1947</x><y>1089</y><w>198</w><h>77</h></coordinates><panel_attributes>enum: TransactionType
+-type:TransactionType</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1770</x><y>990</y><w>180</w><h>70</h></coordinates><panel_attributes>enum: TransactionType
 --
 INCOME
 EXPENSE
 
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1782</x><y>990</y><w>165</w><h>88</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>130;10;10;10;10;60</additional_attributes></element><element><id>Relation</id><coordinates><x>1738</x><y>1133</y><w>132</w><h>88</h></coordinates><panel_attributes>lt=&lt;..
-  consumes</panel_attributes><additional_attributes>60;60;10;10</additional_attributes></element><element><id>UMLNote</id><coordinates><x>176</x><y>1188</y><w>209</w><h>77</h></coordinates><panel_attributes>Le regole di routing verso i 
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1620</x><y>900</y><w>150</w><h>80</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>130;10;10;10;10;60</additional_attributes></element><element><id>Relation</id><coordinates><x>1580</x><y>1030</y><w>120</w><h>80</h></coordinates><panel_attributes>lt=&lt;..
+  consumes</panel_attributes><additional_attributes>60;60;10;10</additional_attributes></element><element><id>UMLNote</id><coordinates><x>160</x><y>1080</y><w>190</w><h>70</h></coordinates><panel_attributes>Le regole di routing verso i 
 microservizi sono definite
  in modo dichiarativo 
-tramite il file application.yml</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1496</x><y>297</y><w>297</w><h>264</h></coordinates><panel_attributes>HomeController
+tramite il file application.yml</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1360</x><y>270</y><w>280</w><h>240</h></coordinates><panel_attributes>HomeController
 --
 -restTemplate: RestTemplate
 -VIEW_TRANSACTIONS: String
@@ -168,7 +168,7 @@ tramite il file application.yml</panel_attributes><additional_attributes></addit
 +updateTransaction(ParsedTransaction t): String
 -loadFinancialReport(Model model): void
 -loadTransactionList(Model model): void
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1474</x><y>649</y><w>330</w><h>165</h></coordinates><panel_attributes>FinancialReport
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1340</x><y>590</y><w>300</w><h>150</h></coordinates><panel_attributes>FinancialReport
 --
 -balance: BigDecimal
 -totalIncome: BigDecimal
@@ -176,7 +176,7 @@ tramite il file application.yml</panel_attributes><additional_attributes></addit
 -expenseByCategory: Map&lt;String,BigDecimal&gt;
 -savingsRate: BigDecimal
 -financialAdvice: String
--alertLevel: String</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>880</x><y>682</y><w>242</w><h>165</h></coordinates><panel_attributes>ParsedTransaction
+-alertLevel: String</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>800</x><y>620</y><w>220</w><h>150</h></coordinates><panel_attributes>ParsedTransaction
 --
 -commandType: CommandType
 -targetId:Long
@@ -188,16 +188,18 @@ tramite il file application.yml</panel_attributes><additional_attributes></addit
 -type: String
 
 
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1144</x><y>110</y><w>495</w><h>209</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>430;170;430;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1683</x><y>550</y><w>77</w><h>121</h></coordinates><panel_attributes>lt=&lt;.
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1040</x><y>100</y><w>450</w><h>190</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>430;170;430;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1530</x><y>500</y><w>70</w><h>110</h></coordinates><panel_attributes>lt=&lt;.
 
 
-   &lt;&lt;use&gt;&gt;</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1111</x><y>550</y><w>517</w><h>187</h></coordinates><panel_attributes>lt=&lt;.
-  &lt;&lt;use&gt;&gt;</panel_attributes><additional_attributes>10;150;270;150;270;40;450;40;450;10</additional_attributes></element><element><id>Relation</id><coordinates><x>891</x><y>176</y><w>55</w><h>77</h></coordinates><panel_attributes>lt=&lt;-
-use</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>374</x><y>132</y><w>440</w><h>979</h></coordinates><panel_attributes>lt=&lt;..
-HTTP POST/PUT/DELETE</panel_attributes><additional_attributes>20;870;10;450;380;10</additional_attributes></element><element><id>Relation</id><coordinates><x>308</x><y>11</y><w>1265</w><h>1100</h></coordinates><panel_attributes>lt=&lt;..
-HTTP GET/POST/PUT/DELETE</panel_attributes><additional_attributes>20;980;10;570;190;20;1130;20;1130;260</additional_attributes></element><element><id>Relation</id><coordinates><x>1133</x><y>1078</y><w>209</w><h>352</h></coordinates><panel_attributes>lt=..&gt;
+   &lt;&lt;use&gt;&gt;</panel_attributes><additional_attributes>10;90;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1010</x><y>500</y><w>470</w><h>170</h></coordinates><panel_attributes>lt=&lt;.
+  &lt;&lt;use&gt;&gt;</panel_attributes><additional_attributes>10;150;270;150;270;40;450;40;450;10</additional_attributes></element><element><id>Relation</id><coordinates><x>810</x><y>160</y><w>50</w><h>70</h></coordinates><panel_attributes>lt=&lt;-
+use</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>340</x><y>120</y><w>400</w><h>890</h></coordinates><panel_attributes>lt=&lt;..
+HTTP POST/PUT/DELETE</panel_attributes><additional_attributes>20;870;10;450;380;10</additional_attributes></element><element><id>Relation</id><coordinates><x>280</x><y>10</y><w>1150</w><h>1000</h></coordinates><panel_attributes>lt=&lt;..
+HTTP GET/POST/PUT/DELETE</panel_attributes><additional_attributes>20;980;10;570;190;20;1130;20;1130;260</additional_attributes></element><element><id>Relation</id><coordinates><x>1030</x><y>980</y><w>190</w><h>320</h></coordinates><panel_attributes>lt=..&gt;
 
 
-HTTP GET</panel_attributes><additional_attributes>170;10;10;10;10;300</additional_attributes></element><element><id>Relation</id><coordinates><x>1309</x><y>1485</y><w>143</w><h>77</h></coordinates><panel_attributes>lt=&lt;-
-uses</panel_attributes><additional_attributes>110;50;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1342</x><y>1540</y><w>110</w><h>55</h></coordinates><panel_attributes>lt=..
-maps</panel_attributes><additional_attributes>80;20;10;30</additional_attributes></element></diagram>
+HTTP GET</panel_attributes><additional_attributes>170;10;10;10;10;300</additional_attributes></element><element><id>Relation</id><coordinates><x>1190</x><y>1350</y><w>130</w><h>70</h></coordinates><panel_attributes>lt=&lt;-
+uses</panel_attributes><additional_attributes>110;50;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1520</x><y>1450</y><w>60</w><h>110</h></coordinates><panel_attributes>lt=..
+maps</panel_attributes><additional_attributes>10;10;10;90</additional_attributes></element><element><id>Relation</id><coordinates><x>960</x><y>1410</y><w>50</w><h>120</h></coordinates><panel_attributes>lt=&lt;-
+uses</panel_attributes><additional_attributes>10;100;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1170</x><y>1410</y><w>50</w><h>160</h></coordinates><panel_attributes>lt=&lt;-
+uses</panel_attributes><additional_attributes>10;140;10;10</additional_attributes></element></diagram>
