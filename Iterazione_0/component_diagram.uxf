@@ -1,4 +1,4 @@
-<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><help_text></help_text><element><id>UMLGeneric</id><coordinates><x>0</x><y>0</y><w>810</w><h>1390</h></coordinates><panel_attributes>symbol=component
+<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><help_text></help_text><element><id>UMLGeneric</id><coordinates><x>0</x><y>0</y><w>810</w><h>1390</h></coordinates><panel_attributes>
 JarFin System</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>40</x><y>420</y><w>200</w><h>240</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
 Web UI</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>90</x><y>760</y><w>200</w><h>220</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
 Accounting Service</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLGeneric</id><coordinates><x>460</x><y>710</y><w>200</w><h>220</h></coordinates><panel_attributes>&lt;&lt;component&gt;&gt;
